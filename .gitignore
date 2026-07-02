@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────
+# WHITELIST-FIRST: ignora TUDO por padrão; cada item versionado
+# é liberado explicitamente abaixo. Arquivo novo só entra no git
+# se ganhar uma exceção aqui — segredos ficam de fora por design.
+# Nunca liberar: .credentials.json, history.jsonl, projects/
+# (transcripts + memória), sessions/, shell-snapshots/, caches.
+# ─────────────────────────────────────────────────────────────
+/*
+
+# ── Versionado ───────────────────────────────────────────────
+!/.gitignore
+!/.gitmodules
+!/CLAUDE.md
+!/README.md
+!/settings.json
+!/agents/
+!/commands/
+!/hooks/
+!/rules/
+!/skills/
+!/vendor/
+
+# ── Exclusões dentro das áreas liberadas ─────────────────────
+# notebooklm: perfil de navegador com sessão Google AUTENTICADA + venv
+skills/notebooklm/data/
+skills/notebooklm/.venv/
+# junk comum
+**/__pycache__/
+*.pyc
+**/.DS_Store
+*.log
+**/node_modules/
+**/.venv/

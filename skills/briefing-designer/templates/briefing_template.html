@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="{{LANGUAGE}}">
+<head>
+<meta charset="UTF-8">
+<title>{{BRIEF_TITLE}}</title>
+<link rel="stylesheet" href="design_system.css">
+<style>
+  /* ============================================================
+     Briefing-specific overrides (optional)
+     Use this block to override design tokens per brief.
+     Leave empty to use the persona defaults.
+  ============================================================ */
+</style>
+</head>
+<body class="persona-{{PERSONA}}">
+<!-- LONG-FORM MODE: for documents >= 15 pp, use instead:
+     <body class="persona-{{PERSONA}} longform" lang="{{LANG}}">
+     and add a <nav class="toc"> right after the cover
+     (COMPONENTS.md, component 15). Running headers and PDF
+     bookmarks then come automatically from the h2/h3 structure. -->
+
+<!-- ============================================================
+     STRING META — sets values for page footers
+     Required: title and date used in @page bottom-left
+============================================================ -->
+<div class="string-set-title">{{BRIEF_TITLE_SHORT}}</div>
+<div class="string-set-date">{{BRIEF_DATE_SHORT}}</div>
+
+<!-- ============================================================
+     COVER
+     Choose ONE variant: cover-editorial / cover-academic /
+     cover-governmental / cover-financial.
+     Examples for each variant are in COMPONENTS.md.
+============================================================ -->
+<section class="cover cover-{{PERSONA}}">
+
+  <div class="cover-kicker">{{KICKER_LINE}}</div>
+
+  <h1 class="cover-title">{{TITLE_LINE_1}}<br>{{TITLE_LINE_2}}</h1>
+
+  <p class="cover-deck">
+    {{DECK_SENTENCE}}
+  </p>
+
+  <hr class="cover-rule">
+
+  <div class="cover-byline">
+    <strong>{{BYLINE_LABEL}}</strong><br>
+    {{BYLINE_LOCATION}} &middot; {{BYLINE_DATE}}<br>
+    <em>{{BYLINE_HORIZON}}</em>
+  </div>
+
+  <div class="cover-abstract">
+    <span class="cover-abstract-label">{{ABSTRACT_LABEL}}</span>
+    {{ABSTRACT_BODY}}
+  </div>
+
+</section>
+
+<!-- ============================================================
+     ARTICLE BODY
+============================================================ -->
+<section class="body-content">
+
+  <div class="article-header">
+    <div class="kicker">{{ARTICLE_KICKER}}</div>
+    <h1>{{ARTICLE_TITLE}}</h1>
+  </div>
+
+  <!-- Wrap the first letter in the dropcap span; omit it from the
+       running text (e.g. <span class="dropcap">O</span> restante...) -->
+  <p class="lede"><span class="dropcap">{{LEDE_FIRST_LETTER}}</span>{{LEDE_PARAGRAPH_REST}}</p>
+
+  <!-- KEY ASSESSMENTS — argumentative/prescriptive briefs open with the
+       2-4 major judgments right after the lede (TRADECRAFT.md §4,
+       COMPONENTS.md component 12). Remove for descriptive briefs. -->
+  <div class="key-assessments">
+    <span class="ka-label">{{KEY_ASSESSMENTS_LABEL}}</span>
+    <ol>
+      <li>{{ASSESSMENT_1}}</li>
+      <li>{{ASSESSMENT_2}}</li>
+    </ol>
+  </div>
+
+  <!-- ========== Section 1 ========== -->
+  <h2>{{SECTION_1_TITLE}}</h2>
+
+  <p>{{SECTION_1_PARA_1}}</p>
+  <p>{{SECTION_1_PARA_2}}</p>
+
+  <!-- Optional sidebar after the first section -->
+  <aside class="sidebar sidebar-numbers">
+    <div class="sidebar-title">{{SIDEBAR_1_TITLE}}</div>
+    <ul>
+      <li><strong>{{NUMBER_1}}</strong> {{LABEL_1}}</li>
+      <li><strong>{{NUMBER_2}}</strong> {{LABEL_2}}</li>
+      <li><strong>{{NUMBER_3}}</strong> {{LABEL_3}}</li>
+    </ul>
+  </aside>
+
+  <!-- ========== Section 2 ========== -->
+  <h2>{{SECTION_2_TITLE}}</h2>
+
+  <p>{{SECTION_2_PARA_1}}</p>
+  <p>{{SECTION_2_PARA_2}}</p>
+
+  <h3>{{SECTION_2_SUB_1_TITLE}}</h3>
+  <p>{{SECTION_2_SUB_1_PARA}}</p>
+
+  <h3>{{SECTION_2_SUB_2_TITLE}}</h3>
+  <p>{{SECTION_2_SUB_2_PARA}}</p>
+
+  <!-- Chart 1 -->
+  <figure class="chart-wrap">
+    <div class="chart-label">{{CHART_LABEL_1}}</div>
+    <div class="chart-title">{{CHART_TITLE_1}}</div>
+    <img src="{{CHART_PATH_1}}" alt="{{CHART_ALT_1}}">
+    <figcaption class="chart-caption">{{CHART_CAPTION_1}}</figcaption>
+  </figure>
+
+  <!-- Pull quote example -->
+  <blockquote class="pullquote">
+    {{PULLQUOTE_TEXT}}
+    <span class="pullquote-attr">{{PULLQUOTE_ATTR}}</span>
+  </blockquote>
+
+  <!-- ========== Section 3 ========== -->
+  <h2>{{SECTION_3_TITLE}}</h2>
+
+  <p>{{SECTION_3_PARA_1}}</p>
+  <p>{{SECTION_3_PARA_2}}</p>
+
+  <!-- ========== Add more sections as needed ========== -->
+
+  <!-- ========== Synthesis (closing section) ========== -->
+  <h2>{{SYNTHESIS_TITLE}}</h2>
+
+  <p>{{SYNTHESIS_PARA_1}}</p>
+  <p>{{SYNTHESIS_PARA_2}}</p>
+  <p>{{SYNTHESIS_PARA_3}}</p>
+
+  <!-- INDICATORS — what would change this assessment
+       (TRADECRAFT.md §5, COMPONENTS.md component 13) -->
+  <div class="indicators">
+    <span class="ind-label">{{INDICATORS_LABEL}}</span>
+    <ul>
+      <li>{{INDICATOR_1}}</li>
+      <li>{{INDICATOR_2}}</li>
+      <li>{{INDICATOR_3}}</li>
+    </ul>
+  </div>
+
+  <div class="end-mark">{{ENDMARK}}</div>
+
+  <!-- ============================================================
+       SOURCES (editorial style)
+       For academic, replace this block with .references
+  ============================================================ -->
+  <div class="sources">
+    <div class="sources-title">{{SOURCES_TITLE}}</div>
+    <p><strong>{{SOURCE_GROUP_1_LABEL}}:</strong> {{SOURCE_GROUP_1_BODY}}</p>
+    <p><strong>{{SOURCE_GROUP_2_LABEL}}:</strong> {{SOURCE_GROUP_2_BODY}}</p>
+    <p><strong>{{SOURCE_GROUP_3_LABEL}}:</strong> {{SOURCE_GROUP_3_BODY}}</p>
+    <p>{{SOURCES_DISCLAIMER}}</p>
+    <!-- Probability-scale legend — required whenever calibrated terms
+         appear in the text (COMPONENTS.md component 14) -->
+    <p class="uncertainty-note">{{UNCERTAINTY_LEGEND}}</p>
+  </div>
+
+</section>
+
+</body>
+</html>

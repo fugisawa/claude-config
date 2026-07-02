@@ -1,0 +1,934 @@
+/* ============================================================
+   BRIEFING DESIGNER — DESIGN SYSTEM
+   v1.0 — works with WeasyPrint 60+
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. DESIGN TOKENS (default = editorial)
+   Override in HTML <style> at top to switch persona
+   ------------------------------------------------------------ */
+
+:root {
+  /* Editorial palette (default) */
+  --accent:    #E3120B;
+  --ink:       #121212;
+  --secondary: #006BA2;
+  --muted:     #758D99;
+  --surface:   #F4EFE5;
+  --paper:     #FEFCF8;
+  --rule:      #2A2A2A;
+
+  /* Type scale */
+  --size-cover-title:   44pt;
+  --size-cover-deck:    16pt;
+  --size-article-title: 18pt;
+  --size-h2:            13.5pt;
+  --size-h3:            11pt;
+  --size-pullquote:     14pt;
+  --size-lede:          11.5pt;
+  --size-body:          10.5pt;
+  --size-sidebar:       9.5pt;
+  --size-source:        8pt;
+  --size-page-furniture: 8.5pt;
+
+  /* Spacing rhythm */
+  --space-paragraph:    3mm;
+  --space-h2-before:    9mm;
+  --space-h2-after:     3mm;
+  --space-h3-before:    5mm;
+  --space-h3-after:     2mm;
+  --space-figure:       6mm;
+
+  /* Section numbering style */
+  --section-numerals: upper-roman;  /* I, II, III */
+}
+
+/* ------------------------------------------------------------
+   2. PAGE SETUP
+   ------------------------------------------------------------ */
+
+@page {
+  size: A4;
+  margin: 22mm 20mm;
+  @bottom-left {
+    content: string(brief-title) " — " string(brief-date);
+    font-family: "Lora", serif;
+    font-size: var(--size-page-furniture);
+    font-style: italic;
+    color: var(--muted);
+  }
+  @bottom-right {
+    content: "p. " counter(page) " / " counter(pages);
+    font-family: "Lora", serif;
+    font-size: var(--size-page-furniture);
+    color: var(--muted);
+  }
+}
+
+@page :first {
+  margin-top: 0;
+  @bottom-left { content: ""; }
+  @bottom-right { content: ""; }
+}
+
+/* ------------------------------------------------------------
+   3. RESET
+   ------------------------------------------------------------ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: "Lora", "Liberation Serif", "DejaVu Serif", serif;
+  font-size: var(--size-body);
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--paper);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* ------------------------------------------------------------
+   4. STRING META (for page footers — set on cover)
+   These elements must NOT use display:none, or string-set fails
+   to capture their content. Use clip-path to hide visually.
+   ------------------------------------------------------------ */
+
+.string-set-title    {
+  string-set: brief-title content();
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+.string-set-date     {
+  string-set: brief-date content();
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   5. COVER (variants)
+   ------------------------------------------------------------ */
+
+.cover {
+  page-break-after: always;
+  height: 257mm;
+  padding: 28mm 25mm 25mm 25mm;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Editorial cover */
+.cover-editorial {
+  border-top: 12pt solid var(--accent);
+}
+
+/* Academic cover */
+.cover-academic {
+  padding-top: 50mm;
+  text-align: left;
+}
+
+.cover-academic .cover-ornament {
+  font-size: 60pt;
+  color: var(--accent);
+  font-family: "Lora", serif;
+  margin-bottom: 8mm;
+  line-height: 1;
+}
+
+/* Governmental cover */
+.cover-governmental {
+  border-top: 3pt solid var(--accent);
+  padding-top: 4mm;
+}
+.cover-governmental::before {
+  content: "";
+  display: block;
+  border-top: 0.5pt solid var(--accent);
+  margin: 2mm 0 22mm 0;
+}
+
+/* Financial cover */
+.cover-financial {
+  background: var(--paper);
+  padding-left: 32mm;
+  position: relative;
+}
+.cover-financial .cover-vertical-rule {
+  position: absolute;
+  left: 18mm;
+  top: 28mm;
+  bottom: 25mm;
+  width: 5pt;
+  background: var(--accent);
+}
+
+/* Cover internals — shared */
+.cover-kicker {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 9pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: bold;
+  margin-bottom: 10mm;
+}
+
+.cover-title {
+  font-family: "Lora", serif;
+  font-size: var(--size-cover-title);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 0 0 8mm 0;
+  letter-spacing: -0.01em;
+}
+
+.cover-academic .cover-title { font-weight: 600; font-size: 36pt; line-height: 1.15; }
+
+.cover-deck {
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-size: var(--size-cover-deck);
+  line-height: 1.35;
+  color: #3A3A3A;
+  font-weight: 400;
+  margin: 0 0 18mm 0;
+  max-width: 88%;
+}
+
+.cover-academic .cover-deck,
+.cover-financial .cover-deck { font-style: normal; }
+
+.cover-rule {
+  border: none;
+  border-top: 0.6pt solid var(--rule);
+  width: 30mm;
+  margin: 0 0 6mm 0;
+}
+
+.cover-byline,
+.cover-author {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 9.5pt;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.cover-byline strong,
+.cover-author strong {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 8.5pt;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.cover-abstract {
+  margin-top: auto;
+  border-top: 0.4pt solid var(--rule);
+  padding-top: 6mm;
+  font-family: "Lora", serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.cover-abstract-label {
+  font-family: "Liberation Sans", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 8.5pt;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 3mm;
+  display: block;
+}
+
+.cover-keywords {
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-size: 9.5pt;
+  margin-top: 6mm;
+  padding-top: 3mm;
+  border-top: 0.3pt dotted var(--muted);
+  color: var(--muted);
+}
+
+/* Financial cover summary table */
+.cover-summary-table {
+  margin: 8mm 0;
+  border-collapse: collapse;
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 10pt;
+}
+.cover-summary-table th {
+  text-align: left;
+  padding: 2mm 8mm 2mm 0;
+  color: var(--muted);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 8pt;
+  border-bottom: 0.3pt solid var(--muted);
+}
+.cover-summary-table td {
+  padding: 2mm 0;
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 0.3pt solid var(--muted);
+}
+
+/* ------------------------------------------------------------
+   6. ARTICLE BODY
+   ------------------------------------------------------------ */
+
+.body-content { counter-reset: section; }
+
+.article-header {
+  text-align: center;
+  margin-bottom: 10mm;
+  padding-bottom: 6mm;
+  border-bottom: 0.4pt solid var(--rule);
+}
+
+.article-header .kicker {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.article-header h1 {
+  font-family: "Lora", serif;
+  font-size: var(--size-article-title);
+  font-weight: 700;
+  margin: 3mm 0 0 0;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* h2 — section heading */
+h2 {
+  counter-increment: section;
+  font-family: "Lora", serif;
+  font-size: var(--size-h2);
+  font-weight: 700;
+  color: var(--ink);
+  margin: var(--space-h2-before) 0 var(--space-h2-after) 0;
+  padding-bottom: 1.5mm;
+  border-bottom: 0.4pt solid var(--rule);
+  page-break-after: avoid;
+  text-align: left;
+}
+
+h2::before {
+  content: counter(section, var(--section-numerals)) ". ";
+  color: var(--accent);
+  font-weight: 700;
+}
+
+h3 {
+  font-family: "Lora", serif;
+  font-size: var(--size-h3);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--ink);
+  margin: var(--space-h3-before) 0 var(--space-h3-after) 0;
+  page-break-after: avoid;
+  text-align: left;
+}
+
+p {
+  margin: 0 0 var(--space-paragraph) 0;
+  text-indent: 0;
+  orphans: 3;
+  widows: 3;
+}
+
+/* Lede */
+.lede {
+  font-size: var(--size-lede);
+  line-height: 1.5;
+  margin-bottom: 5mm;
+}
+
+/* Dropcap — true two-line drop cap via a real floated <span>.
+   WeasyPrint crashes on `::first-letter { float: left }`, but floats on
+   real elements work fine. The previous inline-block ::first-letter
+   approach inflated the first line's box to ~32pt, breaking the body's
+   leading rhythm — hence the span. Markup (see COMPONENTS.md, lede):
+     <p class="lede"><span class="dropcap">O</span> resto do parágrafo...</p>
+   line-height 0.78 sinks the cap across two text lines; padding-top
+   nudges the glyph's visual top to align with the first line's cap height. */
+.lede .dropcap {
+  float: left;
+  font-family: "Lora", serif;
+  font-size: 30pt;
+  font-weight: 700;
+  line-height: 0.78;
+  color: var(--accent);
+  padding: 2pt 4pt 0 0;
+}
+
+/* Inline emphasis */
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+/* ------------------------------------------------------------
+   7. PULL QUOTE
+   ------------------------------------------------------------ */
+
+.pullquote {
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-size: var(--size-pullquote);
+  line-height: 1.35;
+  color: var(--ink);
+  text-align: left;
+  margin: 6mm 8mm 6mm 8mm;
+  padding: 3mm 0 3mm 6mm;
+  border-left: 3pt solid var(--accent);
+  page-break-inside: avoid;
+}
+
+.pullquote-attr {
+  display: block;
+  margin-top: 2mm;
+  font-style: normal;
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------
+   8. SIDEBAR (and variants)
+   ------------------------------------------------------------ */
+
+.sidebar {
+  background: var(--surface);
+  border-left: 3pt solid var(--ink);
+  padding: 5mm 6mm;
+  margin: 5mm 0;
+  font-size: var(--size-sidebar);
+  line-height: 1.45;
+  page-break-inside: avoid;
+}
+
+.sidebar-title {
+  font-family: "Liberation Sans", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 8.5pt;
+  color: var(--accent);
+  font-weight: 700;
+  margin: 0 0 3mm 0;
+}
+
+.sidebar p { margin-bottom: 2mm; }
+.sidebar ul { margin: 0; padding-left: 4mm; }
+.sidebar li { margin-bottom: 1.5mm; }
+
+.sidebar-warning {
+  border-left-color: var(--accent);
+  background: #FBE8E7;  /* tint of accent in editorial; override per persona if needed */
+}
+.sidebar-definition {
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------
+   9. CALLOUTS (interrupting blocks)
+   ------------------------------------------------------------ */
+
+.callout {
+  margin: 5mm 0;
+  padding: 4mm 6mm;
+  page-break-inside: avoid;
+  font-size: 10pt;
+  line-height: 1.45;
+}
+
+.callout-insight {
+  background: var(--surface);
+  border-left: 3pt solid var(--secondary);
+}
+
+.callout-warning {
+  background: #FBE8E7;
+  border-left: 3pt solid var(--accent);
+}
+
+.callout-datapoint {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6mm;
+  text-align: center;
+}
+
+.datapoint-number {
+  font-family: "Lora", serif;
+  font-size: 36pt;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.datapoint-label {
+  margin-top: 3mm;
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 9pt;
+  letter-spacing: 0.05em;
+  color: var(--paper);
+}
+
+/* ------------------------------------------------------------
+   10. CHARTS / FIGURES
+   ------------------------------------------------------------ */
+
+.chart-wrap {
+  margin: var(--space-figure) 0;
+  page-break-inside: avoid;
+  text-align: left;
+}
+
+.chart-wrap img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 3mm 0;
+}
+
+.chart-label {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 1mm;
+}
+
+.chart-title {
+  font-family: "Lora", serif;
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 3mm 0;
+}
+
+.chart-caption {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8pt;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 2mm;
+  text-align: left;
+}
+
+/* ------------------------------------------------------------
+   11. TABLES
+   ------------------------------------------------------------ */
+
+table {
+  border-collapse: collapse;
+  page-break-inside: avoid;
+}
+
+/* 11a — Data table */
+.data-table {
+  width: 100%;
+  font-size: 9pt;
+  margin: 4mm 0;
+  font-family: "Lora", serif;
+}
+
+.data-table th {
+  text-align: left;
+  font-family: "Liberation Sans", sans-serif;
+  text-transform: uppercase;
+  font-size: 7.5pt;
+  letter-spacing: 0.08em;
+  border-bottom: 1pt solid var(--ink);
+  padding: 2mm 4mm 2mm 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.data-table td {
+  padding: 2mm 4mm 2mm 0;
+  border-bottom: 0.3pt solid #DDD;
+  vertical-align: top;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+
+/* 11b — Financial table */
+.financial-table {
+  width: 100%;
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 9pt;
+  margin: 4mm 0;
+}
+
+.financial-table th {
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 7.5pt;
+  letter-spacing: 0.08em;
+  border-bottom: 1.5pt solid var(--ink);
+  padding: 2mm 3mm;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.financial-table td {
+  padding: 2mm 3mm;
+  border-bottom: 0.3pt solid #DDD;
+}
+
+.financial-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.financial-table th.num { text-align: right; }
+
+.financial-table .row-emphasis td {
+  border-top: 0.5pt solid var(--ink);
+  border-bottom: 0.5pt solid var(--ink);
+}
+
+/* 11c — Comparison table */
+.comparison-table {
+  width: 100%;
+  font-size: 9.5pt;
+  margin: 4mm 0;
+  font-family: "Lora", serif;
+}
+
+.comparison-table th {
+  text-align: left;
+  font-family: "Liberation Sans", sans-serif;
+  text-transform: uppercase;
+  font-size: 7.5pt;
+  letter-spacing: 0.08em;
+  padding: 2mm 4mm 2mm 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.comparison-table thead th {
+  border-bottom: 1pt solid var(--ink);
+}
+
+.comparison-table tbody th {
+  border-right: 0.5pt solid #CCC;
+  width: 25%;
+  padding-right: 6mm;
+}
+
+.comparison-table td {
+  padding: 2mm 4mm 2mm 4mm;
+  border-bottom: 0.3pt solid #EEE;
+  vertical-align: top;
+}
+
+/* ------------------------------------------------------------
+   12. SOURCES / REFERENCES
+   ------------------------------------------------------------ */
+
+.sources, .references {
+  margin-top: 12mm;
+  padding-top: 5mm;
+  border-top: 0.4pt solid var(--rule);
+  font-family: "Liberation Sans", sans-serif;
+  font-size: var(--size-source);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.sources-title, .references-title {
+  font-family: "Liberation Sans", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 8.5pt;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 3mm;
+}
+
+.sources p { margin-bottom: 2mm; text-align: left; }
+.sources strong { color: var(--ink); font-weight: 700; }
+
+.references-list {
+  list-style: decimal;
+  padding-left: 5mm;
+  margin: 0;
+}
+.references-list li {
+  margin-bottom: 2mm;
+  text-align: left;
+  padding-left: 1mm;
+}
+
+/* ------------------------------------------------------------
+   13. ENDMARK
+   ------------------------------------------------------------ */
+
+.end-mark {
+  text-align: center;
+  margin-top: 5mm;
+  color: var(--accent);
+  font-size: 14pt;
+}
+
+/* ------------------------------------------------------------
+   14. PERSONA OVERRIDES (apply to <body class="persona-X">)
+   ------------------------------------------------------------ */
+
+/* Academic */
+body.persona-academic {
+  --accent:    #1B2A4E;
+  --secondary: #6B7280;
+  --muted:     #6B7280;
+  --surface:   #EAE7E0;
+  --paper:     #FAFAF7;
+  --section-numerals: decimal;
+}
+body.persona-academic .lede .dropcap {
+  /* No dropcap in academic — neutralize the span entirely */
+  float: none;
+  font-size: var(--size-lede);
+  font-weight: 400;
+  line-height: inherit;
+  color: var(--ink);
+  padding: 0;
+}
+body.persona-academic h3 { font-style: normal; }
+
+/* Governmental */
+body.persona-governmental {
+  --accent:    #2C3E50;
+  --secondary: #A07000;
+  --surface:   #F0EDE5;
+  --paper:     #FCFAF5;
+  --section-numerals: upper-alpha;
+}
+
+/* Financial */
+body.persona-financial {
+  --accent:    #FF6B00;
+  --ink:       #0A0E1A;
+  --secondary: #00A86B;
+  --surface:   #F5F5F2;
+  --paper:     #FFFFFF;
+  --section-numerals: decimal;
+  --size-body: 10pt;
+}
+body.persona-financial { line-height: 1.4; }
+
+/* ------------------------------------------------------------
+   12. ANALYTIC COMPONENTS (v2)
+   Key-assessments box, indicators block, uncertainty legend
+   ------------------------------------------------------------ */
+
+/* Key assessments ("Avaliações principais") — boxed list of the
+   2-4 major judgments, placed immediately after the lede. */
+.key-assessments {
+  background: var(--surface);
+  border-top: 3px solid var(--accent);
+  padding: 5mm 6mm 4mm 6mm;
+  margin: 5mm 0 6mm 0;
+  page-break-inside: avoid;
+}
+.key-assessments .ka-label {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8.5pt;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 3mm;
+}
+.key-assessments ol {
+  margin: 0;
+  padding-left: 5.5mm;
+}
+.key-assessments li {
+  font-size: 10pt;
+  line-height: 1.5;
+  margin-bottom: 2.5mm;
+  text-align: justify;
+}
+.key-assessments li:last-child { margin-bottom: 0; }
+.key-assessments .confidence {
+  /* The separate confidence sentence inside an assessment */
+  color: var(--muted);
+}
+
+/* Indicators ("O que mudaria esta avaliação") — observable
+   developments that would strengthen/weaken the judgments. */
+.indicators {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 4mm 0;
+  margin: 6mm 0;
+  page-break-inside: avoid;
+}
+.indicators .ind-label {
+  font-family: "Liberation Sans", sans-serif;
+  font-size: 8.5pt;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  display: block;
+  margin-bottom: 2.5mm;
+}
+.indicators ul {
+  margin: 0;
+  padding-left: 5mm;
+  list-style-type: square;
+}
+.indicators li {
+  font-size: 9.5pt;
+  line-height: 1.5;
+  margin-bottom: 1.8mm;
+}
+.indicators li::marker { color: var(--accent); }
+
+/* Probability-scale legend — one italic line near the sources. */
+.uncertainty-note {
+  font-size: 8.5pt;
+  font-style: italic;
+  color: var(--muted);
+  margin: 4mm 0;
+  text-align: left;
+}
+
+/* ------------------------------------------------------------
+   13. LONG-FORM MACHINERY (v2)
+   Enable by adding class "longform" to <body>.
+   TOC with dotted leaders, running headers, footnotes, bookmarks.
+   ------------------------------------------------------------ */
+
+/* PDF bookmarks (work in any mode; harmless in article mode) */
+.cover-title   { bookmark-level: 1; }
+article h2     { bookmark-level: 2; }
+article h3     { bookmark-level: 3; }
+
+/* Running section header: each h2 feeds a named string shown at
+   the top-right of subsequent body pages (long-form only). */
+body.longform article h2 { string-set: section-title content(); }
+
+@page longform-body {
+  size: A4;
+  margin: 24mm 20mm 22mm 20mm;
+  @top-right {
+    content: string(section-title);
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 7.5pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  @bottom-left {
+    content: string(brief-title) " — " string(brief-date);
+    font-family: "Lora", serif;
+    font-size: var(--size-page-furniture);
+    font-style: italic;
+    color: var(--muted);
+  }
+  @bottom-right {
+    content: "p. " counter(page) " / " counter(pages);
+    font-family: "Lora", serif;
+    font-size: var(--size-page-furniture);
+    color: var(--muted);
+  }
+}
+body.longform article { page: longform-body; }
+
+/* Table of contents — anchors gain dotted leaders + live page
+   numbers via target-counter(). Place right after the cover. */
+nav.toc {
+  page-break-before: always;
+  page-break-after: always;
+}
+nav.toc .toc-title {
+  font-family: "Lora", serif;
+  font-size: 16pt;
+  font-weight: 700;
+  margin: 10mm 0 6mm 0;
+  color: var(--ink);
+}
+nav.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+nav.toc li {
+  font-size: 10.5pt;
+  line-height: 2.0;
+  text-align: left;
+}
+nav.toc li.toc-l2 { padding-left: 6mm; font-size: 9.5pt; }
+nav.toc a {
+  text-decoration: none;
+  color: var(--ink);
+}
+nav.toc a::after {
+  content: " " leader(dotted) " " target-counter(attr(href), page);
+  color: var(--muted);
+}
+nav.toc li.toc-l1 a { font-weight: 600; }
+nav.toc li.toc-l1 a::after { color: var(--ink); }
+
+/* Footnotes — true page-bottom notes. Usage:
+   inline <span class="footnote">note text</span>.
+   WeasyPrint floats the span to the footnote area and leaves an
+   automatic numbered call in the text. */
+.footnote {
+  float: footnote;
+  /* note: do NOT add `footnote-policy: line` here — it forces the whole
+     line (and following blocks) to the next page whenever the footnote
+     area is tight, leaving large voids. A note spilling to the next page
+     is acceptable book typography; a half-empty page is not. */
+  font-size: 8pt;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--ink);
+}
+.footnote::footnote-call {
+  content: counter(footnote);
+  font-size: 0.65em;
+  vertical-align: super;
+  line-height: 0;          /* prevents call from stretching the line */
+  color: var(--accent);
+}
+.footnote::footnote-marker {
+  content: counter(footnote) ". ";
+  font-size: 8pt;
+  color: var(--accent);
+  font-weight: bold;
+}
+@page {
+  @footnote {
+    border-top: 0.5pt solid var(--rule);
+    padding-top: 2mm;
+    margin-top: 4mm;
+  }
+}

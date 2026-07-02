@@ -1,0 +1,6 @@
+[submodule "vendor/mattpocock-skills"]
+	path = vendor/mattpocock-skills
+	url = https://github.com/mattpocock/skills
+[submodule "skills/notebooklm"]
+	path = skills/notebooklm
+	url = https://github.com/PleasePrompto/notebooklm-skill
