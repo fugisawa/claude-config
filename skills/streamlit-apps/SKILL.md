@@ -61,9 +61,9 @@ Avoid theming via `st.markdown(..., unsafe_allow_html=True)` `<style>` blocks: i
 
 ## Visual QA — don't trust "it renders"
 
-After any UI change, run the app headless, screenshot **every tab in both themes**, and assert **zero console errors**. This is the difference between "compiled" and "works."
+After any UI change, run the app headless, screenshot **every tab/page in both themes**, and assert **zero console errors**. This is the difference between "compiled" and "works."
 
-**REQUIRED:** follow the pytest + Playwright recipe in `visual-qa.md` — it uses the Streamlit-aware readiness wait (`"Running..."` detaches), a real theme toggle, screenshot-all-tabs, console-error assertion, and clean teardown.
+**REQUIRED:** follow the pytest + Playwright recipe in `visual-qa.md` — it uses the Streamlit-aware readiness wait (`"Running..."` detaches), a real theme toggle, screenshot-all-tabs, console-error assertion, and clean teardown. **Multipage `st.navigation` apps:** navigate by `url_path` (not tab clicks) and filter the benign `_stcore/*` 404s — both covered in `visual-qa.md`.
 
 ## Common mistakes
 
@@ -73,3 +73,4 @@ After any UI change, run the app headless, screenshot **every tab in both themes
 - **`st.session_state.x = default` unconditionally** resets state every rerun. Guard with `setdefault` / `if k not in st.session_state`.
 - **`@st.experimental_fragment`** was removed 2025-01-01 → use `@st.fragment`.
 - **Forgetting `--server.fileWatcherType none`** in containers/CI → inotify exhaustion crashes the headless run.
+- **Console-error QA false-fails on multipage deep-links:** navigating to a page `url_path` makes Streamlit's `_stcore/health`/`host-config` probes 404 (they resolve only at root). Benign — filter them (see `visual-qa.md`).

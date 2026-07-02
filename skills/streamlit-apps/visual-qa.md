@@ -1,6 +1,6 @@
 # Visual QA recipe — Streamlit + Playwright
 
-Run the app headless, screenshot every tab in light **and** dark, assert no console errors, tear down cleanly. Adapt the tab labels and port to your app.
+Run the app headless, screenshot every tab (or page) in light **and** dark, assert no console errors, tear down cleanly. Adapt the tab/page labels and port to your app.
 
 ## Install once
 
@@ -86,12 +86,34 @@ def test_dark(page: Page):
     set_theme(page, "dark")
     shoot_all_tabs(page, "dark")
 
+# Deep-linking to a page url_path (multipage apps) makes Streamlit's own probes
+# 404 — benign; ignore them so the assertion doesn't false-fail.
+BENIGN = ("_stcore/health", "_stcore/host-config")
+
 def test_no_console_errors(page: Page):
     errors = []
-    page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+    page.on("console", lambda m: errors.append(m.text)
+            if m.type == "error" and not any(b in m.text for b in BENIGN)
+            else None)
     page.goto(BASE_URL); wait_ready(page)
     assert errors == [], f"Console errors: {errors}"
 ```
+
+## Multipage apps (`st.navigation` / `st.Page`)
+
+Apps built with `st.navigation([st.Page(...)])` have **no top-level `st.tabs`** — each page is a route, reachable by its `url_path`. Clicking a "tab" fails; navigate by URL instead (`""` = default page):
+
+```python
+PAGES = {"hoje": "", "panorama": "panorama", "chaveamento": "chaveamento"}  # label -> url_path
+
+def shoot_all_pages(page: Page, suffix: str):
+    for label, path in PAGES.items():
+        page.goto(f"{BASE_URL}/{path}"); wait_ready(page)
+        page.mouse.move(0, 0)
+        page.screenshot(path=str(SHOTS / f"{label}-{suffix}.png"), full_page=True)
+```
+
+Deep-linking to a sub-path makes `_stcore/health` and `_stcore/host-config` 404 (they resolve only at root) — benign; the console test above already ignores them. On a **heavy-boot app** (e.g. a 50k Monte-Carlo on first load) the port answers 200 long before the first script run finishes — `wait_ready` covers it, but the most robust signal is waiting on real content: `page.get_by_text("Evolução").first.wait_for()` (or your MCP driver's wait-for-text).
 
 ## Run
 
@@ -107,6 +129,7 @@ pytest test_visual_qa.py -v --browser chromium
 - **Toggle theme via the menu**, not a query-param hack — it exercises the same `[theme.dark]` CSS variables your users see.
 - **`page.mouse.move(0,0)`** before each shot removes stray hover/tooltip state that makes diffs noisy.
 - **Console-error assertion** catches the silent JS failures (bad chart spec, missing asset) that a screenshot alone can miss.
+- **Multipage ≠ tabbed:** `st.navigation` apps route by `url_path` — screenshot by navigating URLs, not clicking tabs. Deep-link `_stcore/*` 404s are benign; filter them or the console assertion false-fails.
 
 ## Ephemeral test data
 
