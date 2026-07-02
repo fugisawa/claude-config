@@ -58,3 +58,5 @@ Você não lembra de todas as skills, então consulte este mapa. Quatro acervos 
 - Obsidian → suíte própria (obsidian-note/vault-*) vence plugin `obsidian:*` genérico para o LifeOS.
 
 Manutenção: ao adicionar/renomear/remover skill user-reachable, atualize este mapa — um router desatualizado mente. Atualizar vendored: `git -C ~/.claude/vendor/mattpocock-skills pull` (symlinks acompanham; `diagnosing-bugs` é cópia adaptada, não acompanha).
+
+Manual de uso do paradigma (grill, CONTEXT.md/ADRs, fluxo ideia→código, este router): `~/.claude/docs/manual-grill-e-router.md`.

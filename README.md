@@ -23,6 +23,8 @@ O `.gitignore` ignora tudo (`/*`) e libera item a item. **Nunca entram no git**:
 
 `/ask-daniel` (`skills/ask-daniel/SKILL.md`) mapeia qual skill/agente/comando usar em cada situação e a precedência quando os 4+ acervos (próprios, superpowers, ECC, nativos, vendored) colidem. Manter em dia ao mexer nas skills.
 
+**Manual de uso** (grill, CONTEXT.md/ADRs, fluxo ideia→código, router): [`docs/manual-grill-e-router.md`](docs/manual-grill-e-router.md).
+
 ## Guardrail git (hook)
 
 `hooks/block-dangerous-git.sh` bloqueia `reset --hard`, `clean -f*`, `branch -D`, `checkout .`, `restore .` e `push --force/-f`. **Deliberadamente não bloqueia** `git push` normal nem `--force-with-lease` — o fluxo (vsync, "commita e pusha") depende de push pelo agente.
