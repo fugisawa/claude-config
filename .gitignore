@@ -25,6 +25,8 @@
 # notebooklm: perfil de navegador com sessão Google AUTENTICADA + venv
 skills/notebooklm/data/
 skills/notebooklm/.venv/
+# skills aprendidas auto-geradas (continuous-learning): curar antes de versionar
+skills/learned/
 # junk comum
 **/__pycache__/
 *.pyc
