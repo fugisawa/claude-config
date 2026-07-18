@@ -1,0 +1,350 @@
+/* Aula 01 — Orçamento Público · print stylesheet (WeasyPrint) */
+
+:root {
+  --navy: #1B2A4E;
+  --ink: #1C1E22;
+  --muted: #5C6470;
+  --rule: #C9D2E0;
+  --bg-soft: #F4F6FA;
+  --bg-box: #FAFBFD;
+  --gold: #A07000;
+}
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 20mm 18mm;
+  @top-right {
+    content: string(section-title);
+    font-family: "Inter", sans-serif;
+    font-size: 7pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  @bottom-left {
+    content: string(doc-footer);
+    font-family: "Lora", serif;
+    font-style: italic;
+    font-size: 7.5pt;
+    color: var(--muted);
+  }
+  @bottom-right {
+    content: "p. " counter(page) " / " counter(pages);
+    font-family: "Inter", sans-serif;
+    font-size: 7.5pt;
+    color: var(--muted);
+  }
+}
+
+@page :first {
+  margin: 0;
+  @top-right { content: ""; }
+  @bottom-left { content: ""; }
+  @bottom-right { content: ""; }
+}
+
+@page toc {
+  @top-right { content: ""; }
+}
+
+* { box-sizing: border-box; }
+.string-set-footer {
+  string-set: doc-footer content();
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: "Lora", serif;
+  font-size: 10pt;
+  line-height: 1.55;
+  color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* ---------- Cover ---------- */
+
+.cover, .cover * { text-align: left; hyphens: none; }
+.cover {
+  page: cover;
+  position: relative;
+  height: 297mm;
+  padding: 30mm 26mm;
+  page-break-after: always;
+  background: #FFFFFF;
+}
+.cover-kicker {
+  font-family: "Inter", sans-serif;
+  font-size: 10pt;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10mm;
+}
+.cover-title {
+  font-family: "Inter", sans-serif;
+  font-size: 30pt;
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--navy);
+  bookmark-level: none;
+  margin: 0 0 6mm 0;
+}
+.cover-sub {
+  font-family: "Lora", serif;
+  font-size: 13.5pt;
+  font-style: italic;
+  color: var(--ink);
+  margin-bottom: 14mm;
+}
+.cover-rule { border: none; border-top: 2.5pt solid var(--navy); width: 42mm; margin: 0 0 12mm 0; }
+.cover-meta {
+  font-family: "Inter", sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.cover-meta strong { color: var(--navy); }
+.cover-note {
+  position: absolute;
+  bottom: 26mm; left: 26mm; right: 26mm;
+  font-size: 8.5pt;
+  font-style: italic;
+  color: var(--muted);
+  border-top: 0.6pt solid var(--rule);
+  padding-top: 4mm;
+}
+
+/* ---------- TOC ---------- */
+
+nav.toc { page: toc; page-break-after: always; }
+nav.toc .toc-title {
+  font-family: "Inter", sans-serif;
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 8mm 0;
+}
+nav.toc ul { list-style: none; margin: 0; padding: 0; }
+nav.toc li { margin: 0 0 2.2mm 0; }
+nav.toc a {
+  text-decoration: none;
+  color: var(--ink);
+  font-family: "Inter", sans-serif;
+  font-size: 9.5pt;
+  display: block;
+}
+nav.toc li.lvl2 a { font-weight: 700; color: var(--navy); margin-top: 3mm; }
+nav.toc li.lvl3 a { padding-left: 7mm; font-weight: 400; }
+nav.toc a::after {
+  content: leader(". ") " " target-counter(attr(href), page);
+  color: var(--muted);
+}
+
+/* ---------- Headings ---------- */
+
+article h2 {
+  font-family: "Inter", sans-serif;
+  font-size: 15.5pt;
+  font-weight: 800;
+  color: var(--navy);
+  border-bottom: 1.6pt solid var(--navy);
+  padding-bottom: 2mm;
+  margin: 0 0 6mm 0;
+  page-break-before: always;
+  page-break-after: avoid;
+  string-set: section-title content();
+  bookmark-level: 1;
+  text-align: left;
+}
+article h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 12.5pt;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 8mm 0 3.5mm 0;
+  page-break-after: avoid;
+  bookmark-level: 2;
+  text-align: left;
+}
+article h4 {
+  font-family: "Inter", sans-serif;
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 6mm 0 2.5mm 0;
+  page-break-after: avoid;
+  bookmark-level: 3;
+  text-align: left;
+}
+
+p { margin: 0 0 3mm 0; }
+strong { color: inherit; }
+s { color: var(--muted); }
+
+/* ---------- Lists ---------- */
+
+article ul, article ol { margin: 0 0 3.5mm 0; padding-left: 6mm; }
+article li { margin-bottom: 1.6mm; }
+article ul ul, article ol ul, article ul ol { margin: 1.6mm 0 0 0; }
+article ul { list-style: none; }
+article ul > li::before {
+  content: "▸";
+  color: var(--navy);
+  display: inline-block;
+  width: 4mm;
+  margin-left: -4mm;
+  font-size: 8.5pt;
+}
+article ul ul > li::before { content: "–"; color: var(--muted); }
+article ul ul ul > li::before { content: "·"; }
+
+/* ---------- Tables ---------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Inter", sans-serif;
+  font-size: 8.3pt;
+  line-height: 1.42;
+  margin: 4mm 0 5mm 0;
+  text-align: left;
+}
+th {
+  background: var(--navy);
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 2mm 2.4mm;
+  border: 0.5pt solid var(--navy);
+  text-align: left;
+}
+td {
+  padding: 1.8mm 2.4mm;
+  border: 0.5pt solid var(--rule);
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: var(--bg-soft); }
+td.yes, td.no {
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 9pt;
+}
+td.yes { color: #1E6B3C; background: #EDF6F0 !important; }
+td.no  { color: #8C2F2F; background: #F9F0EF !important; }
+table.compare td:first-child, table.t21 td:first-child { font-weight: 700; color: var(--navy); }
+
+/* ---------- Question boxes ---------- */
+
+section.questao {
+  border: 0.7pt solid var(--rule);
+  border-left: 2.6pt solid var(--navy);
+  background: var(--bg-box);
+  padding: 3.5mm 4.5mm 3mm 4.5mm;
+  margin: 0 0 4.5mm 0;
+  page-break-inside: avoid;
+}
+section.questao .qhead {
+  font-family: "Inter", sans-serif;
+  margin-bottom: 2.5mm;
+  padding-bottom: 1.6mm;
+  border-bottom: 0.5pt solid var(--rule);
+  text-align: left;
+}
+section.questao .qnum {
+  font-weight: 800;
+  font-size: 9.5pt;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+section.questao .qmeta {
+  font-size: 8pt;
+  color: var(--muted);
+  font-weight: 500;
+  display: block;
+  margin-top: 0.6mm;
+}
+section.questao p, section.questao li { font-size: 9.3pt; }
+section.questao ul { padding-left: 5mm; }
+section.questao ul > li::before { content: ""; width: 0; margin-left: 0; }
+section.questao ul { list-style: none; }
+section.questao ol { padding-left: 6mm; }
+section.questao p.coment {
+  border-top: 0.5pt dotted var(--rule);
+  padding-top: 2mm;
+  margin-top: 2.5mm;
+}
+section.questao .gabarito {
+  font-family: "Inter", sans-serif;
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: var(--navy);
+  display: inline-block;
+  padding: 1mm 3mm;
+  border-radius: 1.2mm;
+  margin-top: 1.5mm;
+}
+
+/* ---------- Callouts ---------- */
+
+.callout {
+  padding: 3.5mm 4.5mm;
+  margin: 4mm 0 4.5mm 0;
+  page-break-inside: avoid;
+  border-left: 2.6pt solid var(--navy);
+  background: #EFF3F9;
+}
+.callout.warning { border-left-color: var(--gold); background: #FBF6EA; }
+.callout .callout-title {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 9.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--navy);
+  margin-bottom: 2mm;
+  text-align: left;
+}
+.callout.warning .callout-title { color: var(--gold); }
+.callout p, .callout li { font-size: 9.3pt; }
+
+/* ---------- Quotes, figures, misc ---------- */
+
+blockquote {
+  margin: 3mm 0 4mm 4mm;
+  padding: 1mm 0 1mm 4mm;
+  border-left: 1.4pt solid var(--rule);
+  color: #3A3F47;
+  font-size: 9.3pt;
+}
+blockquote p { margin-bottom: 2mm; }
+
+figure.diagram {
+  margin: 5mm 0 6mm 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+figure.diagram img { width: 100%; max-width: 165mm; }
+figure.diagram figcaption {
+  font-family: "Inter", sans-serif;
+  font-size: 8pt;
+  color: var(--muted);
+  margin-top: 2mm;
+}
+
+p.colophon {
+  margin-top: 10mm;
+  padding-top: 3mm;
+  border-top: 0.6pt solid var(--rule);
+  font-size: 8.2pt;
+  font-style: italic;
+  color: var(--muted);
+}
+
+article hr { display: none; }
+hr.cover-rule { display: block; }

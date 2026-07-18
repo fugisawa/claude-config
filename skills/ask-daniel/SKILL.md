@@ -38,8 +38,8 @@ Você não lembra de todas as skills, então consulte este mapa. Quatro acervos 
 
 - **Forecasting/DS**: `forecasting-calibration`, `senior-data-scientist`, agente `football-forecaster`; visualização: `dataviz` + `dataviz-storytelling`.
 - **Apps**: `streamlit-apps` (inclui verificação visual headless).
-- **Concursos**: planejamento/cronograma/check-in/métricas/replanejamento pós-edital: `estrategista-concurso` (o quê/quando/quanto — nunca conteúdo); método/conteúdo (bancas FGV×CEBRASPE, questões, Anki, discursivas, simulados): `concurso-prep`. Sinais psicológicos: só nomear e proteger o dia — condução é do acervo web (kit-sobrevivencia-atipica). Manual: `~/.claude/docs/manual-concurso.md`. Aprendizado geral stateful (workspace com learning-records): `/teach`.
-- **Documentos**: `briefing-designer` (PDF analítico), `docx`, `pdf-processing-pro`.
+- **Concursos**: planejamento/cronograma/check-in/métricas/replanejamento pós-edital: `estrategista-concurso` (o quê/quando/quanto — nunca conteúdo); método/conteúdo (bancas FGV×CEBRASPE, questões, Anki, discursivas, simulados): `concurso-prep`. Aulas em PDF do IGEPP → MD limpo (Obsidian) + PDF imprimível: `igepp-aula-reformat` (vence `pdf-processing-pro` para PDFs de cursinho/TCPDF com marca d'água). Sinais psicológicos: só nomear e proteger o dia — condução é do acervo web (kit-sobrevivencia-atipica). Manual: `~/.claude/docs/manual-concurso.md`. Aprendizado geral stateful (workspace com learning-records): `/teach`.
+- **Documentos**: `briefing-designer` (PDF analítico), `docx`, `pdf-processing-pro` (genérico; para aula IGEPP use `igepp-aula-reformat`).
 - **LifeOS/Obsidian**: `obsidian-note` (19 tipos), `vault-search`, `vault-review`, `daily-capture`, comandos `/obsidian:*`.
 - **Treino**: `training-protocol`. **LLM eng**: `langchain-stack`, `claude-api`, `senior-prompt-engineer`.
 
