@@ -65,7 +65,7 @@ Campos vazios são aceitáveis — o agente pergunta só o decisório e nunca tr
 
 - "verticaliza esse edital" · "gera 15 questões estilo CEBRASPE de ProcLeg"
 - "monta os cards dos erros dessa semana" · "corrige essa discursiva com critérios FGV"
-- "qual a diferença de abordagem FGV × CEBRASPE em Português?" · "monta meu simulado híbrido"
+- "qual a diferença de abordagem FGV × CEBRASPE em Português?" · "monta meu simulado FGV"
 
 ## Acervo web ↔ Claude Code
 

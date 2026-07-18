@@ -26,7 +26,7 @@ Aprovação é um **sistema baseado em evidência**, não leitura heroica: verti
 
 ## The system (checklist de alto desempenho)
 
-1. **Verticalize o edital** — cada tópico por matéria, cruzado com incidência histórica (QConcursos/TEC por banca). Estude em ordem de incidência decrescente.
+1. **Verticalize o edital** — cada tópico por matéria, cruzado com incidência histórica (QConcursos/TEC por banca). Estude em ordem de incidência decrescente. **Se a fila já existe pronta, ela é a fonte — não re-derive**: para os concursos do Daniel, `~/manual_estudo/disciplinas/<matéria>/trilha.md` (cada passo = aula IGEPP + link QC tunado; planos de semana/dia consomem o primeiro passo não-marcado).
 2. **Ciclo de estudos** por blocos fixos (não por horas totais), girando **todas** as matérias — sem abandonar as difíceis.
 3. **Questões-first** — antes da teoria extensa, resolva ~10 questões **da sua banca** no tópico; estude a teoria como resposta ao erro. Filtro: banca + assunto.
 4. **Revisão espaçada (Anki)** — crie o card no momento do estudo, vinculado ao erro. Cadência abaixo; método em `anki-method.md`.

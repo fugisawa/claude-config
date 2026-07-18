@@ -51,7 +51,7 @@ M1: diagnóstico → M2–M4: mensal → M5+: **quinzenal** (ou imediatamente ao
 2. **Régua** (abaixo): a cor define a escala da resposta — verde não ganha reforma; vermelho não ganha cosmético.
 3. **Ler métricas** contra as regras de decisão (metricas-e-checkin.md). Destacar **no máximo 3 achados**; o resto espera o meso.
 4. **Recalcular prioridades** se houver sinal (zona confirmada, simulado novo, evento, edital).
-5. **Preencher a semana**: slots da semana-modelo com disciplinas + tópicos nomeados e **primeira ação definida por bloco** (P11); tema da discursiva de domingo; simulado se a cadência pedir; se-então pertinentes.
+5. **Preencher a semana**: slots da semana-modelo com disciplinas (matriz) + **tópicos tirados do próximo passo não-marcado da `trilha.md` de cada matéria** (`~/manual_estudo/disciplinas/` — citar "Passo N" no plano; nunca inventar sequência) e **primeira ação definida por bloco** (P11); tema da discursiva de domingo; simulado se a cadência pedir; se-então pertinentes.
 6. **3 prioridades da semana** (derivadas da categoria de erro dominante) + **1 vitória para o mural** (numérica: "Regimento subiu de 38% para 52%").
 7. **Fechar em ~5 linhas**: cor · o que muda · o que observar. Sem sermão, sem auditar a vida — decisão, não relatório.
 

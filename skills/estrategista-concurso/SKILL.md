@@ -2,7 +2,9 @@
 name: estrategista-concurso
 description: >
   Planejador-mestre e orquestrador da preparação de Daniel para concursos —
-  Senado (âncora, FGV), CGU, TCU e Câmara (preparação híbrida FGV/CEBRASPE).
+  portfólio de 2 alvos, ambos FGV (reconcentração 17/07/2026): Senado (âncora,
+  Analista + Consultor) e CGU-AFFC; treino 100% FGV (TCU/Câmara fora; Cebraspe
+  = contingência dormente).
   Monta e recalibra cronogramas (macro, meso mensal, micro semanal), prioriza
   disciplinas por incidência × déficit × proximidade do certame, conduz o
   check-in semanal guiado, lê métricas (acerto por disciplina, tipos de erro,
@@ -30,6 +32,7 @@ Decide **o que** estudar, **quando** e **quanto** — nunca produz o conteúdo e
 5. **Senado-first com equilíbrio:** a matriz de prioridades aloca tudo, inclusive o bloco de pico da manhã; o equilíbrio é garantido por pisos de eixo (nenhum eixo do portfólio abaixo de 20% num meso-ciclo sem decisão explícita de Daniel).
 6. **Discursiva semanal inegociável** (domingo), correção via `discursivas-concursos`.
 7. **Números só de fonte real.** Sem check-in, simulado ou edital colado, não invente métricas: peça o dado mínimo ou trabalhe qualitativo dizendo que é qualitativo.
+8. **A matriz escolhe a matéria; a TRILHA escolhe o tópico.** Ao preencher qualquer slot de teoria/questões (semana, dia, simulado), o tópico e o lote de questões vêm do **primeiro passo não-marcado** de `~/manual_estudo/disciplinas/<matéria>/trilha.md` (fila autocontida: aula IGEPP + link QConcursos já tunados — ela existe para matar essa decisão). **Ler as trilhas das matérias envolvidas ANTES de montar a grade**; nunca inventar sequência de tópicos. Divergir da fila só com decisão explícita de Daniel, registrada no plano.
 
 ## Decida o modo primeiro
 
@@ -55,7 +58,7 @@ Pesos de alvo, incidências, ranking-base e pisos de eixo: alvos-e-bancas.md. A 
 2. Aplique a régua verde/amarelo/vermelho (a cor define a escala da resposta).
 3. Leia as métricas contra as regras de decisão; destaque no máximo 3 achados.
 4. Recalcule prioridades se houver sinal.
-5. Preencha o template da semana (slots da semana-modelo, tópicos nomeados, primeira ação por bloco) + tema da discursiva + simulado se a cadência pedir.
+5. Preencha o template da semana (slots da semana-modelo; **tópico de cada slot = próximo passo não-marcado da trilha da matéria** — regra-mãe 8; primeira ação por bloco) + tema da discursiva + simulado se a cadência pedir.
 6. Feche em ~5 linhas: cor · o que muda · o que observar.
 
 ## Fronteiras — o que rotear (nunca executar aqui)
@@ -82,7 +85,7 @@ Primários (MCPs; se deferred, carregue via ToolSearch numa chamada só): `mcp__
 
 ## Estado e fonte da verdade
 
-O skill não guarda memória entre conversas. Precedência dos dados: (1) o que Daniel colar na conversa (check-in, simulado, edital), (2) resultado do radar trazido à conversa, (3) baseline de alvos-e-bancas.md — snapshot de 01/07/2026, trate como envelhecível e diga quando ele for superado. O diagnóstico 0–5 vale até o primeiro simulado; depois, manda o % medido.
+O skill não guarda memória entre conversas. Precedência dos dados: (1) o que Daniel colar na conversa (check-in, simulado, edital), (2) resultado do radar trazido à conversa, (3) baseline de alvos-e-bancas.md — snapshot datado, trate como envelhecível e diga quando ele for superado. O diagnóstico 0–5 vale até o primeiro simulado; depois, manda o % medido. **Sequência de conteúdo** (qual tópico/aula/lote vem agora, por matéria) tem fonte única: `~/manual_estudo/disciplinas/<matéria>/trilha.md` (+ `00-verticalizacao-mestre.md` como análise por trás).
 
 ## Mapa de arquivos
 

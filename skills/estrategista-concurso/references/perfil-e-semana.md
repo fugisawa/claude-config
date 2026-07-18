@@ -20,7 +20,7 @@ Tetos de foco (planejar blocos dentro deles): Anki 10–15 min · matemática/c�
 
 Alvo **22 h/semana** (faixa saudável 20–25) · piso **10 h** · dia útil cheio ≈ **4h15**. A folga entre alvo e piso é proposital: semanas boas acumulam crédito contra semanas ruins, e ele nunca zera.
 
-Slots do dia útil (a matriz de prioridades define a disciplina de cada slot de teoria/questões):
+Slots do dia útil (a matriz de prioridades define a **disciplina** de cada slot de teoria/questões; o **tópico** dentro dela vem do primeiro passo não-marcado da `trilha.md` da matéria — nunca inventado):
 
 | Slot | Conteúdo | Tipo |
 |---|---|---|
