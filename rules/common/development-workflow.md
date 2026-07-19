@@ -7,6 +7,7 @@ The Feature Implementation Workflow describes the development pipeline: research
 ## Feature Implementation Workflow
 
 0. **Research & Reuse** _(mandatory before any new implementation)_
+   - **Canonical sequence first:** Before building any operational plan/schedule/sprint, search the project for a curated sequence artifact (trilha, fila, backlog ordenado, roadmap) — it decides the order of work; consume its next open item and cite it. Never invent sequence when one exists. *(origem: learned/canonical-sequence-first, 17/07/2026)*
    - **GitHub code search first:** Run `gh search repos` and `gh search code` to find existing implementations, templates, and patterns before writing anything new.
    - **Exa MCP for research:** Use `exa-web-search` MCP during the planning phase for broader research, data ingestion, and discovering prior art.
    - **Check package registries:** Search npm, PyPI, crates.io, and other registries before writing utility code. Prefer battle-tested libraries over hand-rolled solutions.
