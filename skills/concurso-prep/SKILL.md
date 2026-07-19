@@ -32,7 +32,7 @@ Aprovação é um **sistema baseado em evidência**, não leitura heroica: verti
 4. **Revisão espaçada (Anki)** — crie o card no momento do estudo, vinculado ao erro. Cadência abaixo; método em `anki-method.md`.
 5. **Simulados** cronometrados — 1/mês, subindo a 2/semana nas últimas 4 semanas; analise erro **por matéria**, não a nota total.
 6. **Desempenho por assunto** — planilha `%acerto` + tendência; ≥70% manutenção, <60% aprofundar com urgência.
-7. **Discursiva** semanal desde o início (tese + argumentação + norma culta); correção humana ~1×/mês. É **eliminatória**.
+7. **Discursiva** semanal desde o início (tese + argumentação + norma culta); correção humana ~1×/mês. É **eliminatória**. Escrever em folha de resposta fiel à banca: `~/manual_estudo/pdf/discursiva/` (FGV 20/30/90 linhas · Cebraspe; fontes em `folha-discursiva/`).
 
 ## Anki cadence
 
