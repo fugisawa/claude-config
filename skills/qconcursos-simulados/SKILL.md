@@ -1,6 +1,6 @@
 ---
 name: qconcursos-simulados
-description: Use when montando, revisando ou automatizando cadernos e simulados no QConcursos (QC/Elite) — simulado diagnóstico, treino por trilha, prova específica — via UI ou Chrome; também quando URLs do QC dão 404, a sessão parece deslogada, o gerador ignora cotas por assunto, ou um simulado gerado pode repetir questões já resolvidas.
+description: Use when montando, revisando ou automatizando cadernos e simulados no QConcursos (QC/Elite) — simulado diagnóstico, treino por trilha, prova específica — via UI ou Chrome; quando o usuário pede para extrair/ler/analisar o RESULTADO de um simulado feito (screenshots de Gabarito Detalhado, fotos de caderno manuscrito com respostas e confiança); também quando URLs do QC dão 404, a sessão parece deslogada, o gerador ignora cotas por assunto, ou um simulado gerado pode repetir questões já resolvidas.
 ---
 
 # QConcursos — cadernos e simulados
@@ -55,6 +55,17 @@ Montagem de provas de treino no QC com qualidade de baseline: filtro certo → s
 | Gerar sem status **Não resolvidas** | Sempre marcar antes de Filtrar (contamina o baseline) |
 | Planejar cotas por assunto (8·6·6) | Mín 10/disciplina; ajustar o desenho e registrar a adaptação |
 | Confiar nos pools do formulário como prova do filtro | A prova é o **resumo salvo** ("Minhas questões") |
+
+## Extração de resultados (pós-simulado, baseline real 25/07/2026)
+
+Input primário = **screenshots do usuário** (Gabarito Detalhado de cada caderno) + fotos do caderno manuscrito (formato `nº.conf [K/M/R/S/T/P] letra comentário`, confiança 1–5). Automação Chrome é fallback — a extensão pode estar num perfil Chrome deslogado do QC (pareamento de sessão); não trave nisso.
+
+1. **Identifique a página pelo título/breadcrumb, nunca pelo filename** (screenshot chamado "Meus Simulados" era o Gabarito Detalhado). Header traz o placar-verdade: "X Certo · Y Errado".
+2. **Screenshot alto (FGV/MC, ~20k px): varredura programática, não leitura visual.** `uv run --with pillow` (sem ImageMagick na máquina): escanear a coluna da borda esquerda dos cards (~x≈294 em viewport 1866; localizar dinamicamente a 1ª coluna com runs coloridos) — runs >80px verdes = certo, vermelhos = errado, em ordem = q1..qN. **Validar a contagem contra o header antes de usar.** Depois, crop só das erradas: alternativa vermelha = marcada, verde = gabarito. (Leitura visual fatiada funciona, mas custa ~6× mais e arrisca alucinação em texto minúsculo.)
+3. **C/E colapsado:** o "Mapa de questão" lateral dá certo/errado por número. Linhas colapsadas **truncam o enunciado** — para texto integral (ficha de erro), pedir screenshot da questão expandida; **nunca inferir** o item ou o gabarito literal.
+4. **Cruzar caderno×QC letra a letra.** Divergência é sinal real de transcrição (25/07: 3 em 30 na FGV; uma custou 1 ponto) — **confirmar com o usuário antes de classificar o tipo de erro**; para o placar, **o QC é o registro oficial**. Num caderno "C/E" pode haver questão MC legítima (banco Cebraspe tem MC antigas): letra A–E ali não é anomalia.
+5. **Gotcha visual:** screenshots longos do QC podem ter coluna fantasma sobreposta (fragmentos de outras questões) — ler só os cards numerados da coluna principal.
+6. **Saídas e fronteira:** erros × confiança → **conf 4–5 = ponto cego (★) → ficha** no formato `manual_estudo/caderno-erros-a4/ficha-fv-exemplo.typ` (conf 1–3 → log); placar por banca×disciplina → check-in do `estrategista-concurso`. Esta skill **extrai e cruza**; interpretar zonas e realocar é do estrategista. Registro: análise vira MD companion em `build/` (ex.: `build/simulado_diagnostico_analise.md`).
 
 ## Uso geral da plataforma — vereditos (análise 24/07/2026)
 
