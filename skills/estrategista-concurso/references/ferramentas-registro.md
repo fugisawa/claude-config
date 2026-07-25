@@ -33,7 +33,7 @@ PDF A5, uma semana por par de páginas: tracker verde/piso/cinza da semana, camp
 
 React artifact com **window.storage** (nunca localStorage/sessionStorage — falham em artifacts):
 
-- **Chave**: `week:YYYY-WW` → um objeto único por semana (dias com estado verde/piso/cinza, horas, questões, acertos por disciplina, Anki, discursiva, erros por tipo, ânimo, alertas, eventos). Um objeto por semana evita chamadas múltiplas de storage.
+- **Chave**: `week:YYYY-WW` → um objeto único por semana (dias com estado verde/piso/cinza, horas, blocos do plano — concluídos/planejados/adiados —, questões, acertos por disciplina, Anki, discursiva, erros por tipo, ânimo, alertas, eventos). Um objeto por semana evita chamadas múltiplas de storage.
 - **UI mínima**: grade seg–dom (toque alterna verde → piso → cinza), campos numéricos compactos, seletor de semana, e o essencial — **botão "Copiar check-in"** que serializa a semana no bloco canônico exato, pronto para colar na conversa. É a ponte com o skill sem estado.
 - Storage pessoal (`shared=false`); try/catch em toda operação; chave inexistente lança erro (tratar como semana nova).
 - Antes de construir, leia o skill **frontend-design**; estética coerente com a Via 3 (creme/preto, IBM Plex ou equivalente disponível).
