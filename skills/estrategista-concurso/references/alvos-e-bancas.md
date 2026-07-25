@@ -19,7 +19,7 @@ Portfólio **reconcentrado por Daniel (17/07/2026): Senado e CGU — 2 alvos, am
 
 1. **Edital CGU** — o mais próximo e mais certo (≤ dez/2026 sob pena de caducidade; prova a partir de ~fev/2027). Primeira checagem do protocolo 72h: **banca e área**.
 2. Qualquer ato do **Senado** (a validade da lista de 2022 expira em jun/2027; a pressão institucional cresce ao longo de 2027).
-3. *(Dormente)* Ato relevante de **TCU/Câmara** só entra se Daniel decidir reabrir o portfólio — aí os pesos se refazem.
+3. *(Dormente)* Ato relevante de **TCU/Câmara** só entra se Daniel decidir reabrir o portfólio — aí os pesos se refazem. **Fato novo (pesquisa 24/07/2026, dossiê em `manual_estudo/pdf/plano/Dossie-TCU-Carreiras-e-Concurso.pdf`):** o ciclo TCU 2025/26 foi só TEFC + AUFC-TI; um **AUFC "área geral" ~100 vagas está anunciado pelo presidente do TCU e autorizado — edital provável (55–80%) até o início de 2027, banca Cebraspe muito provável**. O gatilho dormente ficou mais próximo; a publicação do edital dispara a pergunta ao Daniel (nunca reabertura automática).
 
 Notícia e probabilidade são do radar-concursos; este arquivo só registra o snapshot que a matriz consome.
 

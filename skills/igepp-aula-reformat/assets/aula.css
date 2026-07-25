@@ -204,6 +204,8 @@ article ul ul ul > li::before { content: "·"; }
 
 /* ---------- Tables ---------- */
 
+tr { page-break-inside: avoid; break-inside: avoid; }
+
 table {
   width: 100%;
   border-collapse: collapse;

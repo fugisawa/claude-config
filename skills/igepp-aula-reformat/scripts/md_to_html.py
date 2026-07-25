@@ -311,6 +311,12 @@ def main() -> None:
     tipo = meta.get("tipo", "")
     autor = meta.get("autor", "")
     edicao = meta.get("edicao", "")
+    atribuicao = meta.get("atribuicao", f"IGEPP — Edição {edicao}")
+    nota_capa = meta.get(
+        "nota_capa",
+        "Edição reformatada: texto integral preservado; diagramas e tabelas "
+        "redesenhados; marca d'água e elementos repetidos do original removidos para impressão limpa.",
+    )
     questoes_line = f"{tipo} — {n_questoes} questões comentadas" if n_questoes else tipo
 
     toc_html = "".join(
@@ -336,10 +342,9 @@ def main() -> None:
   <div class="cover-meta">
     <strong>{inline(disciplina)}</strong><br>
     {questoes_line}<br>
-    Autor: <strong>{inline(autor)}</strong> · IGEPP — Edição {edicao}
+    Autor: <strong>{inline(autor)}</strong> · {inline(atribuicao)}
   </div>
-  <div class="cover-note">Edição reformatada: texto integral preservado; diagramas e tabelas
-  redesenhados; marca d'água e elementos repetidos do original removidos para impressão limpa.</div>
+  <div class="cover-note">{inline(nota_capa)}</div>
 </section>
 
 <nav class="toc">

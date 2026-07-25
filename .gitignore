@@ -25,8 +25,11 @@
 # notebooklm: perfil de navegador com sessão Google AUTENTICADA + venv
 skills/notebooklm/data/
 skills/notebooklm/.venv/
-# skills aprendidas auto-geradas (continuous-learning): curar antes de versionar
-skills/learned/
+# skills aprendidas (continuous-learning): VERSIONADAS desde 25/07/2026 —
+# skills/rules versionadas referenciam learned/ por nome (ex.:
+# qconcursos-simulados → learned/browser-login-session-pairing), então a
+# paridade entre máquinas exige incluí-las. Curadoria continua: só entra
+# arquivo revisado e sem segredos (scan antes de commitar).
 # junk comum
 **/__pycache__/
 *.pyc

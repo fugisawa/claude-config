@@ -17,6 +17,9 @@ autor: "Paulo Lacerda"
 edicao: "2026"
 tipo: "Aula em PDF autossuficiente (teoria e questões comentadas)"
 tags: [concurso, cgu, afo]
+# opcionais — para material ORIGINAL (não-IGEPP) que reusa este pipeline:
+atribuicao: "produzido em DD/MM/AAAA (não é material IGEPP)"   # default: "IGEPP — Edição {edicao}"
+nota_capa: "frase da capa"   # default: nota "Edição reformatada: texto integral preservado…"
 ---
 ```
 

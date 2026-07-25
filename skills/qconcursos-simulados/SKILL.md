@@ -1,0 +1,70 @@
+---
+name: qconcursos-simulados
+description: Use when montando, revisando ou automatizando cadernos e simulados no QConcursos (QC/Elite) — simulado diagnóstico, treino por trilha, prova específica — via UI ou Chrome; também quando URLs do QC dão 404, a sessão parece deslogada, o gerador ignora cotas por assunto, ou um simulado gerado pode repetir questões já resolvidas.
+---
+
+# QConcursos — cadernos e simulados
+
+## Overview
+
+Montagem de provas de treino no QC com qualidade de baseline: filtro certo → simulado salvo → verificação. A área que importa é **elite.qconcursos.com** (a sessão paga vive lá; `www.` pode aparecer deslogado e URLs antigas de memória dão **404** — navegue pela UI, nunca por URL decorada).
+
+**Caderno ≠ Simulado:** caderno = playlist sem cronômetro (revisão, erro, estudo por assunto); simulado = cronômetro + relatório por disciplina + comparação com outros (medição). Para medir, sempre simulado.
+
+## Checklist de qualidade (antes de montar)
+
+1. **Banca + assuntos verticalizados** — nunca disciplina ampla. Os nós vêm da fila canônica do usuário (`~/manual_estudo/disciplinas/<matéria>/trilha.md`, subject_ids prontos); sem trilha, verticalizar do edital.
+2. **Prova anterior real > gerado**, quando existir para o cargo/órgão (seção *Provas* / *Simulado de Provas*): reflete distribuição e estilo reais. Gerado é para diagnóstico/mix por trilha.
+3. **Espelhar a prova-alvo** em total e proporção por disciplina; mínimo estatístico ~20–30 q./assunto p/ leitura de % (n=10/disciplina é o piso aceitável de baseline).
+4. **Exclusões:** anuladas + desatualizadas (default do Elite) **e status "Não resolvidas"** — o gerador **NÃO** exclui já-resolvidas sozinho; sem esse filtro o resultado infla. (Repetição é legítima só em revisão de erro, nunca em medição.)
+5. **Janela de anos** para matéria normativa (2–4 anos); PT/RLM aguentam ~5.
+6. **Conferir o lote**: classificação de assunto do QC falha; após gerar, olhar o resumo salvo (e amostrar questões) antes de confiar no % por assunto.
+
+## Workflow (UI Elite)
+
+1. Sessão: header com avatar = logado; "Entrar" = não. Se o usuário diz que logou e você vê "Entrar" → subdomínio errado ou Chrome errado (**REQUIRED:** `learned/browser-login-session-pairing`). Nunca preencher senha.
+2. Menu → **Questões** → painel de filtros: `Disciplina` (multi, busca rápida), `Assunto` (árvore por disciplina; busca rápida + marcar nó — pai cobre filhos), `Banca`, topo `Minhas questões → Não resolvidas`.
+3. **Filtrar** → QA: a URL deve conter os `subject_ids` esperados + `my_questions=not_resolved` + `examining_board_ids` (FGV=63, Cebraspe=2). Chips = estado-verdade.
+4. **Criar Simulado → Criar meu simulado**: nome (padrão `Caderno N BANCA — DD-MM vN critério`), quantidade **por disciplina** (o formulário mostra pools "válidas" que ignoram o status — o filtro é capturado mesmo assim), tempo, **Salvar simulado** (não *Iniciar*, se for para depois).
+5. **Verificar no resumo salvo**: "Minhas questões: Não resolvidas" + banca + contagens. Sem isso, excluir e recriar — simulado **não é editável**.
+6. Obsoletos: excluir pela lixeira em *Meus simulados* (confirmação inline) para ninguém abrir a versão errada.
+
+## Limites do gerador (Elite, jul/2026)
+
+| Item | Valor |
+|---|---|
+| Questões | 5–150 total · **mín 10/disciplina** · máx 120 no form · até 12 disciplinas |
+| Cotas por assunto | **Não existem** — sorteio aleatório dentro do pool; sem proporção intra-disciplina |
+| Tempo | 30min · 1h · 1h30 · 2h · 3h · 4h · 5h · sem limite |
+| Edição | Impossível — excluir + recriar |
+| Pausa | Permitida dentro do tempo |
+
+## Automação Chrome — gotchas
+
+- Botões **se reposicionam** após re-render (Criar Simulado salta do rodapé ao topo): re-screenshot antes de reclicar.
+- Dropdown *Mais* (tempo) é instável: preferir os botões diretos; se precisar, clicar e screenshot imediato.
+- Busca rápida dos filtros: `triple_click` para limpar antes de digitar o próximo termo.
+- Painéis empilham; `Escape` fecha o de cima.
+
+## Common mistakes (baseline real, 24/07/2026)
+
+| Erro | Correção |
+|---|---|
+| Navegar por URL decorada (`/simulados`, `/cadernos`) → 404 | Entrar pela UI do Elite |
+| "Não está logado" olhando o `www.` | Testar `elite.`/`app.`; ver header |
+| Gerar sem status **Não resolvidas** | Sempre marcar antes de Filtrar (contamina o baseline) |
+| Planejar cotas por assunto (8·6·6) | Mín 10/disciplina; ajustar o desenho e registrar a adaptação |
+| Confiar nos pools do formulário como prova do filtro | A prova é o **resumo salvo** ("Minhas questões") |
+
+## Uso geral da plataforma — vereditos (análise 24/07/2026)
+
+Fonte canônica: `manual_estudo/build/guia_qconcursos_geral.md` (matriz recurso a recurso). Regras duras para o agente:
+
+- **Nunca sugerir** ao Daniel os recursos de sequenciamento/comparação do QC (Trilha da Semana, Mini Simulados automáticos, Treinador, Ranking, Resumão, cursos/teoria): conflitam com trilhas próprias, IGEPP, check-in e o perfil anti-vanity-metrics.
+- **Meu Desempenho** (filtra por banca) = conferência rápida FGV×Cebraspe entre check-ins; nunca fonte-mestre (sem tipo de erro nem calibração; % da comunidade enviesado p/ cima).
+- **TEC Concursos** = upgrade consciente com gatilho registrado (edital publicado → reavaliar no protocolo 72h); não sugerir assinatura antes disso.
+- Curso-alvo da Central: Senado-Analista (âncora; QC não suporta 2 alvos) — a Central não é bússola.
+
+## Registro
+
+Toda montagem/adaptação vira nota no artefato do plano que a consumiu (ex.: `build/simulado_cadernos.md` no manual_estudo) — nomes exatos dos simulados, cotas reais e desvios do planejado.
