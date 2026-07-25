@@ -3,7 +3,7 @@
 - Avalie a possibilidade do uso de agentes, de servidores MCP e de ferramentas sempre que uma tarefa parecer complexa.
 - Na dúvida sobre qual skill/agente/comando usar — ou quando acervos colidirem — consulte o router `/ask-daniel`.
 - Regras detalhadas (workflow, estilo de código, testes, segurança, git) vivem em `rules/common/` e são carregadas automaticamente; não as duplique aqui.
-- Stack real desta máquina: **uv + pyenv + bun** (sem conda/nvm). No Ubuntu, `bat`=`batcat` e `fd`=`fdfind`.
+- Stack real desta máquina: **uv + pyenv + bun** (sem conda/nvm). No Ubuntu, `bat`=`batcat` e `fd`=`fdfind`. Sem ImageMagick (`magick`/`convert` não existem): operações de imagem via `uv run --with pillow python`.
 
 ## Sobre este diretório (`~/.claude` é um repo git)
 

@@ -24,6 +24,13 @@ metadata:
    "Entrar", mesmo com credencial salva no gerenciador. Remédio: estacionar a aba na
    tela de login, dizer ao usuário exatamente onde ela está, e pedir o clique. Retomar
    só após verificar o header logado.
+4. **Sessão num perfil SEM extensão (vivido 25/07/2026).** Todos os browsers conectados
+   à extensão estavam deslogados — a sessão paga vivia num 3º perfil do Chrome onde a
+   extensão não está instalada. Sinal: switch_browser/select_browser não resolve; login
+   continua aparecendo no browser escolhido pelo usuário. Remédio: TIME-BOX a automação
+   (2–3 tentativas) e cair para o input alternativo — **screenshots/prints do próprio
+   usuário como fonte primária** (ele está logado no perfil dele; um print custa 10s).
+   Não é derrota: para leitura de dados, print do usuário ≥ automação.
 
 **Bônus de SPA com filtros (mesmo caso):** o estado-verdade são os CHIPS/URL de filtro
 (conferir `subject_ids`/`board_ids` na URL vale como QA), botões se REPOSICIONAM após
