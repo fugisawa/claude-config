@@ -24,6 +24,7 @@
 
 1. **Atômico**: 1 fato/exceção/par por card; frente 8–25 palavras; máx 3 linhas; artigo com N incisos = N cards; **proibido cloze múltiplo de fatos independentes** (c1..c4 numa nota = 4 cards ruins, não 1 bom).
 2. **Cloze esconde O DADO decisivo, nunca o contexto** — e a lacuna deve ser irrecuperável sem saber o conteúdo (se a sintaxe entrega, o card é ruim).
+2b. Material **visual** (gráfico de distribuição, organograma, fluxo — Estatística/TI/CE): usar a **oclusão de imagem nativa** do Anki; mesmas regras — 1 oclusão-fato por card, verso com por quê + fonte.
 3. Verso/Extra sempre com: por quê + fonte (lei/artigo) + questão-origem quando houver (ancora no contexto de prova).
 4. **Tags flat 4-dim**: `disciplina` · `topico` · `trilha` (bootstrap/teoria/questao-errada) · `banca` (fgv/cebraspe/ambas). **Decks flat por disciplina** (AFO, RLM, …); modelos "Concurso Basic"/"Concurso Cloze".
 5. Teste "esse card presta?": uma pergunta↔uma resposta? resposta objetiva? eu erraria sem saber o conteúdo? tem por quê + fonte? me faz acertar uma questão?
@@ -32,7 +33,7 @@
 
 Regras duras: **nunca** card "julgue Certo/Errado" puro (retrieval fraco, preso ao formato) — exceção única: padrão 3; **nunca clozar a versão errada do item** (consolida falsa memória — reescreva para a versão correta antes); **regra geral no verso é obrigatória** (sem feedback, o distrator persiste).
 
-1. **Correção Produtiva** (item ERRADO): frente = a frase **já corrigida**, cloze exatamente no detalhe que a banca trocou (a pegadinha Cebraspe muda UM detalhe pequeno). Ex.: item "a dotação global da reserva de contingência ofende a especificação" (E) → `A dotação global da reserva de contingência é {{c1::exceção legítima}} ao princípio da especificação (LRF art. 5º, III, b).` Verso: "Banca vende exceção legal como violação — o item nega a exceção ou troca o princípio?"
+1. **Correção Produtiva** (item ERRADO): frente = a frase **já corrigida**, cloze exatamente no detalhe que a banca trocou (a pegadinha Cebraspe muda UM detalhe pequeno). Ex.: item "a dotação global da reserva de contingência ofende a especificação" (E) → `A dotação global da reserva de contingência é {{c1::exceção legítima}} ao princípio da especificação (LRF art. 5º, III, b).` Verso: "Banca vende exceção legal como violação — o item nega a exceção ou troca o princípio?" **Não transcreva a assertiva errada original no card, nem como contexto** (exposição repetida a enunciado falso gruda mesmo rotulada como falsa — illusory truth); referencie a questão-origem por nº/ficha.
 2. **Sentence Mining do Certo** (item CERTO): cloze na palavra que sustenta a assertiva. Ex.: `A vigência da LOA limita-se, em regra, ao exercício financeiro de {{c1::um ano}} (anualidade).`
 3. **Confiança Calibrada** (erro com conf 4–5 registrado no caderno): única exceção com julgamento C/E na frente — o valor é o choque metacognitivo (hipercorreção). Verso abre com `⚠️ você errou isto com conf N no simulado de DD/MM` + correção + regra. (A frente reproduz o item e por isso PODE exceder as 8–25 palavras — comprimir só até onde os conectivos-armadilha sobrevivem.)
 4. **Distrator/Discriminação** (par confundível): **1 par por card**, nunca mais. Ex.: `"Todas as receitas e despesas no orçamento" é {{c1::universalidade}} — não unidade (unidade fala do documento único).`
@@ -55,14 +56,21 @@ Regras duras: **nunca** card "julgue Certo/Errado" puro (retrieval fraco, preso 
 - Intervalo máximo: deixar o default; se capar, capar **conscientemente na data-horizonte da prova**, nunca "90/120/180 dias" por hábito.
 - "Compute optimal retention" **foi removido do Anki** (25.07) → usar **"Help Me Decide"** para simular carga na virada de meso; **otimizar parâmetros FSRS 1×/mês**.
 - **15 novos/dia (teto 25)** [escolha de carga — FSRS é agnóstico; ~20 novos ⇒ ~200 rev/dia]; pedágio-alvo 20–35 min/dia; revisões sem limite; bury siblings ON; zerar atrasados à noite.
-- Leech: default (8 lapsos → suspende); leech = card mal formulado → **reescrever** ou devolver ao caderno, não repetir.
-- Sync: 1 perfil ↔ 1 conta AnkiWeb; **backup `.colpkg` antes do primeiro sync de cada dispositivo** (a resolução de colisão upload×download é destrutiva numa direção). Revisão móvel: AnkiWeb + Anki Mobile (iPhone).
+- Leech: default (8 lapsos → suspende); leech = card mal formulado → **reescrever** ou devolver ao caderno, não repetir. Na auditoria dominical, varrer quase-leeches com `prop:lapses>=4` — pegar o card ruim antes do 8º erro.
+- **Disciplina de botão (dado limpo p/ o FSRS):** errou = **Again**, sempre; ponta-da-língua = Again; "Difícil" nunca é resposta para erro — é para acerto sofrido.
+- Sync: 1 perfil ↔ 1 conta AnkiWeb; **backup `.colpkg` antes do primeiro sync de cada dispositivo** (a resolução de colisão upload×download é destrutiva numa direção) e **semanal** dali em diante (backup automático local não protege contra roubo/quebra do device). Mudou note type (campo novo, template)? → sync imediato nos DOIS lados antes de qualquer edição no outro. Revisão móvel: AnkiWeb + Anki Mobile (iPhone).
+- Opções que ajudam a semana real: **Easy Days** no dia de simulado/discursiva; tag **`vigencia-AAAA`** em card de norma volátil (lei recém-alterada) para caçar cards desatualizados quando a norma mudar.
 
 ## Economia do deck (antídoto à Anki-dependência)
 
 - Teto global e cotas por disciplina: re-derivados no meso pelo estrategista — não são desta skill.
-- **Protocolo de crise**: >150 rev/dia OU >45 min/dia OU backlog >200 → zerar novos + retenção 0,85 + suspender tag `prioridade-baixa`; backlog >500 = "falência do Anki" → reconstruir com o estrategista.
-- Auditoria dominical (10 min): leeches, taxa de Again, cards que nunca erram (podar).
+- **Protocolo de crise (por VOLUME)**: >150 rev/dia OU >45 min/dia OU backlog >200 → zerar novos + retenção 0,85 + suspender tag `prioridade-baixa`, atacando o backlog em **baralho filtrado ordenado por relative overdueness** (senão os intervalos curtos morrem enquanto você revisa longos por acaso); backlog >500 = "falência do Anki" → reconstruir com o estrategista.
+- **Protocolo de reentrada (por TEMPO parado — objetivo: proteger o retorno, não pagar dívida):**
+  - **Dias (2–6):** não encarar a pilha — baralho filtrado diário de ~1,5× o pedágio, ordenado por relative overdueness; novos = 0 até a fila normalizar.
+  - **Semanas (1–4):** repriorizar (suspender `prioridade-baixa` e trilhas temporárias), novos = 0, reintrodução gradual por disciplina da semana vigente.
+  - **Meses:** mover TUDO para um deck "Adormecido" suspenso — a coleção volta ao zero psicológico, **nunca ver backlog** — e reintroduzir card a card conforme a trilha reencontra o tópico.
+- **Modo prova (T-14):** ~2 semanas antes da prova, novos = 0 — o que fecha é a **introdução**; continue **criando** os cards do erro (≤24h, pipeline vivo): eles esperam na fila e entram pós-prova. Véspera = baralho filtrado dos ★/leeches/alta-incidência **sem reagendar**; zero card novo na véspera; pós-prova, volta ao normal.
+- Auditoria dominical (10 min): leeches + `prop:lapses>=4`, taxa de Again, cards que nunca erram (podar). **Guard-rail:** manutenção do sistema cabe NA auditoria + virada de meso; mexer em config fora disso = procrastinação produtiva.
 
 ## Common mistakes
 
