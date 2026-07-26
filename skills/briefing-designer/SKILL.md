@@ -6,7 +6,7 @@ description: >-
 
 # Briefing Designer
 
-> **Ambiente:** WeasyPrint e matplotlib já instalados (render testado) — pule o `pip install`.
+> **Ambiente:** WeasyPrint e matplotlib já instalados (render testado) — pule o `pip install`. Desde 26/07/2026 o fontconfig expõe as OTFs do TeX Live ao WeasyPrint (Source Serif/Sans Pro, Alegreya, Libertinus, Fira…) — paleta tipográfica extra para personas; listar com `fc-list : family`.
 
 Produces analytical PDF briefings that feel like a hybrid between *The Economist*, *Foreign Affairs*, and a quality academic journal — and that *argue* like a first-rate analytical shop: answer first, calibrated uncertainty, honest charts. Dense, restrained, typographically refined, built for a reader who values argument over decoration.
 
@@ -14,7 +14,7 @@ Produces analytical PDF briefings that feel like a hybrid between *The Economist
 
 The defining feature of a briefing is **a substantive analytical argument delivered in editorial form**. Use it for: "Generate a PDF briefing on [topic]", "Turn this into a report / dossiê / relatório / white paper", "Make me a policy brief / investment memo / strategic note", "Create a PDF for circulation about [analysis we just did]", "I need a downloadable analytical document".
 
-Do **not** use for: short notes, simple letters, certificates, slide decks (use `pptx`), spreadsheets (use `xlsx`), generic Word documents (use `docx`).
+Do **not** use for: short notes, simple letters, certificates, slide decks (use `pptx`), spreadsheets (use `xlsx`), generic Word documents (use `docx`); documentos texto-cêntricos com citações — acadêmico ABNT/APA, apostila, relatório sóbrio — vão pelos perfis pandoc (`-d abnt|apa|eisvogel`, ver router `ask-daniel`); acessórios de estudo (cheatsheet, ficha, guia rápido) vão pela trilha HTML/CSS leve — o workflow gated deste skill é pesado demais para eles.
 
 Upstream/downstream integrations: the `deep-research` skill can power the retrieval layer before writing; the `data-analyst` skill can prepare the analytical layer (EDA, statistics) whose findings this skill renders; the `repercussao-midiatica` skill consumes this skill's templates and scripts directly — **never rename or move `scripts/make_charts.py`, `scripts/validate.py`, `templates/`, or `PERSONAS.md`**, other skills depend on these paths.
 
