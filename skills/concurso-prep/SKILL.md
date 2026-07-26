@@ -1,6 +1,6 @@
 ---
 name: concurso-prep
-description: Use when preparing for a Brazilian public-service exam (concurso público) — FGV or Cebraspe/CESPE banca, Câmara/Senado or similar; verticalizing an edital, planning a study cycle, drilling questões-first, building Anki spaced-repetition decks, writing discursivas, running simulados, or generating banca-style practice questions.
+description: Use when preparing for a Brazilian public-service exam (concurso público) — FGV or Cebraspe/CESPE banca, Câmara/Senado or similar; verticalizing an edital, planning a study cycle, drilling questões-first, building Anki spaced-repetition decks, turning wrong questions or Certo/Errado items into flashcards, configuring FSRS, writing discursivas, running simulados, or generating banca-style practice questions.
 ---
 
 # Concurso Prep (FGV & Cebraspe)
@@ -29,22 +29,14 @@ Aprovação é um **sistema baseado em evidência**, não leitura heroica: verti
 1. **Verticalize o edital** — cada tópico por matéria, cruzado com incidência histórica (QConcursos/TEC por banca). Estude em ordem de incidência decrescente. **Se a fila já existe pronta, ela é a fonte — não re-derive**: para os concursos do Daniel, `~/manual_estudo/disciplinas/<matéria>/trilha.md` (cada passo = aula IGEPP + link QC tunado; planos de semana/dia consomem o primeiro passo não-marcado).
 2. **Ciclo de estudos** por blocos fixos (não por horas totais), girando **todas** as matérias — sem abandonar as difíceis.
 3. **Questões-first** — antes da teoria extensa, resolva ~10 questões **da sua banca** no tópico; estude a teoria como resposta ao erro. Filtro: banca + assunto.
-4. **Revisão espaçada (Anki)** — crie o card no momento do estudo, vinculado ao erro. Cadência abaixo; método em `anki-method.md`.
+4. **Revisão espaçada (Anki)** — crie o card no momento do estudo, vinculado ao erro, passando pelo gate fato/interpretação. FSRS-6 e padrões por banca em `anki-method.md`.
 5. **Simulados** cronometrados — 1/mês, subindo a 2/semana nas últimas 4 semanas; analise erro **por matéria**, não a nota total.
 6. **Desempenho por assunto** — planilha `%acerto` + tendência; ≥70% manutenção, <60% aprofundar com urgência.
 7. **Discursiva** semanal desde o início (tese + argumentação + norma culta); correção humana ~1×/mês. É **eliminatória**. Escrever em folha de resposta fiel à banca: `~/manual_estudo/pdf/discursiva/` (FGV 20/30/90 linhas · Cebraspe; fontes em `folha-discursiva/`).
 
-## Anki cadence
+## Anki (resumo)
 
-| Revisão | Prazo |
-|---|---|
-| 1ª | 24 h |
-| 2ª | 7 dias |
-| 3ª | 15 dias |
-| 4ª | 30 dias |
-| depois | SM-2 assume |
-
-20–30 cards novos/dia, deck por matéria, **cloze de aplicação** (nunca "qual o art. X?"). Detalhes: `anki-method.md`.
+**FSRS-6** (retenção 0,90; learning steps só de minutos — **sem cadência manual**, a tabela 24h/7d/15d/30d da v1 foi abolida) · **15 novos/dia (teto 25)** · deck flat por matéria · **cloze de aplicação** (nunca "qual o art. X?") · **gate**: fato → card; interpretação/raciocínio → caderno de erros, nunca card · item Cebraspe C/E → **5 padrões** (nunca "julgue C/E" puro; nunca clozar a versão errada) · geração por LLM sempre com revisão humana lote a lote. Método completo: `anki-method.md`.
 
 ## Common mistakes
 
