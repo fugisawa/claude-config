@@ -36,6 +36,8 @@ nota_capa: "frase da capa"   # default: nota "Edição reformatada: texto integr
 - Callouts: use a **gramática semântica da trilha de estudo** (ver seção "Marcação
   semântica" abaixo). `[!warning]`/`[!tip]`/`[!note]` continuam aceitos (aliases:
   warning→excecao, tip/note→dica), mas em aula NOVA prefira o tipo específico.
+  Aviso SEU sobre a reformatação (duplicata, trecho mantido conforme o original) vai
+  em `> [!edicao]`, nunca em `[!warning]`: `[!warning]` é a voz do autor.
 - Blockquote comum (`> `) só para notas de rodapé de tabela; citação de norma
   vai em `> [!lei]`.
 - Ênfases: `**negrito**`, `*itálico*`, `~~tachado~~` (para correções didáticas do
@@ -97,12 +99,18 @@ aos elementos da gramática da trilha de estudo e marque-os com o callout espec�
 | macete, mnemônico, "guarde que..." | `> [!dica] título` |
 | prazo, data, percentual, quórum memorizável | `> [!prazo] rótulo` |
 | prosa argumentativa/expositiva | parágrafo comum (explicação) |
+| **observação do REFORMATADOR** (duplicata de questão no original, trecho mantido conforme a fonte, nota de reformatação) | `> [!edicao] título` |
 
 - **Na dúvida sobre a classificação — ou sobre a exatidão do conteúdo — pesquise em
   fontes fidedignas** (texto da norma no Planalto, MTO/SOF, jurisprudência STF/STJ,
   manuais oficiais) antes de decidir. Registre a fonte consultada no resumo final.
 - Não force: trecho que não é claramente um elemento fica como prosa. Elemento
   errado é pior que elemento ausente.
+- **`[!edicao]` é a única linha da tabela em que quem fala NÃO é o autor** — é o
+  reformatador avisando o leitor. Antes dele esses avisos iam em `[!warning]` (âmbar,
+  no vocabulário do conteúdo), e o leitor lia como exceção da matéria uma observação
+  que não é da matéria. Sai quieto (hairline cinza, glifo `※`) e não ecoa na banda.
+  Nunca use `[!edicao]` para conteúdo do autor.
 
 ## Fidelidade ao conteúdo (política de 26/07/2026 — substitui o verbatim estrito)
 
