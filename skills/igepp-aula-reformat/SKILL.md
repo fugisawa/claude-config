@@ -31,17 +31,25 @@ rotacionadas (`scripts/extract_spans.py`).
 3. **Transcrição visual** — renderize páginas com diagramas/tabelas a 200 dpi e
    transcreva o conteúdo olhando a imagem (não confie no dump para tabelas).
 4. **Autoria do MD** — escreva o Markdown seguindo `CONVENTIONS.md` (obrigatório:
-   é o formato que o conversor parseia). Valide blocos mermaid (tool MCP do Mermaid,
-   se disponível — o retorno é grande: salve e leia só `.valid` com jq; sem a tool,
-   mantenha sintaxe básica de flowchart e confira no Obsidian).
+   é o formato que o conversor parseia). **Duas obrigações da política 26/07/2026**
+   (detalhe em CONVENTIONS.md): (a) marcar os elementos semânticos da gramática da
+   trilha de estudo ([!def]/[!lei]/[!ex]/[!pegadinha]/[!excecao]/[!dica]/[!prazo]) —
+   na dúvida sobre classificação ou exatidão, pesquisar fonte fidedigna (Planalto,
+   MTO/SOF, STF/STJ) antes de decidir; (b) clareza permitida, substância preservada,
+   correção só de erro crasso e evidente, tudo registrado no resumo final.
+   Valide blocos mermaid (tool MCP do Mermaid, se disponível — o retorno é grande:
+   salve e leia só `.valid` com jq; sem a tool, mantenha sintaxe básica de flowchart
+   e confira no Obsidian).
 5. **Diagramas do PDF** — redesenhe cada diagrama como `diagramaN.svg` (N = ordem
    dos blocos mermaid) na pasta de saída do HTML.
-6. **Conversão e render** —
-   `python ~/.claude/skills/igepp-aula-reformat/scripts/md_to_html.py aula.md saida/aula.html`
-   (o script copia `aula.css` sozinho se faltar), depois
-   `python ~/.claude/skills/briefing-designer/templates/render.py saida/aula.html saida/Aula.pdf`
-   (WeasyPrint e pypdf já instalados nesta máquina via briefing-designer; senão,
-   `uv run --with weasyprint --with pypdf python .../render.py ...`).
+6. **Conversão e render** — **no manual_estudo (caminho padrão desde 26/07/2026):**
+   acrescente `formato: aula` ao frontmatter e renderize pela trilha de estudo —
+   `python3 estudo/build.py disciplinas/<d>/aulas/aula.md pdf/aulas/<D>/Aula.pdf`
+   (da raiz do projeto; identidade Plex+Lora, grade Spivak, validação embutida;
+   figuras = `<stem>-diagramaN.svg` AO LADO do MD, versionadas). **Fora do
+   manual_estudo:** o pipeline legado da skill continua —
+   `python scripts/md_to_html.py aula.md saida/aula.html` +
+   `python ~/.claude/skills/briefing-designer/templates/render.py saida/aula.html saida/Aula.pdf`.
 7. **Inspeção visual (obrigatória)** — folha de contato de TODAS as páginas do PDF
    gerado + zoom em capa, sumário, cada diagrama, cada tabela grande e 1-2 questões.
    Confira: nº de questões = original; sem texto da marca d'água; tachados presentes.
@@ -72,7 +80,9 @@ Caminhos abaixo relativos à skill (`~/.claude/skills/igepp-aula-reformat/`).
   ("o orçamento ~~tradicional~~ programa...").
 - Contagem de questões diferente do original → sumiu bloco na autoria; compare
   `grep -c '^\*\*Questão'` com a contagem feita no diagnóstico.
-- Reescrever o conteúdo do autor (ver política de fidelidade em `CONVENTIONS.md`).
+- Reescrever o conteúdo do autor no seu estilo, "melhorar" doutrina ou corrigir sem
+  confirmar em fonte fidedigna — a política (CONVENTIONS.md) permite CLAREZA e exige
+  registro; elemento semântico forçado onde não é claro é pior que prosa comum.
 - PDF de outra origem (Word/PowerPoint, sem marca d'água rotacionada): este pipeline
   não se aplica; extraia normalmente e use só as etapas 4-8 se quiser o mesmo visual.
 

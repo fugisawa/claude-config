@@ -33,9 +33,11 @@ nota_capa: "frase da capa"   # default: nota "Edição reformatada: texto integr
 - Listas: `- ` com aninhamento por **2 espaços**; numeradas `1. `. Cada item em UMA linha.
 - Tabelas GFM. Célula da última coluna exatamente `**Sim**`/`**Não**` ganha selo
   colorido; `<br>` literal é permitido dentro de célula para quebra de linha.
-- Callouts Obsidian: `> [!warning] Título` (âmbar) e `> [!tip] Título` (azul);
-  outros tipos (`[!note]`, `[!info]`...) renderizam com o estilo base azul.
-- Blockquote comum (`> `) para citações de lei e notas de rodapé de tabela.
+- Callouts: use a **gramática semântica da trilha de estudo** (ver seção "Marcação
+  semântica" abaixo). `[!warning]`/`[!tip]`/`[!note]` continuam aceitos (aliases:
+  warning→excecao, tip/note→dica), mas em aula NOVA prefira o tipo específico.
+- Blockquote comum (`> `) só para notas de rodapé de tabela; citação de norma
+  vai em `> [!lei]`.
 - Ênfases: `**negrito**`, `*itálico*`, `~~tachado~~` (para correções didáticas do
   autor), `\*`/`\_` para literais.
 - Última linha do arquivo: parágrafo `*Material original: IGEPP — ...*` (vira colofão).
@@ -79,13 +81,46 @@ Enunciado corrido...
 - A linha `**Gabarito:**` FECHA o bloco — tudo entre a linha `**Questão N** — ...`
   e ela fica dentro da caixa no PDF.
 
-## Fidelidade ao conteúdo
+## Marcação semântica dos elementos (política de 26/07/2026)
 
-- Texto do autor é verbatim. Corrigir SOMENTE erros mecânicos evidentes
-  (ex.: "DESEMPNEHO", parêntese não fechado, duplicação de layout) — nunca
-  reescrever, "melhorar" ou completar afirmações, mesmo que pareçam erradas.
-- Inconsistência real no original (ex.: gabarito que contradiz o comentário):
-  manter como está e AVISAR o usuário no resumo final.
+Ao autorar o MD, **identifique ativamente** os trechos da apostila que correspondem
+aos elementos da gramática da trilha de estudo e marque-os com o callout específico
+(contrato completo em `~/manual_estudo/estudo/CONVENTIONS-ESTUDO.md`):
+
+| No texto do autor | Elemento |
+|---|---|
+| "X é...", "conceitua-se...", "entende-se por..." | `> [!def] Termo` |
+| transcrição de CF/lei/decreto/súmula/MTO | `> [!lei] Art. N, norma` |
+| "por exemplo", caso concreto, aplicação | `> [!ex] contexto` |
+| "a banca costuma...", "cuidado com...", troca clássica | `> [!pegadinha] título` |
+| "salvo...", "exceto...", ressalva à regra | `> [!excecao] título` |
+| macete, mnemônico, "guarde que..." | `> [!dica] título` |
+| prazo, data, percentual, quórum memorizável | `> [!prazo] rótulo` |
+| prosa argumentativa/expositiva | parágrafo comum (explicação) |
+
+- **Na dúvida sobre a classificação — ou sobre a exatidão do conteúdo — pesquise em
+  fontes fidedignas** (texto da norma no Planalto, MTO/SOF, jurisprudência STF/STJ,
+  manuais oficiais) antes de decidir. Registre a fonte consultada no resumo final.
+- Não force: trecho que não é claramente um elemento fica como prosa. Elemento
+  errado é pior que elemento ausente.
+
+## Fidelidade ao conteúdo (política de 26/07/2026 — substitui o verbatim estrito)
+
+- **Substância do autor é preservada; clareza pode melhorar.** É permitido deixar o
+  texto mais claro e melhor explicado — desfazer frase confusa, quebrar período
+  quilométrico, explicitar um conectivo, completar frase truncada pela diagramação —
+  **sem alterar muito o conteúdo**: mesmas afirmações, mesma ordem de ideias, mesma
+  voz. NÃO é permitido: reescrever no seu estilo, acrescentar doutrina própria,
+  cortar conteúdo, mudar o alcance de uma afirmação.
+- **Corrigir SOMENTE erro crasso e evidente** — e confirmado (pesquise a fonte
+  fidedigna antes): artigo de lei citado errado conferível no Planalto, troca
+  patente de PPA/LDO contra a CF, erro mecânico ("DESEMPNEHO", parêntese aberto).
+  Toda correção entra no resumo final (o quê, onde, fonte).
+- Erro *suspeito* mas não evidente (ex.: gabarito que contradiz o comentário sem
+  que se prove qual dos dois está certo): **manter como está e AVISAR** no resumo.
+- `nota_capa` de aula com intervenções deve ser honesta: em vez de "texto integral
+  preservado", use "conteúdo do autor com marcação semântica e ajustes pontuais de
+  clareza; correções listadas no colofão".
 - Sublinhados do original → `**negrito**`; tachados didáticos → `~~...~~`
   (recupere-os do dump do pymupdf4llm, que emite `<u>`/`~~` mesmo mutilando o texto).
 - Lead-ins duplicados/frases truncadas por erro de diagramação do original podem
