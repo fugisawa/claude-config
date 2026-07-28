@@ -8,7 +8,7 @@ Portfólio **repactuado por Daniel (24/07/2026): Senado e TCU — 2 alvos, banca
 
 | Alvo · cargo | Banca | Fase do ciclo (24/07/2026) | Inicial (bruto) |
 |---|---|---|---|
-| **Senado** — Analista Legislativo (Processo Legislativo) **e Consultor Legislativo** (peso 0,50; âncora) | FGV em 2022; próxima **indefinida** → prior FGV | Represamento: lista de 2022 zerada em 10/06/2026; validade expira jun/2027; Lei 15.350/2026 reajustou a carreira (vetos nas parcelas 2027–29) | Analista ~R$ 36,7 mil · Consultor ~R$ 46,3 mil (dossiê 24/07, Quadro vigente desde 04/2026) |
+| **Senado** — Analista Legislativo (Processo Legislativo) **e Consultor Legislativo** (peso 0,50; âncora) | FGV em 2022; próxima **indefinida** → prior FGV | Represamento: lista de 2022 zerada em 06/2026 (convocação integral, 104 nomeados); validade expira **por edital** — Analista 17/01/2027 · Consultor 27/04/2027 (correção 28/07/2026; "jun/2027" era só o Edital 5/Policial); Lei 15.350/2026 reajustou a carreira (vetos nas parcelas 2027–29) | Analista ~R$ 36,7 mil · Consultor ~R$ 46,3 mil (dossiê 24/07, Quadro vigente desde 04/2026) |
 | **TCU** — Auditor Federal de Controle Externo (AUFC), **área geral/Controle Externo** (peso 0,50) | **Cebraspe muito provável** (contrato vigente até 2028; TEFC-2025 e AUFC-TI-2025/26 foram Cebraspe) | **~100 vagas anunciadas 2× pelo presidente do TCU e autorizadas; edital provável (55–80%) ≤ início/2027**; Lei 15.351/2026 reescreveu a carreira | ≈ R$ 27,6 mil com GDAE no piso de 40% (banda até ~R$ 33,7 mil se GDAE 100%; ver dossiê) |
 
 ## Fora do portfólio
@@ -22,7 +22,7 @@ Portfólio **repactuado por Daniel (24/07/2026): Senado e TCU — 2 alvos, banca
 1. **Edital TCU AUFC-geral** — o mais provável do horizonte (≤ início/2027). Dispara o **protocolo 72h**: banca, áreas, formato e engenharia reversa da incidência real (a atual é provisória).
 2. **Confirmação da banca do TCU antes do edital** — hoje Cebraspe muito provável; surpresa → protocolo 72h recalibra a divisão de treino.
 3. **Edital CGU** (≤ dez/2026 sob pena de caducidade da autorização; prova ≥ 2 meses após) — **não reativa nada sozinho**: dispara a pergunta de reavaliação da contingência a Daniel.
-4. **Atos do Senado** — validade da lista de 2022 expira jun/2027; nomeações via CR/LOA-2026 reduzem o represamento que sustenta a aposta-âncora.
+4. **Atos do Senado** — validade dos editais de 2022 expira **por edital**: Analista 17/01/2027 · Consultor 27/04/2027 (correção 28/07/2026, avisos oficiais de prorrogação; o "jun/2027" anterior era do Edital 5/Policial). Com a lista zerada em 06/2026, o represamento está integral; o sinal a vigiar passa a ser autorização/anúncio de novo concurso.
 5. *(Remuneratórios, informam mas não replanejam)* ato da GDAE do TCU e eventual derrubada dos vetos das Leis 15.350/15.351 — ver dossiê.
 
 Notícia e probabilidade são do radar-concursos; este arquivo só registra o snapshot que a matriz consome.
@@ -102,4 +102,4 @@ Com a matriz banca-dupla, a média ponderada sozinha deixaria o **Processo Legis
 
 ## Atualização deste arquivo
 
-Snapshot de **24/07/2026** (substitui o de 17/07/2026) — o skill é estático. *Nota de manutenção: o pivô de 24/07 foi executado nos artefatos (Plano v3, 1-Página v3, Calendário v2, 15 disciplinas v1.1) no próprio dia, mas este arquivo ficara no snapshot 17/07; materializado em 25/07/2026 (TB0 do plano aprovado por Daniel).* Quando um fato novo chegar (colado por Daniel ou trazido do radar), a informação da conversa **prevalece** e o snapshot deve ser declarado envelhecido. A engenharia reversa completa (incidência real por tópico) refaz-se com edital em mãos, no protocolo 72h. Slot de baseline por banca preenche no check-in nº 1 (26/07).
+Snapshot de **24/07/2026** (substitui o de 17/07/2026) — o skill é estático. *Emenda pontual de 28/07/2026 (aprovada por Daniel): validade do CR-2022 corrigida para POR EDITAL (Analista 17/01/2027 · Consultor 27/04/2027; "jun/2027" era o Edital 5/Policial) — fonte: avisos oficiais de prorrogação, pesquisa do ensaio de carreira.* *Nota de manutenção: o pivô de 24/07 foi executado nos artefatos (Plano v3, 1-Página v3, Calendário v2, 15 disciplinas v1.1) no próprio dia, mas este arquivo ficara no snapshot 17/07; materializado em 25/07/2026 (TB0 do plano aprovado por Daniel).* Quando um fato novo chegar (colado por Daniel ou trazido do radar), a informação da conversa **prevalece** e o snapshot deve ser declarado envelhecido. A engenharia reversa completa (incidência real por tópico) refaz-se com edital em mãos, no protocolo 72h. Slot de baseline por banca preenche no check-in nº 1 (26/07).
