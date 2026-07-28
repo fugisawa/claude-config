@@ -17,6 +17,25 @@ The gap to a sharp market is closed **not by model complexity** but by four disc
 
 **Not for:** point/regression forecasting without probabilities → `senior-data-scientist`. Chart design → `dataviz-storytelling`. App wiring → `streamlit-apps`.
 
+## Daniel's working repo — start here, don't rebuild
+
+`~/Projects/futebol_forecast` (criado 28/07/2026) já implementa o esqueleto
+deste checklist e **está medido**: devig, RPS (Constantinou & Fenton), Dixon-Coles
+via `penaltyblog`, e um backtest walk-forward que imprime modelo × mercado ×
+uniforme lado a lado. 17 testes; dados reais versionados em `dados/`.
+
+Baseline registrado (Premier League 2023-24, 190 jogos fora da amostra):
+mercado 0,1670 · Dixon-Coles 0,1818 · uniforme 0,2374. **O modelo perde do
+mercado** — resultado esperado e o ponto de partida honesto para os passos 3 e 4
+do checklist (recalibração e blend), que ainda não estão implementados.
+
+Gaps conhecidos vs. este checklist: o devig implementado é multiplicativo e
+aditivo, não o **power method** recomendado no passo 1; não há recalibração
+isotônica nem log-opinion pooling. Implementar nessa ordem.
+
+Libs aprovadas: `penaltyblog` (modelos + scrapers) e `soccerdata`. Armadilha
+paga: o kernel Cython do penaltyblog exige `.to_numpy(copy=True)`.
+
 ## Beat-the-market checklist
 
 1. **De-vig the closing line with the power method** — it is your single best predictor and your calibration target. (Basic normalization ignores favorite-longshot bias and underprices favorites.)

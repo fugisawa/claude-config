@@ -4,6 +4,14 @@
 - Na dúvida sobre qual skill/agente/comando usar — ou quando acervos colidirem — consulte o router `/ask-daniel`.
 - Regras detalhadas (workflow, estilo de código, testes, segurança, git) vivem em `rules/common/` e são carregadas automaticamente; não as duplique aqui.
 - Stack real desta máquina: **uv + pyenv + bun** (sem conda/nvm). No Ubuntu, `bat`=`batcat` e `fd`=`fdfind`. Sem ImageMagick (`magick`/`convert` não existem): operações de imagem via `uv run --with pillow python`.
+- **Node do sistema é 18** e vários pacotes npm exigem 20+. Contorno padrão: `bun x --bun <pacote>` (usa o runtime do Bun). Não instale nvm.
+
+## MCPs e recursos próprios (inventário, jul/2026)
+
+- `anki` — cria e revisa flashcards respeitando o FSRS (exige Anki aberto). `mcp-brasil` — 70 fontes públicas BR via 7 tools de entrada; comece sempre por `search_tools`. `youtube-transcript` — legendas de aula em vídeo. Detalhes e limites de cada fonte pública: skill `legislacao-br`.
+- Custo/uso da sessão: `bunx ccusage` (histórico) e `ccost` (inclui estimativa de rate-limit).
+- **Nunca cite dispositivo legal, artigo ou acórdão de memória** — resolva a fonte pela skill `legislacao-br` ou declare que não conferiu.
+- Antes de começar projeto de forecasting/calibração, leia `~/Projects/futebol_forecast` (baseline já medido) — a skill `forecasting-calibration` explica o estado.
 
 ## Sobre este diretório (`~/.claude` é um repo git)
 
