@@ -23,3 +23,12 @@ usuário abre todo dia.
 
 **Anti-padrão a evitar:** "corrigir" menções históricas datadas (apaga rastreabilidade) e esquecer
 material de contingência (rotular como dormente ≠ deletar).
+
+**Recorrência confirmada (28/07/2026, pivô CGU→TCU de 24/07):** o padrão vazou de novo, e pelo
+mesmo vetor — o passo 4. O cânone e a prosa foram atualizados no dia; ficaram para trás a
+**descrição (frontmatter) do skill estrategista-concurso** (anunciava o portfólio antigo em toda
+sessão, contradizendo o próprio reference dela), os **cabeçalhos das trilhas por banca** nos
+references, a **bússola do planner** (fonte Typst + PDF) e o rótulo "contingência dormente" da
+folha de discursiva Cebraspe — que o pivô tornou treino ativo, porque a nova banca entrou no
+portfólio. **Lição nova:** um pivô que muda de banca vira o rótulo de material de contingência do
+avesso — varra "dormente/contingência" também, não só o nome do alvo que saiu.

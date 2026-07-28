@@ -1,6 +1,6 @@
 # Ciclos e templates
 
-Sumário: Macro (fases) · Trilha CGU paralela · Deload China · Progressão de simulados · Protocolo pós-edital (72h) · Meso template mensal · Roteiro do check-in semanal · Régua e retomada · Regra de parada
+Sumário: Macro (fases) · Trilha de intensificação paralela · Deload China · Progressão de simulados · Protocolo pós-edital (72h) · Meso template mensal · Roteiro do check-in semanal · Régua e retomada · Regra de parada
 
 ## Macro — fases (jun/2026 → dez/2027)
 
@@ -15,9 +15,18 @@ Disciplinas entram e nunca saem: passam à manutenção (FSRS + questões). Volu
 
 Sem edital até o M18 → a Fase 3 vira **manutenção de platô**: simulados + Anki em ritmo reduzido perto do piso, sem perder o ponto nem queimar. O alvo não muda; intensifica quando o edital sair.
 
-## Trilha de intensificação CGU paralela
+## Trilha de intensificação paralela (alvo cujo edital sai primeiro)
 
-Se o edital CGU sair (≤ dez/2026), **não** vira Fase 3 geral. Abre-se uma trilha paralela: verticalizar camada CE + formato da banca definida rumo à prova (~2 meses), **mantendo os pisos de eixo** dos demais alvos — exatamente o equilíbrio que Daniel pediu ("não perder o Senado por ter priorizado contabilidade"). O protocolo 72h abaixo define os números.
+Quando o edital de um dos alvos sair, **não** vira Fase 3 geral. Abre-se uma
+trilha paralela: verticalizar a camada do alvo + formato da banca confirmada
+rumo à prova (~2 meses), **mantendo os pisos de eixo** do outro alvo — o
+equilíbrio que Daniel pediu ("não perder o Senado por ter priorizado
+contabilidade"). O protocolo 72h abaixo define os números.
+
+**Caso CGU (contingência dormente desde 24/07/2026):** o edital dela (≤ dez/2026)
+**não** abre trilha nenhuma sozinho — ele dispara **reavaliação de portfólio, que
+é decisão do Daniel, nunca reativação automática**. Só se ele decidir reativar é
+que esta seção passa a valer para a CGU. Pergunte; não assuma.
 
 ## Deload China (15 dias, out/2026)
 

@@ -34,14 +34,14 @@ Recuperação com feedback supera releitura (g=0,50) e recuperação **espaçada
 
 **Lógico** (tem porquê → entender: a maior parte do Processo Legislativo) · **Semilógico** (tem padrão → deduzir pela gravidade: prazos maiores para atos mais graves, quóruns maiores para decisões mais definitivas) · **Arbitrário puro** (número solto sem porquê → SÓ aqui mnemônica/método de loci, ancorado na sala dele, que é estável). Proibido cartão do que ele ainda não explica em voz alta (P1). A matéria "odiada" deixa de ser um muro e vira caça ao tesouro de poucos itens.
 
-## Trilha FGV (Senado; CGU provisório)
+## Trilha FGV (Senado)
 
 - **"Incompleto ≠ incorreto"**: buscar a alternativa SEM NADA ERRADO, não a "mais completa" (prática observada da banca, não regra publicada — o vício de quem treinou literalidade é marcar "errada" onde a FGV apenas omitiu sem negar).
 - Treinar **leitura veloz de enunciado longo** e **subsunção caso→norma** (a etapa que a FGV mais cobra e mais gente omite).
 - **Peça por quesitos** (o corretor lê com checklist, não com fruição): introdução top-down espelhando o comando · tópico frasal que responde à indagação · fundamento normativo imediato (artigo/súmula/juris) · aplicação ao caso · coesão sem prolixidade (a fórmula pune excesso).
 - Cronometrar toda peça no **tempo real −20%**. Se por 2 semanas a estrutura não fecha nesse tempo → o gargalo é estrutura, não conteúdo: mais repetição da arquitetura sob cronômetro, não mais leitura.
 
-## Trilha CEBRASPE (TCU; Câmara)
+## Trilha CEBRASPE (TCU)
 
 - **Restritivos** ("sempre", "apenas", "exclusivamente", "jamais"): riscar fisicamente antes de julgar — codificação tátil transforma atenção em ato motor obrigatório sob fadiga.
 - **Política de marcação por valor esperado**: com −1/+1, o branco vale o mesmo que o chute cego (zero) e perde para qualquer vantagem real sobre o acaso (p=0,6 → EV=+0,2/item). Regra de campo: **marcar N1 e N2; branco só no N3** (terminologia que ele sequer reconhece). Confirmar a regra de pontuação no edital — ela varia (ex.: CACD usa −0,5).
