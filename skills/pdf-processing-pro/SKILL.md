@@ -5,6 +5,19 @@ description: Production-ready PDF processing with forms, tables, OCR, validation
 
 # PDF Processing Pro
 
+> **Inventário conferido em 02/08/2026.** Os 9 scripts documentados **existem e foram
+> testados ponta a ponta** (formulário gerado para o teste; PDF de 27 páginas dividido em 3
+> e remontado com contagem conferida). Oito deles foram escritos em 02/08/2026 — antes disso
+> a skill documentava um toolkit que não tinha.
+>
+> Contrato compartilhado em `scripts/_common.py`: códigos de saída (0 ok · 1 arquivo não
+> encontrado · 2 entrada inválida · 3 erro de processamento · 4 falha de validação), logger
+> e checagem de dependência opcional. Cada script continua rodável sozinho.
+>
+> **Para converter PDF de terceiro em Markdown fiel, esta não é a skill** — use
+> `pdf-to-markdown`, que cuida do método (marca d'água, mobília, ênfase, tabela, QA). Esta
+> aqui cuida da mecânica do arquivo: formulário, merge, split, validação, tabela, OCR.
+
 Production-ready PDF processing toolkit with pre-built scripts, comprehensive error handling, and support for complex workflows.
 
 ## Quick start
