@@ -51,7 +51,6 @@ skills/*
 !skills/langchain-stack
 !skills/learned
 !skills/legislacao-br
-!skills/notebooklm
 !skills/obsidian-note
 !skills/pdf-processing-pro
 !skills/pdf-to-markdown
@@ -67,9 +66,12 @@ skills/*
 !skills/writing-great-skills
 
 # ── Exclusões dentro das áreas liberadas ─────────────────────
-# notebooklm: perfil de navegador com sessão Google AUTENTICADA + venv
-skills/notebooklm/data/
-skills/notebooklm/.venv/
+# notebooklm: fora do git por inteiro desde 07/08/2026 (não usado). Era submodule
+# de github.com/PleasePrompto/notebooklm-skill e nunca foi inicializado aqui: o
+# índice guardava só o ponteiro e os 10 arquivos do disco não eram rastreados por
+# ninguém. Sem a exceção `!skills/notebooklm`, `skills/*` cobre o diretório todo —
+# inclusive o `data/` com sessão Google AUTENTICADA, que antes precisava de linha
+# própria. Para voltar a usar: reinstale a skill e libere-a de novo aqui.
 # skills aprendidas (continuous-learning): VERSIONADAS desde 25/07/2026 —
 # skills/rules versionadas referenciam learned/ por nome (ex.:
 # qconcursos-simulados → learned/browser-login-session-pairing), então a
