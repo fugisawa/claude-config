@@ -22,6 +22,50 @@
 !/skills/
 !/vendor/
 
+# ── skills/: curadoria item a item ───────────────────────────
+# `!/skills/` acima libera o DIRETÓRIO; sem as duas linhas abaixo, as ~1.260
+# skills instaladas de terceiros aparecem como não rastreadas e um único
+# `git add -A` commitaria todas de uma vez. Aqui ignora-se o conteúdo e
+# libera-se skill a skill. Sem barra final: casa symlink (metade delas é)
+# tanto quanto diretório. Skill nova só é versionada se ganhar linha aqui.
+skills/*
+!skills/agent-development
+!skills/ask-daniel
+!skills/bigtech-analyst
+!skills/briefing-designer
+!skills/codebase-design
+!skills/concurso-prep
+!skills/continuous-learning
+!skills/daily-capture
+!skills/dataviz-storytelling
+!skills/diagnosing-bugs
+!skills/docx
+!skills/domain-modeling
+!skills/estrategista-concurso
+!skills/file-organizer
+!skills/forecasting-calibration
+!skills/grill-me
+!skills/grill-with-docs
+!skills/grilling
+!skills/igepp-aula-reformat
+!skills/langchain-stack
+!skills/learned
+!skills/legislacao-br
+!skills/notebooklm
+!skills/obsidian-note
+!skills/pdf-processing-pro
+!skills/pdf-to-markdown
+!skills/qconcursos-simulados
+!skills/senior-data-scientist
+!skills/senior-prompt-engineer
+!skills/seo-optimizer
+!skills/streamlit-apps
+!skills/teach
+!skills/training-protocol
+!skills/vault-review
+!skills/vault-search
+!skills/writing-great-skills
+
 # ── Exclusões dentro das áreas liberadas ─────────────────────
 # notebooklm: perfil de navegador com sessão Google AUTENTICADA + venv
 skills/notebooklm/data/
