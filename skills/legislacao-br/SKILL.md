@@ -51,17 +51,41 @@ curl -sS -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gec
   -o cf88.html "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm"
 ```
 
-Duas pegadinhas ao processar:
+Pegadinhas ao processar — todas MEDIDAS em 07/08/2026 extraindo a LC 200/2023 e
+a Lei 8.443/1992 de ponta a ponta (detalhe em `referencias/extrair-planalto.md`):
 
-- O HTML declara `charset=utf-8` mas há páginas servidas em **Latin-1** — tente
-  `utf-8` e caia para `latin-1`, senão o texto sai corrompido.
+- **Decodifique como `cp1252`, não `latin-1`.** O HTML declara `charset=utf-8` e
+  mente. Cair para `latin-1` é só meio certo: o Planalto é Windows-1252, e o que
+  a latin-1 lê como controles C1 (0x91, 0x93, 0x94, 0x96) são aspas curvas e
+  travessão. Sem glifo, saem como tofu no PDF.
 - O texto **compilado** traz as redações revogadas empilhadas junto com a
   vigente, na ordem cronológica. Ao extrair um dispositivo alterado por EC, a
   **última** ocorrência é a vigente — pegar a primeira devolve texto revogado.
   (Ex.: o art. 167, IV da CF aparece quatro vezes; só a quarta, da EC 42/2003,
   vale.)
+- **Toda página traz um `<script id="f5_cspm">` (bot-defense F5) com token
+  aleatório a cada request** — mesmo tamanho, bytes diferentes. Hash do conteúdo
+  bruto acusa mudança sempre. Remova `<script>` antes de hashear.
 
 Extraia com `beautifulsoup4` + `lxml`, não com regex sobre o HTML.
+
+## A armadilha que nenhuma verificação de fonte pega
+
+Um dispositivo pode estar **vigente, não revogado, com o texto idêntico ao do dia
+em que foi promulgado — e ainda assim ensinar o errado**, porque a norma superior
+mudou em volta dele.
+
+Caso medido: a **LOTCU (Lei 8.443/1992), art. 71, I** exige "menos de sessenta e
+cinco anos" para Ministro do TCU. Redação de 1992, nunca alterada. Mas a **EC
+122/2022** deu nova redação ao **art. 73, § 1º, I da CF**, que passou a exigir
+**menos de setenta anos**. Em prova prevalece a Constituição — e a divergência
+entre as duas é justamente o que a banca cobra.
+
+Nem comparar hash, nem checar `Last-Modified`, nem reler a fonte detecta isso: a
+lei não mudou. Só a leitura cruzada detecta. Ao montar material de estudo sobre
+lei ordinária que reproduz matéria constitucional (requisitos de cargo, prazos,
+competências), **confira o dispositivo da CF correspondente** antes de dar por
+bom.
 
 ## Jurisprudência STF/STJ/TST: o `mcp-brasil` está quebrado (01/08/2026)
 
@@ -178,5 +202,9 @@ art. 73, §1º, I da CF — a EC 122/2022 mudou para setenta.
 
 ## Referências
 
-- `referencias/consultar-norma.md` — chamadas reais, seleção de versão, o path
-  fix, a receita do fallback Planalto e os limites medidos.
+- `referencias/consultar-norma.md` — chamadas reais à API, seleção de versão, o
+  path fix, detecção de mudança e os limites medidos.
+- `referencias/extrair-planalto.md` — os oito modos de corromper o texto ao
+  extrair do Planalto, todos medidos. Leia **antes** de escrever parser: cada um
+  falha em silêncio, e a implementação de referência já existe em
+  `~/manual_estudo/normas/` com 34 testes offline.

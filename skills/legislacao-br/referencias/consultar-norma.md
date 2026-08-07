@@ -77,16 +77,16 @@ sucesso — exatamente o erro que este skill existe para evitar.
 ## Fallback: Planalto
 
 `https://www.planalto.gov.br/ccivil_03/...` responde 200 com User-Agent de
-browser. Regras medidas em 07/08/2026 (CF/88, Lei 8.443, Lei 14.133):
+browser. Mas o HTML embute a redação vencida junto da vigente, e extrair dali tem
+oito modos de falhar **em silêncio** — decodificação, riscado, remissão contada
+como dispositivo, rubrica engolida, lei alterada assumindo a autoria da
+alteradora, anexo republicado no fim.
 
-- **Decodifique como `latin-1`.** O `<meta charset>` da página mente; o byte
-  0xea quebra UTF-8 já na posição 475 da Lei 8.443.
-- **Texto superado vem embutido na página**, marcado de duas formas: `<strike>`
-  (dominante — 773 na CF/88, 44 na 14.133) e `style="line-through"` (raro mas
-  real — 12 na 14.133, 7 na CF/88). Trate as duas. `<s>` não apareceu.
-- **Os stubs de revogação sobrevivem à limpeza.** Em 72 dos 77 casos na CF/88, a
-  anotação `(Revogado…)` está *fora* do riscado — o padrão `a) (Revogada)` é
-  texto vivo. Remover o riscado não apaga o registro.
+**→ `extrair-planalto.md`.** Não improvise: cada item de lá custou uma leitura de
+PDF para ser encontrado.
+
+Duas coisas que ficam aqui por serem sobre endereçamento, não extração:
+
 - **Âncora com ponto final não é versão histórica.** `name="art6."` traz o texto
   vigente do art. 6º, e a âncora sem ponto também existe. Não use isso como
   heurística de descarte.
