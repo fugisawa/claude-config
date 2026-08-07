@@ -8,13 +8,28 @@ disable-model-invocation: true
 
 Você não lembra de todas as skills, então consulte este mapa. Quatro acervos coexistem: **próprios** (`~/.claude/skills`, `~/.claude/commands`, `~/.claude/agents`), **superpowers** (plugin, vários auto-disparam), **ECC** (everything-claude-code), **nativos** do harness, e **mp** (vendored de mattpocock/skills em `~/.claude/vendor/mattpocock-skills`, symlinked).
 
+## Não achou a skill? Ela pode estar arquivada, não perdida
+
+Desde 07/08/2026 o acervo tem **duas camadas**: `skills/` é o que carrega (996) e
+`skills-archive/` fica fora da árvore varrida — **295 skills que existem no disco
+mas não aparecem na lista da sessão**, a custo zero de contexto. Se procurou algo
+de Azure, Odoo, WordPress, Angular, n8n, Apify, three.js, makepad, fp-ts, SEO
+(fora `seo-optimizer`), leilão, wiki, conductor, startup ou fal e não achou: está
+lá. Consulte `docs/skills-inventory.md` — registra nome, família e o que cada uma
+fazia — e traga de volta com
+`uv run --with pyyaml python scripts/apply_skills_archive.py --restore <nome>`
+(reinicie depois; o watcher só vê diretório que já existia no início da sessão).
+
+**Nada foi apagado.** Arquivar em vez de apagar é o que permite podar sem medo —
+e é a razão de este mapa poder ser curto sem esconder nada de você.
+
 ## Fluxo principal: ideia → código
 
 1. **Alinhar** — `/grill-with-docs` (com codebase: entrevista + gera `CONTEXT.md` e ADRs via `/domain-modeling`) ou `/grill-me` (sem codebase). `superpowers:brainstorming` auto-dispara antes de trabalho criativo — deixe; grilling é o modo manual de stress-testar um plano já esboçado.
 2. **Planejar** — `/ultraplan` (profundo: pesquisa-primeiro, seams, user stories, tracer bullets) para trabalho grande; `ecc:plan` para leve. Agente `planner` (ECC) por baixo.
 3. **Implementar** — TDD é mandatório (rule `testing.md`: seams pré-acordados, anti-padrões, fatias verticais). `superpowers:test-driven-development` auto-dispara; `tdd-guide` (ECC) como agente.
 4. **Revisar** — `/code-review` nativo para o diff (`ultra` para revisão multi-agente na nuvem); agente `code-reviewer` próprio para relatório dois-eixos (Standards × Spec + smells de Fowler). `/simplify` para limpeza sem caça a bugs.
-5. **Verificar** — `/verify` nativo (exercita o fluxo de verdade); `superpowers:verification-before-completion`.
+5. **Verificar** — `/run` nativo (sobe o app de verdade e exercita a mudança, não só os testes); `superpowers:verification-before-completion`.
 6. **Entregar** — `/commit`, `/create-pr`; `/repo-sync` para reconciliar casa↔trabalho sem perder trabalho.
 
 ## Debug
@@ -59,6 +74,6 @@ Você não lembra de todas as skills, então consulte este mapa. Quatro acervos 
 - Pesquisa → `/deep-research` primeiro; agentes de pesquisa para tarefas delegadas paralelas.
 - Obsidian → suíte própria (obsidian-note/vault-*) vence plugin `obsidian:*` genérico para o LifeOS.
 
-Manutenção: ao adicionar/renomear/remover skill user-reachable, atualize este mapa — um router desatualizado mente. Atualizar vendored: `git -C ~/.claude/vendor/mattpocock-skills pull` (symlinks acompanham; `diagnosing-bugs` é cópia adaptada, não acompanha).
+Manutenção: ao adicionar/renomear/remover skill user-reachable, atualize este mapa — um router desatualizado mente, e mente em silêncio: até 07/08/2026 ele mandava usar `/verify`, que não existe (o nativo é `/run`), e ninguém percebeu porque router quebrado não dá erro. Antes de commitar mexida em `agents/` ou `skills/`, rode `scripts/doctor_agents.py` e `scripts/doctor_skills.py` (exit 1 = erro). Instalar skill nova: **prefira marketplace/plugin a cópia solta** — plugin é reinstalável e liga/desliga pelo `enabledPlugins` do `settings.json` versionado; cópia solta não tem nenhuma das duas, e foi assim que `skills/` chegou a 1.291 sem ninguém decidir. Atualizar vendored: `git -C ~/.claude/vendor/mattpocock-skills pull` (symlinks acompanham; `diagnosing-bugs` é cópia adaptada, não acompanha).
 
 Manual de uso do paradigma (grill, CONTEXT.md/ADRs, fluxo ideia→código, este router): `~/.claude/docs/manual-grill-e-router.md`.
