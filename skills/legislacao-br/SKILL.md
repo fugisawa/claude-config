@@ -33,7 +33,9 @@ quando divergirem, vale a da seção, que é onde o teste foi feito.
 | **Texto consolidado** de norma federal | `normas.leg.br`, encoding **Compilação Monovigente** | plano A — ver `referencias/consultar-norma.md` |
 | Texto quando não há Monovigente | **Planalto por `curl` com User-Agent de navegador** | plano B — ver abaixo, exige separar o riscado |
 | URN canônica + ementa + link oficial de uma norma | `normas.leg.br/api/public/normas` | idem |
-| Acórdão do **TCU**, CARF | MCP `mcp-brasil` | `search_tools` → `call_tool` |
+| Acórdão do **TCU** por número/ano | **LexML por URN** + Exa/Tavily sobre `contas.tcu.gov.br` | `mcp-brasil` não serve para isto — ver abaixo |
+| Acórdãos recentes do TCU (feed) | MCP `mcp-brasil`, `tcu_consultar_acordaos` **sem filtro** | qualquer filtro quebra a chamada — ver abaixo |
+| CARF | MCP `mcp-brasil` | `search_tools` → `call_tool` |
 | Jurisprudência **STF, STJ, TST** | ⚠️ `mcp-brasil` **quebrado** — use Exa/Tavily sobre `portal.stf.jus.br` e Buscador Dizer o Direito | ver "Jurisprudência" abaixo |
 | Publicação no DOU ou diário municipal | MCP `mcp-brasil` | `diario_oficial_dou_buscar` → `dou_ler_publicacao` |
 | Proposições, votações, comissões (Câmara/Senado) | MCP `mcp-brasil` | features `camara`, `senado` |
@@ -94,7 +96,38 @@ obtidos por engenharia reversa, e os três colocaram proteção anti-bot na fren
 deles: STF devolve 202 com `x-amzn-waf-action: challenge`, STJ devolve 403 do
 Cloudflare, TST devolve 503. Como o cliente embrulha tudo em `except: return []`,
 **a falha aparece como "nenhum resultado", não como erro** — não gaste tempo
-reformulando a query. As features `tcu` e `dou` do mesmo MCP seguem normais.
+reformulando a query.
+
+### E o `tcu` também está meio quebrado (medido em 08/08/2026)
+
+`tcu_consultar_acordaos` funciona **sem filtro** e quebra com **qualquer** filtro,
+inclusive `ano` sozinho:
+
+```
+{"quantidade": 3}                → OK, devolve os 3 acórdãos mais recentes
+{"ano": "2026", "quantidade": 3} → ValidationError: numeroAta / relator
+                                   "Input should be a valid string", recebeu None
+```
+
+A causa está na própria descrição da tool: "quando filtros são usados, busca um lote
+maior da API e filtra localmente". Nesse lote maior vêm registros com `relator` e
+`numeroAta` nulos, e o modelo Pydantic os rejeita, derrubando a chamada inteira. Ao
+menos falha alto, diferente do módulo de jurisprudência.
+
+Consequência prática: **sem filtro, a tool é um feed reverso-cronológico** — chegar a
+um acórdão de 2015 exigiria paginar dez anos. Para achar acórdão por número e ano,
+use o **LexML**, que tem URN canônica para decisão de tribunal de contas:
+
+```
+urn:lex:br:tribunal.contas.uniao;plenario:acordao:2015-10-07;2461
+https://www.lexml.gov.br/urn/<urn>
+```
+
+O registro traz data, colegiado e o link para o inteiro teor em `contas.tcu.gov.br`.
+Não sabendo a data, chegue à URN por busca Exa/Tavily com número, ano e assunto — e
+confirme relator e colegiado no LexML antes de citar.
+
+A feature `dou` do mesmo MCP segue normal.
 
 Rota que funciona: Exa/Tavily sobre `portal.stf.jus.br` (a seção "A Constituição
 e o Supremo" é curadoria oficial por artigo), `buscadordizerodireito.com.br`,
@@ -165,6 +198,31 @@ Lei 13.709 (LGPD). **Não têm: Lei 14.133/2021 e LC 200/2023** — só `Origina
 Isso é uma armadilha silenciosa: pegar `encoding[0]` ou "a última entrada"
 devolve texto original de 2021 ou um stub de veto, com cara de sucesso.
 **Falhe alto** quando não houver `Current` — nunca emita o que veio no lugar.
+
+### O outro buraco: URN errada não dá 404, dá 200 vazio
+
+Medido em 08/08/2026. URN que não resolve devolve **HTTP 200 com um eco de si
+mesma**, 62 bytes: `{ "urn": "urn:lex:br:federal:lei.complementar:2025-01-01;224"}`.
+Nenhum erro, nenhum 404. O `encoding[]` sai `[]`, o seletor de versão devolve
+`None`, e o chamador conclui "não tem Monovigente, vou para o Planalto" — quando a
+verdade é "esta norma não existe, ou a data está errada". Aí ele baixa a URL de
+fallback, que aponta para **outra lei**, e serve texto errado com cara de acerto.
+
+Antes de olhar `encoding`, pergunte se o objeto tem só a chave `urn`. Se tiver,
+falhe alto: `if set(md.keys()) <= {"urn"}: raise SemNorma(...)`.
+
+### A CF/88 no Monovigente não diz qual emenda mudou o quê
+
+Contagem de 08/08/2026: o Monovigente da Constituição traz **zero** anotações de
+alteração em 412 KB; o compilado do Planalto traz **2.087** em 864 KB. Em lei
+ordinária e complementar as anotações vêm (a LRF traz "Artigo acrescido pela Lei
+Complementar nº 224, de 26/12/2025"); na Constituição, não.
+
+Como a banca cobra a autoria da emenda, isto decide a fonte: **texto vigente da CF
+pelo Monovigente; autoria de emenda, só pelo Planalto.** E o preço de usar o
+compilado sem separar as camadas é o erro clássico do material de cursinho —
+transcrever as duas redações do mesmo inciso como se fossem incisos diferentes.
+Detalhe e o caso do art. 163 em `referencias/consultar-norma.md`.
 
 ## Detectar que uma norma mudou
 
