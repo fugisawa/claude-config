@@ -100,6 +100,23 @@ filtros vem com **Anuladas e Desatualizadas EXCLUÍDAS por padrão**, então a b
 esconde exatamente a questão que você foi auditar. Se ela some com o filtro e aparece sem
 ele, isso por si já é a resposta: está anulada ou desatualizada.
 
+**O campo `q=` NÃO é busca por frase — e essa é a maior perda de tempo do fluxo.** Ele
+casa os termos soltos e ordena por relevância, então frase genérica de concurso devolve
+dezenas de questões alheias: "orçamento tradicional fundamenta-se em realizações" achou a
+questão certa, mas "fixava tetos para contas das autoridades monetárias" devolveu **99
+questões de economia** e nenhuma delas era o alvo. O que decide é haver um **token raro** no
+trecho — um número de programa, um nome próprio, uma palavra incomum:
+
+| Consulta | Resultado |
+|---|---|
+| `Programa 2210 Empregabilidade` | **1 questão** — acerto direto ("2210" é raro) |
+| `marco na evolução da tecnicidade orçamentária` | **1 questão** ("tecnicidade" é raro) |
+| `vigora até o fim do primeiro ano da gestão subsequente` | dezenas — todo termo é comum |
+
+Aspas não ativam busca literal. Se não houver token raro no enunciado, desista da busca por
+texto e filtre por **Banca + Ano + Órgão**. Enunciado marcado "(adaptada)" no seu material
+não vai ser achado por texto: o que você tem não é o que a plataforma indexou.
+
 Depois: `get_page_text` na página resolve tudo — traz enunciado, banca/ano/órgão, o código
 `Qxxxxxxx` e os comentários. As abas por questão são `Gabarito Comentado · Aulas ·
 Comentários · Estatísticas · Cadernos · Anotações`.
