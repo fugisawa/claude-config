@@ -24,6 +24,27 @@ apontada pelo `doctor_skills.py` como impossível de rotear, OU duplicata
 literal de outra. Preservados: as 36 curadas, `gsd-*` (67, integrado a 33
 arquivos versionados), `tavily-*` e `hugging-*`.
 
+## Citadas pelo router e nunca construídas (08/08/2026)
+
+Categoria diferente das arquivadas: **estas não estão em `skills-archive/` porque
+nunca chegaram a existir.** O `ask-daniel` as citava, o `doctor_router.py` as
+acusava, e a citação mandava o Claude para o vazio sem erro. As citações saíram;
+o registro fica aqui, que é onde se procura "cadê a skill X".
+
+| nome | o que seria | por que não foi construída |
+|---|---|---|
+| `trilha-carreira` | mapa de competências de uma carreira ou função — tronco comum + ramos por especialidade, a partir de documentos-fonte, renderizado em grafo HTML + MD do Obsidian + PDF, em `~/trilhas/<trilha>/` | `~/trilhas/` nunca existiu e não há um único artefato de trilha de carreira no disco. Capacidade aspiracional, sem uso em três semanas de trabalho denso |
+| `roadmapsh-creator` | publicar uma trilha no site roadmap.sh e minerar os roadmaps oficiais de lá | depende de `trilha-carreira` para ter o que publicar; e o próprio router registrava o custo — ~1 min de clique por nó, achatando os ramos |
+| `deep-research` | relatório profundo multi-fonte verificado | redundante: `research-orchestrator` já conduz o projeto inteiro (clarificação → `research-coordinator` → especialistas → `report-generator`), e o router agora aponta para ele |
+| `trilha-builder` | fila de estudo por disciplina (união IGEPP × QConcursos × verticalização) | a capacidade tem quatro donos corretos — `estrategista-concurso` (regra-mãe 8), `concurso-prep`, `~/manual_estudo/disciplinas/README.md` (formato v2) e a regra dura do CLAUDE.md do projeto. Uma quinta cópia seria a única capaz de divergir das outras quatro |
+
+**Gatilhos para reconsiderar.** `trilha-carreira` e `roadmapsh-creator`: quando
+houver uma carreira concreta a mapear e um documento-fonte para ela — decisão do
+Daniel, e o texto original do router está em `git show 8fe0000^:skills/ask-daniel/SKILL.md`.
+`trilha-builder`: se um edital trouxer disciplina nova e for preciso montar trilha
+do zero sob o protocolo 72h; aí as peças a fundir são o `disciplinas/README.md` e
+o `qconcursos-simulados` (colheita de `subject_ids`, tuning de link por banca).
+
 ## Índice — 295 skills
 
 | família | qtd |
