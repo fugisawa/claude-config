@@ -246,6 +246,39 @@ Material de cursinho envelhece em silêncio e é a fonte de erro mais comum:
 um vade mecum de 2021 ainda ensina "menos de sessenta e cinco anos" no
 art. 73, §1º, I da CF — a EC 122/2022 mudou para setenta.
 
+## Quando a pendência NÃO é norma — dado oficial, sigla, fato histórico (08/08/2026)
+
+Corrigindo material de estudo, boa parte do que fica pendente não é dispositivo legal e não
+se resolve por nada acima: o nome por extenso de um sistema de governo, a estatística que o
+material cita, a data e a autoria de um fato histórico, a referência bibliográfica que uma
+afirmação atribui a um autor. Aí a ferramenta é **Exa/Tavily**, com a mesma disciplina de
+fonte que este skill aplica à lei. Três casos resolvidos assim, com o que cada um ensinou:
+
+| Pendência | Fonte que resolveu | Regra que sai daí |
+|---|---|---|
+| **SIOP** — expansão da sigla | `gov.br/planejamento` e `siop.planejamento.gov.br` (manuais oficiais) | sigla de sistema de governo tem **dono**: procure o órgão que o mantém, não o glossário de cursinho |
+| **Dívida/PIB** — material dizia "cerca de 90%" | `bcb.gov.br/estatisticas/estatisticasfiscais` | ver abaixo: capture a **série**, não só o número |
+| **PPBS** — origem atribuída à ONU | Britannica + relatório histórico do GAO | fato histórico pede **duas fontes independentes**; a segunda é o que separa "li em algum lugar" de conferido |
+
+**A regra que mais rende, e que só apareceu ao fazer:** ao resolver uma estatística, o que
+entra no material **não é o número — é a série e a data**. Medido: o Banco Central publica
+*Dívida Bruta do Governo Geral* (81,9% do PIB em jun/2026) e *Dívida Líquida do Setor
+Público* (68,5% na mesma data). Um material que diz só "a dívida é X%" já erra antes de
+envelhecer, porque não diz qual das duas — e é exatamente a troca entre elas que a banca
+cobra. Número de mês nenhuma prova cobra; ele envelhece antes da aplicação. Então: registre
+a série, a data de referência, a data da consulta, e diga no texto que o que se cobra é o
+conceito.
+
+**Ordem de preferência da fonte**, na mesma lógica do resto do skill: órgão que produz o
+dado (BCB, Tesouro, IBGE, o próprio ministério) > publicação oficial dele > enciclopédia ou
+imprensa que o cita. Notícia serve para **achar** o número e datar a divulgação; nunca para
+ser a fonte citada.
+
+**O que continua fora de alcance:** referência bibliográfica precisa — edição e página de um
+livro que só existe impresso. Exa e Tavily acham a *atribuição* ("Giacomoni diz que…"), não
+a página. Nesse caso o material declara a atribuição **e** declara que a obra não foi aberta.
+Melhor uma procedência honestamente incompleta que uma página inventada.
+
 ## Cuidados
 
 - **Legislação estadual e municipal não está coberta por nada disso.**
