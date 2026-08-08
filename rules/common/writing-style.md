@@ -74,10 +74,22 @@ dois:
 ## Coesão e explicação
 
 - Cada parágrafo deixa claro qual é a relação com o anterior. Salto sem conectivo é salto.
+- **Escreva a ideia-núcleo do parágrafo antes de desenvolvê-la.** O ganho não é de estilo, é
+  de controle: enunciada de saída, ela impede a digressão, porque tudo o que não a
+  desenvolve fica visivelmente fora de lugar. É o remédio do salto lógico na origem, e não
+  na revisão. (Othon Garcia, *Comunicação em Prosa Moderna*, cap. do parágrafo.)
 - **Uma explicação boa vale mais que duas ruins.** Se a primeira não pegou, a segunda muda
-  de ângulo — exemplo concreto, contraste ou consequência. Repetir com outras palavras é a
-  forma mais comum de nenhuma das duas prestar.
+  o **tipo** de desenvolvimento, não as palavras. Os tipos são sete: enumeração de detalhes,
+  confronto (contraste ou paralelo), analogia, exemplo, causa e motivo, divisão em partes,
+  definição. Repetir a mesma forma com sinônimos é a maneira mais comum de nenhuma das duas
+  prestar.
+- **Analogia explica o desconhecido pelo conhecido, o estranho pelo familiar.** Se o termo
+  que explica for tão desconhecido quanto o explicado, não é analogia — é exemplo obscuro, e
+  sai.
 - Exemplo serve para iluminar. Exemplo que precisa de exemplo sai.
+- **Fato tem causa e efeito; ato humano tem razão, motivo e consequência.** Decisão de
+  tribunal, escolha de gestor e mudança de norma pedem "a razão de" e "as consequências de",
+  não "a causa" nem "os efeitos".
 
 ## Passe de releitura
 
@@ -85,6 +97,11 @@ Antes de enviar resposta longa ou entregar arquivo de texto, **releia procurando
 lista.** O passe separado vale mais que a boa intenção na hora de escrever: revisar em
 segunda passada derrubou decalque de 43% para 25%, enquanto pedir naturalidade de antemão
 piorou o resultado (Li et al., ACL 2025).
+
+**O teste do resumo, que é o mais barato de todos.** Percorra os parágrafos extraindo a
+ideia-núcleo de cada um, na ordem. Se a sequência ler como um sumário coerente, a estrutura
+está de pé. Onde ela tropeçar, aquele parágrafo não tem ideia-núcleo ou tem duas — e é ali
+que está o salto que o leitor vai sentir.
 
 ## O que esta regra não manda
 
