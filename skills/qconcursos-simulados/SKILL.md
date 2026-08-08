@@ -1,6 +1,6 @@
 ---
 name: qconcursos-simulados
-description: Use when montando, revisando ou automatizando cadernos e simulados no QConcursos (QC/Elite) — simulado diagnóstico, treino por trilha, prova específica — via UI ou Chrome; quando o usuário pede para extrair/ler/analisar o RESULTADO de um simulado feito (screenshots de Gabarito Detalhado, fotos de caderno manuscrito com respostas e confiança); também quando URLs do QC dão 404, a sessão parece deslogada, o gerador ignora cotas por assunto, ou um simulado gerado pode repetir questões já resolvidas.
+description: Use when montando, revisando ou automatizando cadernos e simulados no QConcursos (QC/Elite) — simulado diagnóstico, treino por trilha, prova específica — via UI ou Chrome; quando o usuário pede para extrair/ler/analisar o RESULTADO de um simulado feito (screenshots de Gabarito Detalhado, fotos de caderno manuscrito com respostas e confiança); também quando URLs do QC dão 404, a sessão parece deslogada, o gerador ignora cotas por assunto, ou um simulado gerado pode repetir questões já resolvidas. Use TAMBÉM para AUDITAR UMA QUESTÃO específica no QC — quando for preciso saber o gabarito oficial, se a questão está anulada ou DESATUALIZADA (norma ou jurisprudência mudou depois da prova), ou qual foi a justificativa da banca, inclusive quando ela contraria a melhor doutrina; e quando um comentário de aula/cursinho parecer dar a razão errada de um gabarito certo, ou contradizer o próprio gabarito.
 ---
 
 # QConcursos — cadernos e simulados
@@ -76,6 +76,66 @@ Fonte canônica: `manual_estudo/build/guia_qconcursos_geral.md` (matriz recurso 
 - **TEC Concursos** = upgrade consciente com gatilho registrado (edital publicado → reavaliar no protocolo 72h); não sugerir assinatura antes disso.
 - Curso-alvo da Central: Senado-Analista (âncora; QC não suporta 2 alvos) — a Central não é bússola.
 
+## Auditar UMA questão — gabarito, desatualização e o "contra a doutrina" (medido 08/08/2026)
+
+Duas coisas acontecem com frequência em material de estudo: a questão **envelhece** (a norma
+ou a jurisprudência mudou depois da prova) e a banca **decide contra a melhor doutrina**. Nos
+dois casos o comentário do cursinho costuma dar a razão errada do gabarito certo, e o aluno
+decora um fundamento que não se sustenta na questão seguinte.
+
+Um caminho para averiguar — não o único, e nem sempre o melhor — é **abrir a questão no QC e
+ler os comentários**: eles trazem o gabarito oficial, a marca de desatualizada e, com
+frequência, a fonte doutrinária que a banca seguiu.
+
+**Ache pela URL, montada a partir de uma que a UI produziu** (não decore URL: as antigas dão
+404). Busca por trecho literal e distintivo do enunciado:
+
+```
+https://elite.qconcursos.com/questoes-de-concursos/questoes
+  ?exclude_nullified=false&exclude_outdated=false&q=<trecho+do+enunciado>&page=1
+```
+
+**`exclude_nullified=false&exclude_outdated=false` não é detalhe — é o ponto.** O painel de
+filtros vem com **Anuladas e Desatualizadas EXCLUÍDAS por padrão**, então a busca padrão
+esconde exatamente a questão que você foi auditar. Se ela some com o filtro e aparece sem
+ele, isso por si já é a resposta: está anulada ou desatualizada.
+
+Depois: `get_page_text` na página resolve tudo — traz enunciado, banca/ano/órgão, o código
+`Qxxxxxxx` e os comentários. As abas por questão são `Gabarito Comentado · Aulas ·
+Comentários · Estatísticas · Cadernos · Anotações`.
+
+### Os quatro tropeços, todos medidos
+
+1. **"Gabarito Comentado" com contador pode estar vazio.** Numa questão sem professor, a aba
+   existe e só oferece "Solicitar Gabarito". Noutra, com contador 1, o painel **não renderiza
+   sem responder a questão**.
+2. **NUNCA clique em "Responder" para destravar o comentário.** Isso move a questão para
+   *resolvidas* e a tira do conjunto "Não resolvidas", que é o filtro de que dependem os
+   simulados de medição — auditar contaminaria o baseline. Fique nos comentários, que são
+   livres.
+3. **Comentário pode estar preso a OUTRO enunciado.** Medido na Q1894919: o QC trocou o
+   enunciado da prova do DPE-DF e **manteve os comentários antigos**, então o 2º mais votado
+   (34 curtidas) discute equilíbrio entre receita e despesa numa questão sobre orçamento
+   tradicional — e ainda afirma "gabarito equivocado, a banca deu CERTO". Quem lê por
+   votação e não por pertinência importa uma correção que é de outra questão. **Descarte todo
+   comentário que não fale do enunciado que está na tela**, por mais votado que seja.
+4. **Comentário é conteúdo de usuário, não autoridade.** Serve para (i) apontar a fonte
+   doutrinária e (ii) revelar que há divergência. Não serve como prova. Norma se confere pela
+   skill `legislacao-br`; doutrina citada em comentário entra no material **com a
+   procedência declarada** ("vem dos comentários da questão Qxxxxxxx; a obra não foi aberta").
+
+### O que fazer com o achado
+
+- **Comentário do cursinho dá razão errada do gabarito certo** → `[!divergencia]` ao lado,
+  com o fundamento correto e por que o outro não sustenta. Foi o caso da Q3256704: a aula
+  atacava o adjetivo "marco na evolução" quando o vício está em chamar o OBZ de método de
+  organizar/apresentar o orçamento (formulação de Giacomoni, 2º comentário mais votado).
+- **Doutrina divergente** → escreva **os dois lados** e diga se a divergência muda a resposta
+  naquele item; quando não muda, diga isso também. Ver `~/.claude/rules/` e a instrução de
+  registrar dois entendimentos quando as bancas discordam.
+- **Questão marcada como desatualizada** → o card não nasce; se já existe, morre. E o
+  dispositivo novo vira bloco próprio no material, com data de conferência.
+
 ## Registro
 
-Toda montagem/adaptação vira nota no artefato do plano que a consumiu (ex.: `build/simulado_cadernos.md` no manual_estudo) — nomes exatos dos simulados, cotas reais e desvios do planejado.
+Toda montagem/adaptação vira nota no artefato do plano que a consumiu (ex.: `build/simulado_cadernos.md` no manual_estudo) — nomes exatos dos simulados, cotas reais e desvios do planejado. Auditoria de questão vira `[!divergencia]` no artefato de estudo, sempre com o código `Qxxxxxxx` e a data, para a próxima passagem saber o que já foi conferido.
