@@ -3,7 +3,7 @@ name: estrategista-concurso
 description: >
   Planejador-mestre e orquestrador da preparação de Daniel para concursos —
   portfólio de 2 alvos em banca-dupla (pivô de 24/07/2026, pesos 0,50/0,50):
-  Senado (Analista + Consultor, FGV) e TCU (AUFC área geral, Cebraspe muito
+  Senado (Consultor Legislativo, FGV) e TCU (AUFC área geral, Cebraspe muito
   provável); treino alterna FGV × Cebraspe. CGU e Câmara fora (CGU =
   contingência dormente, edital dispara reavaliação, nunca reativação
   automática).
