@@ -25,6 +25,10 @@ O `.gitignore` ignora tudo (`/*`) e libera item a item. **Nunca entram no git**:
 
 **Manuais de uso**: [`docs/manual-grill-e-router.md`](docs/manual-grill-e-router.md) (grill, CONTEXT.md/ADRs, fluxo ideia→código, router) · [`docs/manual-concurso.md`](docs/manual-concurso.md) (estrategista-concurso × concurso-prep, loop semanal, check-in, mapa web↔CLI).
 
+## Retrieval
+
+[`docs/tavily.md`](docs/tavily.md) — em inglês, para ser compartilhado. Separa o que é da Tavily (as 8 skills oficiais, não vendored aqui) do que é autoral (playbook de roteamento, `deep-research`, `search-specialist`), documenta as regras de roteamento, o uso medido, notas de campo sobre fontes oficiais BR e a camada de frescor/deriva que faltou.
+
 ## Guardrail git (hook)
 
 `hooks/block-dangerous-git.sh` bloqueia `reset --hard`, `clean -f*`, `branch -D`, `checkout .`, `restore .` e `push --force/-f`. **Deliberadamente não bloqueia** `git push` normal nem `--force-with-lease` — o fluxo (vsync, "commita e pusha") depende de push pelo agente.
