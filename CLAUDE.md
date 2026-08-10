@@ -3,8 +3,8 @@
 - Avalie a possibilidade do uso de agentes, de servidores MCP e de ferramentas sempre que uma tarefa parecer complexa.
 - Na dúvida sobre qual skill/agente/comando usar — ou quando acervos colidirem — consulte o router `/ask-daniel`.
 - Regras detalhadas (workflow, estilo de código, testes, segurança, git) vivem em `rules/common/` e são carregadas automaticamente; não as duplique aqui.
-- Stack real desta máquina: **uv + pyenv + bun** (sem conda/nvm). No Ubuntu, `bat`=`batcat` e `fd`=`fdfind`. Sem ImageMagick (`magick`/`convert` não existem): operações de imagem via `uv run --with pillow python`.
-- **Node do sistema é 18** e vários pacotes npm exigem 20+. Contorno padrão: `bun x --bun <pacote>` (usa o runtime do Bun). Não instale nvm.
+- Stack real (comum às duas máquinas): **uv + pyenv + bun**, sem conda. **O que varia por máquina — versão de node, nvm, se `bat` é `bat` ou `batcat`, rede — está em [`docs/ambiente-por-maquina.md`](docs/ambiente-por-maquina.md), não aqui.** Este arquivo é carregado nas duas máquinas: frase que diga "esta máquina" é infalsificável e já esteve errada em 3 de 4 afirmações (10/08/2026). Antes de mandar instalar, desinstalar ou invocar binário cujo nome varia, **confira lá ou meça** — `command -v <cmd>`, e para node meça também em shell interativo, porque `command -v node` mente sobre o que aparece no terminal.
+- ⏳ **PENDENTE (10/08/2026) — para a sessão da máquina de CASA:** a seção *Máquina B* de [`docs/ambiente-por-maquina.md`](docs/ambiente-por-maquina.md) nunca foi medida. Rode o bloco de coleta que está lá, substitua a seção pelo resultado e commite. Feito isso, o que coincidir sobe para cá e **este item se apaga**.
 
 ## MCPs e recursos próprios (inventário, jul/2026)
 
