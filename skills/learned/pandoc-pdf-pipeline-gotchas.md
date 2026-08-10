@@ -1,6 +1,6 @@
 ---
 name: pandoc-pdf-pipeline-gotchas
-description: Montar pipeline md→PDF/DOCX com pandoc defaults files (-d perfil) e xelatex — gotchas vividos: defaults SEMPRE vence o YAML do doc (fallback via filtro Lua), -V concatena em vez de sobrescrever ("fonte AB" not found), fontes OTF do texlive invisíveis ao fontconfig no Ubuntu, Eisvogel 3.x exige pandoc recente, -o /dev/null não testa engine
+description: "Montar pipeline md→PDF/DOCX com pandoc defaults files (-d perfil) e xelatex — gotchas vividos: defaults SEMPRE vence o YAML do doc (fallback via filtro Lua), -V concatena em vez de sobrescrever ('fonte AB' not found), fontes OTF do texlive invisíveis ao fontconfig no Ubuntu, Eisvogel 3.x exige pandoc recente, -o /dev/null não testa engine"
 metadata:
   pattern: workarounds
   origin: construção do md-export-kit (perfis abnt/apa/eisvogel/docx/html, 26/07/2026)
