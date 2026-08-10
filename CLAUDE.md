@@ -15,6 +15,7 @@
 
 ## Sobre este diretório (`~/.claude` é um repo git)
 
+- **Gancho de pre-commit — instale uma vez por clone: `git config core.hooksPath githooks`.** Roda os quatro doctors (agents, skills, router, ambiente) em ~1s e reprova o commit; até 10/08/2026 o parágrafo abaixo só *pedia* que fossem rodados à mão, e pedido não é guarda. Gancho em `.git/hooks/` não viaja no clone — por isso ele é versionado em `githooks/`. Se um dia passar de ~2s, mova o que engordou para `pre-push` em vez de conviver com `--no-verify`.
 - Config versionada com `.gitignore` em **whitelist**: nada entra no git sem liberação explícita. Segredos (`.credentials.json`), `history.jsonl`, `projects/` (transcripts + memória) e caches ficam de fora por design — ao criar arquivo que deva ser versionado, adicione a exceção no `.gitignore`.
 - `vendor/mattpocock-skills` é submodule; skills de terceiros entram por **symlink relativo** em `skills/`. Exceção: `skills/diagnosing-bugs` é cópia adaptada (user-invoked) e não acompanha o submodule.
 - Ao adicionar/renomear/remover skill user-reachable, atualize o router `skills/ask-daniel/SKILL.md` — um router desatualizado mente.

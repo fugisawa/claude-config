@@ -7,96 +7,95 @@ máquinas consegue detectar que a frase está errada *para ela*. A prosa vira se
 estado real e diverge calada — ver
 [`skills/learned/a-segunda-copia-da-regra-diverge-calada.md`](../skills/learned/a-segunda-copia-da-regra-diverge-calada.md).
 
-**Aconteceu, e não foi sutil.** Em 10/08/2026 o `CLAUDE.md` afirmava quatro coisas sobre
-"esta máquina"; três estavam erradas na máquina do trabalho:
+**Aconteceu, e não foi sutil.** Achado de **10/08/2026**, na máquina do trabalho — registro
+datado, que não se edita depois: das quatro afirmações que o `CLAUDE.md` fazia sobre "esta
+máquina", **três estavam erradas**. Dizia "não instale nvm" com o nvm instalado e quatro
+versões no disco; dizia "node do sistema é 18" onde o apt tinha v20.20.2; e mandava usar
+`batcat`, **que não existe ali** — seguir a instrução falharia. Só "sem ImageMagick" era
+verdade.
 
-| Afirmação no `CLAUDE.md` | Medido em 10/08/2026 (OptiPlex) |
-|---|---|
-| "sem conda/**nvm**" · "Não instale nvm" | nvm presente, **4 versões**, bloco vivo no `.bashrc` |
-| "Node do sistema é **18**" | `/usr/bin/node` é **v20.20.2** |
-| "`bat`=`batcat`" | **`batcat` não existe**; `bat` responde direto (brew) |
-| "Sem ImageMagick" | ✅ verdadeiro (`magick`/`convert` ausentes) |
+## A regra deste arquivo
 
-Seguir a instrução do `batcat` **falharia**; a do nvm mandava não instalar o que já estava
-instalado. Por isso os fatos que variam por máquina moram aqui, com **uma seção por
-máquina**, e o `CLAUDE.md` guarda só o que é verdade nas duas.
+**Um bloco ` ```decl ` por máquina, e ele é a fonte única.** A prosa em volta explica e
+adverte, mas **nunca repete um valor** — valor repetido em prosa é a segunda cópia que este
+arquivo existe para eliminar.
+
+Declara-se **comportamento, não leitura**: o dono do node e o *major* (`nvm v24`), jamais o
+patch. `v24.18.0 → v24.19.1` não muda nada para quem lê a instrução, e reprovar isso faria o
+gancho apanhar `--no-verify` em uma semana. O que muda comportamento é comando que aparece
+ou some, dono que troca, major que anda.
+
+A chave é o **`machine-id`**, não o `hostname`: as duas máquinas se chamam `fugisawa`, e
+chave que colide faz uma ler a seção da outra como sua, em silêncio.
+
+Guarda: `uv run --with pyyaml python scripts/doctor_ambiente.py` (exit 1 na divergência),
+que roda no `pre-commit`. Sem ele esta declaração envelheceria exatamente como a prosa que
+ela substituiu.
 
 ## Como preencher a sua seção
 
-A chave é o **machine-id**, não o `hostname` — as duas máquinas se chamam `fugisawa`, e chave
-que colide faz a máquina de casa ler a linha do trabalho como sua, em silêncio.
-
 ```bash
-# identidade
-echo "$(cat /sys/devices/virtual/dmi/id/sys_vendor) $(cat /sys/devices/virtual/dmi/id/product_name) · id=$(cut -c1-8 /etc/machine-id) · $(hostname)"
-# ambiente
-bash -ic 'node --version'; command -v node; /usr/bin/node --version 2>/dev/null
-ls ~/.nvm/versions/node 2>/dev/null; for c in conda bun uv pyenv brew bat batcat fd fdfind rg magick convert; do printf '%s: %s\n' "$c" "$(command -v $c || echo AUSENTE)"; done
+echo "machine-id: $(cut -c1-8 /etc/machine-id)"
+echo "rotulo: $(cat /sys/devices/virtual/dmi/id/sys_vendor) $(cat /sys/devices/virtual/dmi/id/product_name)"
+bash -ic 'command -v node; node --version'          # interativo (o do terminal)
+command -v node && node --version                    # não-interativo (o dos scripts)
+/usr/bin/node --version 2>/dev/null                  # o do apt
+for c in bat batcat fd fdfind rg conda uv pyenv bun brew magick convert; do
+  printf '%s: %s\n' "$c" "$(command -v $c >/dev/null && echo presente || echo AUSENTE)"; done
+[ -s ~/.nvm/nvm.sh ] && echo "nvm: presente" || echo "nvm: AUSENTE"
 ```
 
-Regra ao preencher: **só entra o que foi medido.** Preferência ("eu tendo a usar a estável
-mais nova") vai para a linha *Preferência declarada*, nunca para a coluna do estado — as duas
-não podem ocupar a mesma célula, senão daqui a um mês ninguém sabe qual das duas se está
-lendo.
+**Só entra o que foi medido.** Preferência ("tendo a usar a estável mais nova") vai para a
+prosa, nunca para o bloco — as duas não podem ocupar a mesma célula, senão daqui a um mês
+ninguém sabe qual das duas está lendo.
 
 ---
 
-## Máquina A — trabalho · Dell OptiPlex 7070 · `id=19aeb4de`
+## Máquina A — trabalho · Dell OptiPlex 7070
 
-**Medido em 10/08/2026.** Ubuntu 24.04.4 LTS.
+Ubuntu 24.04.4 LTS. Rede corporativa com **TLS interceptado** (`fw.abin.gov.br`): o apt
+quebra em repositório de VPN, e o contorno é `--fix-missing`. Não é defeito da máquina.
 
-| Item | Estado |
-|---|---|
-| node (shell **interativo**) | **v24.18.0**, via nvm |
-| node (**não**-interativo, o que os scripts pegam) | **v26.7.0**, `/home/linuxbrew/.linuxbrew/bin/node` |
-| node do apt | v20.20.2 (`/usr/bin/node`) |
-| nvm | **presente** — v24.14.0, v24.16.0, v24.17.0, v24.18.0; bloco vivo no `.bashrc` |
-| conda | ausente |
-| uv · pyenv · bun | 0.12.3 · 2.8.3 · 1.3.14 |
-| brew | 6.0.16 (`/home/linuxbrew`) |
-| `bat` | responde **direto** (brew) — **`batcat` não existe aqui** |
-| `fd` | responde **direto** (`~/.local/bin/fd`); `fdfind` também existe (apt) |
-| ImageMagick | **ausente** — imagem via `uv run --with pillow python` |
-| rede | corporativa, **TLS interceptado** (`fw.abin.gov.br`) — apt quebra em repo de VPN; contorno `--fix-missing` |
+```decl
+machine-id: 19aeb4de
+rotulo: trabalho · Dell OptiPlex 7070
+medido-em: 2026-08-10
+node-interativo: nvm v24
+node-nao-interativo: brew v26
+node-apt: apt v20
+presentes: bat, fd, fdfind, rg, nvm, uv, pyenv, bun, brew
+ausentes: batcat, conda, magick, convert
+```
 
-**Armadilha desta máquina:** o node muda conforme o shell. Interativo dá v24 (nvm);
-não-interativo dá v26 (brew). Script que assume uma versão só quebra num dos dois modos, e o
-`command -v node` **mente** sobre o que você vê no terminal.
+**Armadilha desta máquina:** o node muda conforme o shell — o interativo vem do nvm, o
+não-interativo vem do brew. Script que assuma uma versão só quebra num dos dois modos, e o
+`command -v node` de dentro de um script **mente** sobre o que aparece no terminal.
 
 ---
 
-## Máquina B — casa · `PENDENTE`
+## Máquina B — casa
 
-> **RECADO PARA A SESSÃO DE CASA.** Esta seção nunca foi medida — a máquina do trabalho não
-> tem como saber o que existe aí, e **inventar um valor plausível seria pior que deixar
-> vazio**, porque a tabela pareceria completa. Rode o bloco *Como preencher a sua seção* aí em
-> cima, substitua esta seção pelo resultado, e commite. Quando as duas seções existirem,
-> decidimos o que é comum às duas (sobe para o `CLAUDE.md`) e o que é local (fica aqui).
+> **RECADO PARA A SESSÃO DE CASA.** Esta seção nunca foi medida. A máquina do trabalho não
+> tem como saber o que existe aí, e **inventar valor plausível seria pior que deixar
+> pendente**, porque a tabela pareceria completa e o doctor aprovaria uma mentira. Rode o
+> bloco *Como preencher a sua seção*, substitua o bloco abaixo pelo resultado, e commite.
+> Depois disso, o que coincidir com a Máquina A sobe para o `CLAUDE.md` como fato comum, e
+> o item ⏳ de lá se apaga.
 >
-> Já se sabe, **por declaração do Daniel e não por medição**:
-> - conda **não** é usado em casa também;
-> - *Preferência declarada:* ele tende a preferir a versão estável mais atual do node — mas
->   **não sabe** qual está instalada lá, nem em que estado está o ambiente. Preferência não é
->   estado: preencha o que a máquina responder, mesmo que contrarie a preferência. Se
->   contrariar, isso é justamente o achado.
+> Sabe-se **por declaração do Daniel, não por medição**: conda não é usado em casa também;
+> e ele *tende a preferir* a versão estável mais atual do node — mas não sabe qual está
+> instalada nem em que estado está o ambiente. **Preferência não é estado:** preencha o que
+> a máquina responder, mesmo que contrarie a preferência. Se contrariar, isso é o achado.
 
-| Item | Estado |
-|---|---|
-| node (interativo / não-interativo / apt) | `pendente` |
-| nvm | `pendente` |
-| conda | ausente (declarado pelo Daniel, não medido) |
-| uv · pyenv · bun · brew | `pendente` |
-| `bat` / `fd` | `pendente` — confira se é `bat`/`batcat` e `fd`/`fdfind` |
-| ImageMagick | `pendente` |
-| rede | doméstica — sem interceptação de TLS conhecida |
+```decl
+machine-id: pendente
+rotulo: casa
+```
 
 ---
 
-## O que já é comum às duas (e por isso vive no `CLAUDE.md`)
+## O que já é comum às duas
 
-- **conda não é usado** em nenhuma das duas.
-- `uv` + `pyenv` + `bun` são o stack de fato.
-- `rg` (ripgrep) responde direto nas duas.
-
-Quando a Máquina B for medida, o que coincidir sobe para cá; o que divergir fica na seção de
-cada uma. **Nada volta a ser escrito como "esta máquina".**
+`uv` + `pyenv` + `bun` são o stack de fato, e **conda não é usado** em nenhuma das duas —
+esta é a parte que o `CLAUDE.md` pode afirmar sem mentir para uma delas. O resto espera a
+Máquina B. **Nada volta a ser escrito como "esta máquina".**

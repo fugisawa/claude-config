@@ -16,6 +16,7 @@
 !/agents/
 !/commands/
 !/docs/
+!/githooks/
 !/hooks/
 !/rules/
 !/scripts/

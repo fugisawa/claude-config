@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# pre-commit do ~/.claude — a guarda que o CLAUDE.md até então só PEDIA.
+#
+# Instala-se uma vez por clone:   git config core.hooksPath githooks
+# Gancho em .git/hooks/ NÃO viaja no clone; por isso ele é versionado aqui.
+#
+# Deliberadamente enxuto: 0,63s medidos em 10/08/2026 para os quatro doctors.
+# Gancho lento é gancho desligado com --no-verify na primeira pressa — se algum
+# dia passar de ~2s, mova o que engordou para o pre-push em vez de aceitar.
+#
+# Escopo honesto: os doctors leem a ÁRVORE DE TRABALHO, não o índice. Eles
+# garantem que o registro está íntegro agora, não que o commit isolado esteja.
+# Para o que eles guardam (nome duplicado de agente/skill, citação órfã no
+# router, declaração de ambiente vencida) a árvore é a pergunta certa.
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# `&&` e nunca `;`: com `;` o comando seguinte roda mesmo depois do vermelho, e
+# o gancho passaria a imprimir erro sem reprovar nada. (manual_estudo 0007 §5:
+# seis variações do mesmo defeito em trinta horas.)
+run() {
+    local nome="$1"; shift
+    if ! "$@"; then
+        printf '\n✗ pre-commit: %s reprovou. Conserte, ou use --no-verify sabendo o que ignora.\n' "$nome" >&2
+        return 1
+    fi
+}
+
+PY=(uv run --quiet --with pyyaml python)
+
+run doctor_agents   "${PY[@]}" scripts/doctor_agents.py   >/dev/null &&
+run doctor_skills   "${PY[@]}" scripts/doctor_skills.py   >/dev/null &&
+run doctor_router   "${PY[@]}" scripts/doctor_router.py   >/dev/null &&
+run doctor_ambiente "${PY[@]}" scripts/doctor_ambiente.py >/dev/null
