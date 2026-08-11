@@ -75,27 +75,46 @@ não-interativo vem do brew. Script que assuma uma versão só quebra num dos do
 
 ## Máquina B — casa
 
-> **RECADO PARA A SESSÃO DE CASA.** Esta seção nunca foi medida. A máquina do trabalho não
-> tem como saber o que existe aí, e **inventar valor plausível seria pior que deixar
-> pendente**, porque a tabela pareceria completa e o doctor aprovaria uma mentira. Rode o
-> bloco *Como preencher a sua seção*, substitua o bloco abaixo pelo resultado, e commite.
-> Depois disso, o que coincidir com a Máquina A sobe para o `CLAUDE.md` como fato comum, e
-> o item ⏳ de lá se apaga.
->
-> Sabe-se **por declaração do Daniel, não por medição**: conda não é usado em casa também;
-> e ele *tende a preferir* a versão estável mais atual do node — mas não sabe qual está
-> instalada nem em que estado está o ambiente. **Preferência não é estado:** preencha o que
-> a máquina responder, mesmo que contrarie a preferência. Se contrariar, isso é o achado.
+Ubuntu 24.04.4 LTS, sem rede corporativa no caminho — o apt resolve direto.
 
 ```decl
-machine-id: pendente
-rotulo: casa
+machine-id: 8b4740ec
+rotulo: casa · Dell Precision Tower 5810
+medido-em: 2026-08-11
+node-interativo: nvm v24
+node-nao-interativo: apt v18
+node-apt: apt v18
+presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew
+ausentes: bat, fd, conda, magick, convert
 ```
+
+**Armadilha desta máquina, e é a mesma do trabalho com outro elenco:** o `node` do terminal
+é v24, servido pelo nvm, e o de dentro de um script é v18, do apt. Seis versões de diferença
+entre o que o Daniel vê e o que o script recebe.
+
+**A preferência do Daniel bateu com o estado, e isso foi sorte, não confirmação.** Ele disse
+tender à estável mais nova e o terminal entrega v24 — mas quem entrega é o nvm, que ele
+acreditava não ter instalado. Medir era a única forma de saber, e a coincidência do
+resultado não valida o palpite.
 
 ---
 
 ## O que já é comum às duas
 
-`uv` + `pyenv` + `bun` são o stack de fato, e **conda não é usado** em nenhuma das duas —
-esta é a parte que o `CLAUDE.md` pode afirmar sem mentir para uma delas. O resto espera a
-Máquina B. **Nada volta a ser escrito como "esta máquina".**
+Com a Máquina B medida em 11/08/2026, o comum passa a ser isto, e só isto:
+
+`uv`, `pyenv`, `bun`, `brew`, `rg`, `fdfind` e **`nvm`** existem nas duas; `conda`, `magick`
+e `convert` não existem em nenhuma. O `node` do terminal interativo é **v24 pelo nvm** nos
+dois lados.
+
+**Dois achados que só apareceram com as duas medidas na mesa.** O primeiro é que a
+instrução "sem nvm / não instale nvm" estava errada **nas duas** — não era desvio de uma
+máquina, era afirmação falsa desde sempre, e a preferência declarada do Daniel batia com o
+estado por coincidência. O segundo é `bat` × `batcat`: em casa só existe `batcat`, no
+trabalho só existe `bat`. Uma inversão perfeita, do tipo que uma máquina sozinha nunca
+detecta, porque de cada lado a instrução parece certa.
+
+**O que continua divergindo, e por isso não sobe para o `CLAUDE.md`:** o `node` de dentro de
+script (v18 em casa, v26 no trabalho), o node do apt, a presença de `fd`, e a rede.
+
+**Nada volta a ser escrito como "esta máquina".**
