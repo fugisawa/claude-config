@@ -31,6 +31,7 @@ e é a razão de este mapa poder ser curto sem esconder nada de você.
 4. **Revisar** — `/code-review` nativo para o diff (`ultra` para revisão multi-agente na nuvem); agente `code-reviewer` próprio para relatório dois-eixos (Standards × Spec + smells de Fowler). `/simplify` para limpeza sem caça a bugs.
 5. **Verificar** — `/run` nativo (sobe o app de verdade e exercita a mudança, não só os testes); `superpowers:verification-before-completion`.
 6. **Entregar** — `/commit`, `/create-pr`; `/repo-sync` para reconciliar casa↔trabalho sem perder trabalho.
+7. **Aprender** — o hook `Stop` já extrai lição no fim de toda sessão (runtime em `skills/continuous-learning/`, saída em `skills/learned/`). **`/continuous-learning`** é o mesmo trabalho **sob demanda, no meio da sessão**, com a decisão que a varredura não toma: se aquilo é lição reusável (`learned/`), fato do projeto (memória) ou mudança de rumo (`decisoes/`) — e com portão, porque o acervo inflado é o defeito que a camada `skills-archive/` existe para conter.
 
 ## Debug
 
