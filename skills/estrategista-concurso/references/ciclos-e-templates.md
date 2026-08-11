@@ -42,7 +42,7 @@ M1: diagnóstico → M2–M4: mensal → M5+: **quinzenal** (ou imediatamente ao
 
 - **D0 — Ler o edital como contrato**: banca; regra de pontuação (−1? teto de desconto de norma culta?); o que é eliminatório; pesos por disciplina/prova; datas; conteúdo programático × baseline (o que entrou, o que caiu fora). Se precisar conferir o PDF oficial, use `Tavily:tavily_extract` ou `Exa:web_fetch_exa`.
 - **D1 — Engenharia reversa + matriz**: incidência real por tópico (banco de questões filtrado por banca/órgão); recalcular `P`; redefinir pesos de portfólio (o alvo com edital ganha peso); redistribuir eixos respeitando pisos — ou propor explicitamente a quebra de um piso, se o calendário exigir.
-- **D2 — Novo meso**: cronograma até a prova de trás para frente; cadência de simulados no formato da banca; decks reetiquetados (→ anki-concursos); temas e grade de discursiva da banca (→ discursivas-concursos); esquemas prioritários (→ esquematizador-juridico).
+- **D2 — Novo meso**: cronograma até a prova de trás para frente; cadência de simulados no formato da banca; decks reetiquetados (→ concurso-prep); temas e grade de discursiva da banca (→ concurso-prep); esquemas prioritários (→ concurso-prep).
 - Entregar em ~1 página: o que muda, o que sai, o que entra. O radar segue monitorando retificações.
 
 ## Meso template (mensal — preencher na virada de mês)
@@ -70,10 +70,23 @@ M1: diagnóstico → M2–M4: mensal → M5+: **quinzenal** (ou imediatamente ao
 - **Amarelo** (faixa intermediária por 1 semana, OU pulou a discursiva, OU queda de % numa matéria): **encolher para o núcleo** (questões + Anki + caderno de erros) na semana seguinte, sem carga nova; investigar o gatilho que disparou.
 - **Vermelho** (piso por 2 semanas seguidas, OU corrente quebrada por vários dias, OU ≥ 2 sinais de alerta): **protocolo de retomada** — 7 dias de hábito mínimo (sentar e fazer 5 questões/dia, reconstruindo a corrente pela frequência); reler mural + cartão-âncora antes de qualquer decisão; **pauta de terapia**; reescrever o cronograma da semana do zero (para este perfil, recomeçar com plano fechado novo é mais fácil que "voltar ao trilho").
 - **Sinais de alerta** (2+ simultâneos acendem o vermelho): evitar abrir a planilha · hiperfoco migrando para interesse paralelo no horário de estudo · narrativa "não vai dar / tarde demais" reaparecendo · 3+ dias-piso seguidos sem causa externa · pular o ritual de domingo.
-- **Depleção** (exaustão que descanso não repõe, perda de capacidades antes fáceis) → não é amarelo/vermelho comum: proteger o piso, **não empurrar meta**, rotear ao kit + pauta de terapia (perfil-e-semana.md).
+- **Depleção** (exaustão que descanso não repõe, perda de capacidades antes fáceis) → não é amarelo/vermelho comum: proteger o piso, **não empurrar meta**, rotear ao kit + pauta de terapia (perfil-e-janelas.md).
 
 Lembrete de topo de planilha: manter o alvo; atrasou, intensifica, não troca; **dia-piso é vitória, não fracasso**.
 
 ## Regra de parada plurianual (conjuntiva — as 3 juntas, nunca "ou")
 
 **> 18 meses de método rigoroso E > 10.000 questões analisadas E platô objetivo por 4 simulados consecutivos** → aí, e só aí, a conversa muda de "estudar mais" para recalibrar (portfólio, método, avaliação externa). Faltando qualquer condição, ainda há alavanca a puxar e a estagnação não está provada. A regra existe para bloquear as duas falácias: a desistência precoce e o custo irrecuperável.
+
+## Trabalho de construção (entra no meso e no check-in, como qualquer bloco)
+
+Parte do trabalho da campanha não é estudar: é **produzir o material que torna o estudo possível**. Ele compete pelas mesmas janelas, e um plano que o ignora promete horas já gastas. Dois tipos, os dois de escopo desta skill porque são "o quê, quando e quanto":
+
+| Tipo | Quando entra | Regra |
+|---|---|---|
+| **Verticalizar disciplina sem trilha** | antes de qualquer bloco de conteúdo daquela matéria | Disciplina sem `trilha.md` não é planejável. Ordem de construção: verticalizar o edital → medir a incidência na prova aplicada → escolher a fonte de teoria → só então trilha e lotes |
+| **Converter acervo com prazo** | pauta fixa do check-in da **1ª semana de cada mês** | *Baixa-se cedo o que é permanente e barato; converte-se ao longo do tempo o que é perecível.* Não se cria alarme novo — máquina nova é máquina que se esquece |
+
+Regras de custo ao alocar construção (medidas em 08/08/2026): **uma conversão por sessão nova** (converter no turno 200 de uma conversa longa custa uma fração a mais, porque o contexto inteiro é recobrado a cada turno); leitura pesada vai para **subagente**, que devolve o rascunho e descarta o texto-fonte; **artefato destilado, nunca um-para-um** — vinte tópicos não viram vinte documentos, viram um glossário e três fichas; e modelo por tarefa, com o raciocínio caro reservado ao julgamento.
+
+Construção **não conta como bloco de estudo** no tracker de presença, e não substitui o DMV. Ela tem orçamento próprio no meso, declarado em horas, para não competir em silêncio com o conteúdo.

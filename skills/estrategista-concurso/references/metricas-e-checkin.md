@@ -10,7 +10,7 @@ Sumário: Bloco canônico · Como ler os campos · Limiares e regras de decisão
 CHECK-IN — semana de DD/MM a DD/MM
 Presença: _/7 verdes · dias-piso: _ · DMV: _
 Horas: __,_ (alvo 22 · piso 10)
-Plano: blocos __/__ · adiados: __ · mesmo bloco 2×? S/N
+Rodada: item 1 em __/__ dias com janela decente · blocos puxados: __ · mesmo bloco adiado 2×? S/N
 Questões: ___ · acerto geral __% · por disciplina: SIGLA __% (n=__), ...
 Anki: retenção __% · reviews/dia ~__ · atrasados: __
 Discursiva: S/N · nota __/__ · quesito fraco: ______
@@ -26,7 +26,7 @@ Eventos: ______
 - **n < 10 numa disciplina**: não conclua nada — é ruído amostral. Registre e espere acumular.
 - **Presença** é o painel emocional (verde/piso/cinza); **horas** são log técnico. Não misturar: cobrar horas alimenta a autocrítica, e autocrítica alimenta desistência.
 - **Acerto por disciplina** alimenta as zonas; **erros por tipo** alimentam a terapêutica; **N1** alimenta a calibração. São três leituras diferentes do mesmo caderno.
-- **Plano** (novo, 25/07/2026) mede aderência: blocos executados ÷ planejados do Plano-Semana/Dia. **Antecipar bloco conta a favor** — a ordem dentro da semana é livre; o que importa é o bloco acontecer. O dado decisório não é o %, é **qual** bloco repete adiamento (evitação localizada). % baixo sem causa externa apenas reforça o amarelo das horas — não é régua nova.
+- **Rodada** mede aderência (campo de 25/07/2026, **refeito em 09/08/2026**). O denominador antigo eram os blocos planejados do `Plano-Semana/Dia`, que foram arquivados em 08/08 — a fila não tem blocos planejados, então o campo ficou sem sobre o que operar. O que substitui é o que a fila de fato promete: **o item 1 (teoria) aconteceu na primeira janela decente, em quantos dos dias que tiveram janela decente?** Antecipar conta a favor; a ordem dentro da semana é livre. O dado decisório não é o %, é **qual** bloco repete adiamento — evitação localizada. Item 1 abaixo de metade dos dias, sem causa externa, é o sinal de que a fuga para questões está ganhando.
 
 ## Limiares e regras de decisão
 
@@ -43,10 +43,10 @@ Eventos: ______
 | Erros de Desatenção | Predomínio no lote | Automaticidade: ruído + cronômetro + riscar restritivos; checar sono |
 | Erros N1 | Qualquer recorrência | Prioridade máxima da semana: investigar um a um |
 | Anki retenção | > 95% numa disciplina | Podar/subir retenção-alvo; realocar tempo |
-| Anki atrasados | Crescendo por 2 semanas | Reduzir novos/dia (redimensionar com anki-concursos) |
+| Anki atrasados | Crescendo por 2 semanas | Reduzir novos/dia (redimensionar com concurso-prep) |
 | Discursiva | Estrutura não fecha no tempo −20% por 2 semanas | Gargalo é estrutura: repetição de arquitetura cronometrada, não mais leitura |
-| Discursiva | Nota por quesito estagnada 3+ peças | Levar o quesito fraco ao discursivas-concursos como foco do treino |
-| Ânimo | ≤ 4 por 2 semanas | Pauta de terapia + checar depleção (perfil-e-semana.md → kit) |
+| Discursiva | Nota por quesito estagnada 3+ peças | Levar o quesito fraco ao concurso-prep como foco do treino |
+| Ânimo | ≤ 4 por 2 semanas | Pauta de terapia + checar depleção (perfil-e-janelas.md → kit) |
 | Alertas | 2+ simultâneos | Vermelho, mesmo com números bons |
 
 ## Prontidão por disciplina×banca (leitura mensal — só no meso)

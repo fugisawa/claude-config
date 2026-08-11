@@ -1,6 +1,6 @@
-# Metodologias — destilado operacional do "Engenharia do Estudo"
+# Metodologias — destilado operacional do *Manual-de-Metodo-de-Estudo*
 
-Sumário: O motor · Sequência por estágio · Método por disciplina · Lei seca (3 baldes) · Trilha FGV · Trilha CEBRASPE · Taxonomia do erro · Log de confiança N1–N3 · Zonas e simulado · Anki (dimensionamento) · Pilar invisível
+Sumário: O motor · Sequência por estágio · Método por disciplina · Formato (vídeo/texto/curso aberto) · Lei seca (3 baldes) · Trilha FGV · Trilha CEBRASPE · Taxonomia do erro · Log de confiança N1–N3 · Zonas e simulado · Anki (dimensionamento) · Pilar invisível
 
 ## O motor (o porquê em quatro linhas)
 
@@ -22,13 +22,35 @@ Recuperação com feedback supera releitura (g=0,50) e recuperação **espaçada
 | Constitucional | Arquitetura antes da literalidade (poderes → direitos → controle) → artigos de alta incidência → jurisprudência por último |
 | AFO | Ciclo PPA/LDO/LOA contado como história; exemplo resolvido → lacunas → questões; dose diária pequena |
 | Administração Pública | Modelos com o porquê histórico; governo digital e accountability por casos |
-| Controle Externo / Auditoria | Do concreto (acórdão, achado de auditoria) para o conceito; questões TCU/CGU cedo |
+| Controle Externo / Auditoria | Do concreto (acórdão, achado de auditoria) para o conceito; questões **TCU** cedo (a CGU está dormente). ⚠ As duas fontes de vídeo disponíveis estão defeituosas — o módulo do IGEPP ensina o **IPPF 2017, revogado**, e o do Gran omite a Lei 8.443/92 e usa Regimento vencido. Fonte é material próprio e as publicações do próprio TCU |
 | Contabilidade Pública | Conceito antes do procedimento (o que a conta modela) → exemplo resolvido → volume |
 | Administrativo | Princípios → atos → Lei 14.133 como sistema; resíduo literal nos 3 baldes |
-| Português | Por tipo de questão (inferência, coesão, norma); norma culta pelo erro, não pela gramática crua (dúvida pontual → gramatica-concursos) |
+| Português | Por tipo de questão (inferência, coesão, norma); norma culta pelo erro, não pela gramática crua (dúvida pontual → concurso-prep) |
 | RLM | Abre o dia para gerar autoeficácia; questões difíceis direto; manutenção 2×/sem com teto — o hiperfoco vai querer morar aqui, o cronograma é a trava |
-| Discursiva | Produção semanal sob tempo −20% + correção externa (→ discursivas-concursos); estrutura antes de conteúdo |
-| TI & Dados / Inglês | Vantagem de perfil: manutenção leve por questões; confirmar peso real no edital |
+| Discursiva | Produção semanal sob tempo −20% + correção externa (→ concurso-prep); estrutura antes de conteúdo |
+| TI & Dados / Inglês | Vantagem de perfil: manutenção leve por questões. Peso do Inglês **confirmado** no Consultor: 8 questões objetivas mais **tradução EN→PT de 15 pontos na discursiva** — a tradução treina-se à parte, não sai de questão objetiva |
+
+## Formato: vídeo, texto e curso aberto
+
+Decide-se o **canal** por tipo de conteúdo e estágio, nunca por preferência. Inventário do que existe: `~/manual_estudo/disciplinas/_infra/videoaulas.md`.
+
+| Decisão | Regra |
+|---|---|
+| **Padrão** | **Leia.** Doutrina, teoria e lei — permite grifar, voltar e controlar o ritmo |
+| **Assista quando** | o conteúdo for **dinâmico ou espacial**: gráfico se desenhando, distribuição mudando de forma, lançamento contábil sendo montado |
+| **Primeira demão** | vídeo no primeiro contato com matéria **totalmente nova**; texto assim que houver base. É a reversão da expertise outra vez — o suporte que ajuda o novato atrapalha o avançado |
+| **Velocidade** | **1,5× é o teto seguro.** A partir de 2× o custo é estatisticamente significativo (Tharumalingam e col., 2025, meta-análise dedicada: 110 tamanhos de efeito, 24 estudos) |
+| **Depois de todo vídeo** | teste-se **sem consultar nada** antes de concluir que aprendeu |
+| **Exercício resolvido** | vídeo na primeira passada, para ver a forma do problema; **refazer por escrito, sem vídeo**, na segunda |
+| **Nunca** | escolher formato por "meu jeito de aprender" — estilo de aprendizagem mede d = 0,04, indistinguível de zero |
+
+> **A ilusão de fluência é o achado mais replicado, e é um alerta.** Aula fluente — gestos, voz confiante, sem hesitação — **eleva o quanto ele acha que aprendeu sem elevar o que aprendeu**. É característica geral de aula gravada, não de professor carismático, e a única correção que funciona é **autoteste intercalado dentro da aula**, não ao final. Ao planejar um bloco de vídeo, o autoteste faz parte do bloco; sem ele, o bloco não conta como estudado.
+
+⚠ **O 1,5× substitui o "2×" que circula em três lugares do projeto** (inclusive no `CLAUDE.md` e numa seção do próprio `videoaulas.md`). Meta-análise dedicada vence contagem informal de estudos. **Limite declarado:** nenhum desses estudos testou velocidade em conteúdo numérico denso — estender o número para vídeo de exercício resolvido é extrapolação, não medida.
+
+**Curso aberto (DataCamp, MOOC) entra sob três condições que valem JUNTAS:** o tópico é lacuna confirmada (ruim ou ausente na fonte paga **e** não coberto pelo livro); a prova cobra o **conceito**, e fazer é o caminho mais curto até ele; e **retoma-se um curso pendente, não se começa outro** — com 28 pendentes, abrir o 95º é o próprio sintoma. Estatuto: **curso já concluído reduz o CUSTO do passo, não o CUMPRE.** Marca-se `[x]` quando o tipo sai automático nas duas bancas, não quando lembrou. E curso aberto nunca ensina padrão de banca — isso é do QConcursos.
+
+**A taxa de conclusão mediana de MOOC é ~12,6%, com metade da evasão na primeira ou segunda semana.** Use o dado como argumento antidesistência ao desenhar o bloco (fazer caber numa janela, com primeira ação óbvia), não como veto: a evasão mede o formato aberto sem estrutura, e aqui a estrutura é a trilha.
 
 ## Lei seca — os 3 baldes (P2)
 
@@ -56,7 +78,7 @@ Regras de decisão — só sobre lote ≥ 20 erros/matéria na quinzena (abaixo 
 - **Predomínio Desatenção** → fadiga/automaticidade, não conteúdo: treino sob ruído + cronômetro + riscar restritivos; checar sono.
 - **Conceito > 50% do lote** → regressão focada à teoria **do subtema** (nunca o capítulo inteiro).
 - **Método** → mais exemplos resolvidos e prática dirigida do mesmo tipo.
-- **Norma** → cartão de aplicação (cloze com a exceção embutida) → anki-concursos.
+- **Norma** → cartão de aplicação (cloze com a exceção embutida) → concurso-prep.
 
 ## Log de confiança N1–N3
 
@@ -68,7 +90,7 @@ Antes de conferir o gabarito, marcar: **N1** convicção plena · **N2** palpite
 
 O simulado **é treino** (recuperação massiva, sob tempo, no formato da banca), não termômetro de fim de ciclo. O que se mede é **erro por assunto × tipo** (+ N1–N3), nunca a nota agregada — a nota esconde exatamente a informação que corrige a lacuna. Correção no mesmo dia. Cadência: ciclos-e-templates.md.
 
-## Anki — o que o estrategista dimensiona (a criação é do anki-concursos)
+## Anki — o que o estrategista dimensiona (a criação é do concurso-prep)
 
 FSRS com retenção-alvo 0,90 · novos 20–25/dia no máximo (ajustar para baixo se o check-in mostrar atrasados crescendo) · leech **suspende**, não repete · retenção real > 95% numa disciplina = revisando o já cristalizado → podar ou subir o alvo e realocar o tempo · zerar atrasados à noite (a dívida acumulada é como o Anki morre na 3ª semana). Cartão bom: atômico, de aplicação, nascido de erro real, verso redigido como explicação a si mesmo.
 
