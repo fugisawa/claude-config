@@ -32,3 +32,27 @@ references, a **bússola do planner** (fonte Typst + PDF) e o rótulo "contingê
 folha de discursiva Cebraspe — que o pivô tornou treino ativo, porque a nova banca entrou no
 portfólio. **Lição nova:** um pivô que muda de banca vira o rótulo de material de contingência do
 avesso — varra "dormente/contingência" também, não só o nome do alvo que saiu.
+
+**Terceira recorrência (11/08/2026, saída do Analista em 08/08 e banca do TCU) — e ela ensina
+o modo de falha do passo 1.** O grep amplo foi rodado três vezes e **se declarou completo nas
+três**: a primeira achou 3 arquivos, a segunda 16, a terceira 17. Não foi desleixo — foi que
+**o termo da decisão antiga tem sinônimos**, e cada varredura procurou a forma que quem a
+escreveu imaginou. A mesma afirmação vivia como `TCU (Cebraspe)`, como
+`TCU=Cebraspe provável` e como `Cebraspe (banca provável do TCU)`; um conserto anterior tinha
+mirado só a primeira forma e passado, com razão, por completo.
+
+**A terceira variante não foi achada por grep nenhum: apareceu ao ler o PNG do artefato
+renderizado**, dentro de um box de pegadinhas. Daí a regra que faltava ao passo 5: quando o
+defeito é de **prosa**, o render é parte da varredura e não a conferência final dela. Grep
+acha o que você imaginou; o papel mostra o que está escrito.
+
+Duas consequências práticas: (a) antes de declarar varredura completa, liste as **formas** do
+termo, não só o termo — sigla, nome por extenso, o mesmo em posição de adjetivo; (b) para
+artefato com build, releia o render **depois** do grep, porque é lá que a variante que ninguém
+imaginou aparece.
+
+Nesta rodada apareceu também uma classe que o passo 2 já previa e que é fácil apagar por
+engano: **procedência**. Linhas como "Base: editais FGV 1/2022 (Analista) e 4/2022 (Consultor)"
+citam o alvo que saiu e **devem ficar** — são de onde o dado veio. O código de alvo `SA` nas
+tabelas foi **redefinido** (a legenda passou a dizer que o cargo está fora do portfólio) em vez
+de arrancado, porque arrancar exigiria re-etiquetar cada linha e perderia a medição da prova.
