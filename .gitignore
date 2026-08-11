@@ -37,6 +37,10 @@ skills/*
 !skills/codebase-design
 !skills/concurso-prep
 !skills/continuous-learning
+# O `-v2` precisa de linha PRÓPRIA: a exceção acima casa o nome exato, e sem esta o
+# runtime ficaria de fora enquanto o `settings.json` — que é versionado — aponta para
+# ele. Hook versionado apontando para script não versionado quebra na outra máquina.
+!skills/continuous-learning-v2
 !skills/daily-capture
 !skills/dataviz-storytelling
 !skills/deep-research
