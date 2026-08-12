@@ -33,4 +33,5 @@ PY=(uv run --quiet --with pyyaml python)
 run doctor_agents   "${PY[@]}" scripts/doctor_agents.py   >/dev/null &&
 run doctor_skills   "${PY[@]}" scripts/doctor_skills.py   >/dev/null &&
 run doctor_router   "${PY[@]}" scripts/doctor_router.py   >/dev/null &&
-run doctor_ambiente "${PY[@]}" scripts/doctor_ambiente.py >/dev/null
+run doctor_ambiente "${PY[@]}" scripts/doctor_ambiente.py >/dev/null &&
+run doctor_rules    "${PY[@]}" scripts/doctor_rules.py    >/dev/null
