@@ -64,10 +64,20 @@ submodule, não está no `.gitignore` curado e não aparecia em documento nenhum
 `CLAUDE.md` manda registrar a procedência de cópia solta justamente para este caso, e
 ela nunca foi registrada — este parágrafo paga essa dívida antes de arquivar.
 
-Pesa **218 MB em 1.417 arquivos**, dos quais 78 MB são `data/`, que guarda
-`auth_info.json` e um perfil de navegador com **sessão autenticada do Google**.
-Arquivar move, não apaga: esses dados continuam em `skills-archive/notebooklm/`, e
-apagá-los de vez é decisão separada desta. Voltar é
+Chegou pesando **218 MB em 1.417 arquivos**. Dos 78 MB de `data/`, o que importava não
+era o tamanho: o `browser_state/state.json` guardava **34 cookies** de `.google.com`,
+`accounts.google.com` e `notebooklm.google.com`, e o `browser_profile/` ao lado
+carregava a mesma sessão autenticada. Uma skill de terceiro, trazida sem procedência,
+mantinha sessão viva da conta Google do Daniel parada no disco desde 04/04/2026.
+
+**`data/` foi apagado em 12/08/2026, por decisão dele.** Restam 140 MB, quase todos do
+`.venv`. Duas ressalvas ficam registradas porque não se leem do diretório. A primeira
+é que **apagar o arquivo local não revoga a sessão no Google** — quem revoga é a
+página de segurança da conta, e enquanto isso não for feito o cookie que já vazou (se
+vazou) continua valendo. A segunda é que restaurar a skill **não a faz funcionar de
+novo**: sem `data/`, ela pede autenticação do zero, e é assim que deve ser.
+
+Voltar continua sendo
 `uv run --with pyyaml python scripts/apply_skills_archive.py --restore notebooklm`.
 
 ## Índice — 296 skills
