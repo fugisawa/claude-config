@@ -53,6 +53,8 @@ Load the module(s) the query touches; each is self-contained (what to track → 
 | Foundation-model labs, model capability/economics, valuations, the bubble debate, open vs closed, compute, chips | `references/generative_ai.md` |
 | Theory, frameworks, the tech right, sovereignty, how to structure a power/discourse analysis | `references/theoretical_framework.md` |
 | Where to look, primary filings, trackers, critical media, Brazil sources | `references/sources_directory.md` |
+| Brazil: digital activism, disinformation, platform regulation, attacks on institutions — **snapshot ending Aug/2025, treat as history and check what changed since** | `references/brazil_digital_politics_2013_2025.md` |
+| The critical literature itself — seven books on digital manipulation and political power, with their arguments | `references/critical_tech_bibliography.md` |
 
 Cross-cutting requests (e.g. "the AI bubble", "Big Tech and energy", "the tech right") usually need two or three modules plus `landscape_2026.md`. Grep across modules when hunting a specific metric, e.g. `grep -i "capex\|depreciation" references/*.md`.
 
