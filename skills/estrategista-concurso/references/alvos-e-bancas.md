@@ -12,21 +12,21 @@ O estado de cada alvo mora nos painéis, que têm build, QA visual e um doutor q
 |---|---|
 | Estrutura da prova, matriz medida, datas duras, o que está em aberto | `~/manual_estudo/pdf/plano/Painel-Senado-Consultor.pdf` · `Painel-TCU-AUFC.pdf` |
 | Incidência por tópico dentro de uma disciplina | `disciplinas/<matéria>/mapa-incidencia.md` |
-| Fases, datas duras e **restrições de ordem** (o que a sequência não pode fazer) | `pdf/plano/Calendario-Mestre-18-Meses.pdf` — desde 09/08/2026 ele **não atribui mais matéria a mês**; quem aloca é a matriz |
+| Fases, datas duras e **restrições de ordem** (o que a sequência não pode fazer) | `pdf/plano/Calendario-Mestre-18-Meses.pdf` — desde 09/08/2026 ele **não atribui mais matéria a mês**; quem aloca desde 11/08/2026 são as **fases do `planos/0004`** |
 | Tese completa da campanha | `pdf/plano/Plano-18-Meses-Daniel.pdf` |
 
 Quando um fato novo chegar pela conversa, ele **prevalece** sobre qualquer coisa escrita aqui, e o que estiver aqui deve ser declarado envelhecido.
 
-## Os 2 alvos
+## Os 2 alvos — e a ordem entre eles
 
-Portfólio repactuado por Daniel em **24/07/2026**: Senado e TCU, **pesos 0,50/0,50**, treino em banca-dupla. Racional: dominar as duas bancas como método (o contraste aprofunda o domínio), força pessoal em Estatística/Dados, e o Dossiê TCU, que recomendava não *somar* TCU à reta CGU — a substituição elimina a colisão.
+Portfólio repactuado por Daniel em **24/07/2026**: Senado e TCU, os dois mantidos (decisão `0001`, que segue de pé). **Desde 11/08/2026 a alocação deixou de ser por peso e passou a ser por sequência — TCU primeiro** (`~/manual_estudo/planos/0004-tcu-primeiro.md`, aceito): estudar **tudo o que o TCU cobra**, mais **uma única matéria pelo Senado** (Processo Legislativo); Direito Eleitoral e os passos só-Senado ficam para **depois da prova do TCU**. A razão é de eficiência, não de desistência — a maior parte das matérias serve aos dois alvos, o TCU é o único prazo que existe, e o Senado só volta com edital novo, sem data conhecida. Os pesos 0,50/0,50 de 24/07 valem como registro do racional daquela época, e não mais como regra de corte.
 
 | Alvo | Banca | Situação |
 |---|---|---|
 | **Senado — Consultor Legislativo**, especialidade Assessoramento Legislativo, área *Direito Constitucional, Administrativo, Eleitoral e Processo Legislativo* | FGV em 2022; a próxima é indefinida, prior de trabalho FGV | Lista de 2022 zerada em 06/2026. Validade do cadastro do Consultor: **27/04/2027** |
 | **TCU — Auditor Federal de Controle Externo, área geral** | ⚠ **A definir** — ver abaixo | ~100 vagas anunciadas e autorizadas; edital não publicado |
 
-> ⚠ **A banca do TCU é uma aposta, e menor do que o cânone dizia.** A formulação anterior — "Cebraspe muito provável" — apoiava-se em dois certames recentes do órgão, que são o **Técnico** e o **AUFC-TI**. Mas o último concurso de **AUFC área geral**, em 2021, **foi FGV**, e as fontes de acompanhamento listam a banca da área geral como "a definir". Isso não derruba nada: é o argumento mais forte que a decisão de treinar banca-dupla já recebeu. O que muda é o que se pode afirmar — trate como **aberta**, com Cebraspe à frente por contrato vigente e formato recente, e não como resolvida. *(Triangulado em cinco fontes, 09/08/2026.)*
+> ⚠ **A banca do TCU segue aberta — e a probabilidade está medida: ~65% Cebraspe · ~25% FGV · ~10% outra** (`0004 §9`, apurado em 11/08/2026, quatro fontes). O que sustenta a Cebraspe é **histórico e gestão** (a gestão atual já a escolheu em maio de 2025, disputando com a FGV) — e **não contrato**: o ISC nº 13/2025 amarra o objeto ao concurso de **2025** (TI e Técnico), e a cláusula 13.2 desmente os seis arquivos que diziam "contrato vigente até 2028". O último AUFC-geral (2021) foi FGV. O número é de check-in: é função do mês em que o edital sair, e um 70/30 pressupõe que ele saia ainda sob a gestão atual.
 
 **Decisão de 08/08/2026 — o Senado deixou de ser dois cargos numa linha.** O alvo é o Consultor; o Analista saiu. Três consequências, todas apuradas na prova aplicada de 2022 e não só no Anexo I: AFO e Contabilidade **saem da coluna Senado** (o edital não dá o bloco de AFO àquela área) e passam a valer só pelo TCU; **Direito Eleitoral entra**, com 10 questões; e Constitucional mais Administrativo somam **46 das 70 específicas** — deixam de ser núcleo de peso médio e passam a ser a prova.
 
@@ -35,18 +35,20 @@ Portfólio repactuado por Daniel em **24/07/2026**: Senado e TCU, **pesos 0,50/0
 - **Câmara** — saiu em 17/07/2026.
 - **CGU** — saiu em 24/07/2026 → **contingência dormente**. Material hibernado, nunca deletado. O edital dela **não reativa nada sozinho**: dispara a pergunta de reavaliação a Daniel. Pergunte; não assuma.
 - **Literatura Nacional** — ficou **sem alvo** com a saída do Analista. Não entra em linha guarda-chuva nenhuma: disciplina com incidência 0 nos dois alvos não se estuda. Marcada, não deletada.
-- **Condicionais do TCU** (entram só se o edital confirmar): Economia do Setor Público (provável), Direito Civil/Processual Civil, Direito Penal. Matemática Financeira acopla em RLM/Estatística e não vira pasta.
+- **Condicionais do TCU** — deixaram de ser órfãs em 11/08/2026: o curso Gran **204948** cobre com PDF as quatro (Economia do Setor Público, Direito Civil, Processual Civil, Anticorrupção; inventário em `~/manual_estudo/disciplinas/_infra/catalogo-gran-tcu-204948.md`). São ~13 questões; entram por decisão de escopo, não por falta de material. **Matemática Financeira NÃO acopla em RLM: ela é disciplina do Bloco P1-I e vira pasta própria** (decisão do Daniel, 11/08/2026; a criação aguarda a decisão de vocabulário de 12/08). E **RLM saiu do escopo do TCU** — não está no edital de 2021; vale só pelo Senado, depois da prova.
 
 ## Datas-gatilho (disparam o modo Replanejar)
 
-1. **Edital TCU AUFC-geral** — o mais provável do horizonte. Dispara o **protocolo 72h**: banca, áreas, formato e engenharia reversa da incidência real.
+1. **Edital TCU AUFC-geral** — o mais provável do horizonte. Dispara o **protocolo 72h**: banca, áreas, formato e engenharia reversa da incidência real. **E planeja-se pela PROVA, não pelo edital**: nos nove certames levantados a prova veio de 51 a 136 dias depois dele, e os dois AUFC recentes ficaram em 121 e 136 (`0004 §6`) — ancorar o horizonte na data do edital foi o erro que derrubou o plano 0003.
 2. **Definição da banca do TCU antes do edital** — hoje aberta; a definição recalibra a divisão de treino entre FGV e Cebraspe.
 3. **Edital CGU** — dispara a pergunta de reavaliação, nunca reativação automática.
 4. **01/01/2027 — vencimento da assinatura Gran.** É **prazo de trabalho**, não gatilho estratégico: a colheita e a conversão têm de estar fechadas até o fim de dezembro. Alarme uma semana antes, em **24/12/2026**, na pauta do check-in daquela semana. Detalhe em `~/manual_estudo/disciplinas/_infra/acervos-ativos.md`.
 
-## Treino banca-dupla
+## Treino de banca — a proporção segue a probabilidade, não os pesos
 
-Proporção ≈ pesos (50/50), **alternando por sessão**; nunca misturar bancas no mesmo lote de questões — o que se está medindo é justamente a diferença entre elas. A discursiva alterna as duas: parecer no formato FGV e peça técnica no formato Cebraspe (esta em folha de **50 linhas**, não 30).
+**A alternância 50/50 por sessão morreu em 12/08/2026** (`0004 §9`, implementado em `~/manual_estudo/estudo/dia.py`): treina-se na proporção da probabilidade de banca do TCU — **~65% Cebraspe / ~35% FGV, por matéria** —, com a banca do dia derivada do log de lotes: escolhe-se a que puxa a fração acumulada de volta ao alvo. Continua inegociável **nunca misturar bancas no mesmo lote**, porque o que se mede é a diferença entre elas. O 65/35 revisa-se a cada check-in, junto com a probabilidade que o gera.
+
+A discursiva prioriza a **peça técnica** — o gênero do TCU há vinte anos — nas folhas de **20 e 50 linhas**, e o treino não espera o edital: **na Cebraspe a discursiva cai no mesmo dia da objetiva** (na FGV de 2021 caiu 70 dias depois — quem se prepara pelo calendário da FGV e cai na Cebraspe perde setenta dias que achava que tinha; `0004 §10`). O **parecer** do Senado sai do horizonte até depois da prova do TCU.
 
 ## O que foi medido — e o que não foi
 
@@ -63,31 +65,18 @@ Tempo não é gargalo em banca nenhuma. Seis erros vieram com confiança 4–5 (
 
 **Treze das dezesseis disciplinas nunca foram medidas**, e três delas são as de maior incidência do TCU: Estatística (nível 3 **autodeclarado, nunca medido**), Contabilidade e Controle Externo. Para essas, a primeira providência é **medir** — lote diagnóstico de 10–20 questões —, não presumir déficit. Nível autoavaliado entra na matriz com a marca *sem dado*, e "sem dado" nunca é "fraco" (regra-mãe 7).
 
-## Prioridades
+## Prioridades — as fases do 0004 mandam
 
-Tiers, com a razão de cada um ao lado. Quando um tier discordar da fórmula da matriz, **diga qual está usando e por quê** — foi a divergência silenciosa entre os dois que manteve Administrativo um tier abaixo do que a conta mandava.
+A alocação por tiers foi **superada em 11/08/2026 pelo escopo por bloco de prova** (`0004 §3 e §8`). A régua que a substituiu: **nota abaixo de 25 em P1 OU em P2 elimina** (edital 10.10, sem compensação), então cada fase roda os dois lados da prova ao mesmo tempo, nunca um só. A ordem aceita: **fase 1 = Estatística + Contabilidade** (os 19 passos prontos — um bloco de 25 questões mais metade de outro, sem depender de construção) → **2** = TI & Dados + AFO → **3** = Controle Externo → **4** = Constitucional + Administrativo → **5** = manutenção (Português, Inglês, RLM, Adm. Pública) → **6** = Processo Legislativo → **depois da prova**: Direito Eleitoral e o que for só-Senado. Contagens, executáveis e custo por fase moram no 0004 — copiá-los para cá é como este arquivo apodreceu da última vez.
 
-- **P1 — o que é a prova:** Constitucional (28q no Senado, 2 no TCU) · **Administrativo** (18q; com a Lei 14.133 no TCU) · **Contabilidade/CASP** e **Controle Externo/Auditoria** (incidência 3 no TCU, e as duas em nível 0 — são o maior déficit do portfólio) · AFO (incidência 3 no TCU; **deixou de ser transversal** quando saiu da coluna Senado, mas o déficit medido em FGV a mantém no topo).
-- **P2:** Estatística & Análise de Dados (incidência 3 no TCU, trilha inteira pronta em folhas de passo, e **sem medição**) · Português · Discursiva (1 peça por semana, contínua) · **Direito Eleitoral** — que antes de ser estudável precisa ser **construída** (ver abaixo).
-- **P3:** Adm. Pública & PP · RLM (manutenção 2×/semana com teto — trava anti-hiperfoco) · Processo Legislativo · TI & Dados · Inglês (manutenção por questões, mais o treino de tradução).
-- **P4:** Ética · Atualidades (áudio no deslocamento).
-
-**Direito Eleitoral é o caso especial e não pode ser tratado como os outros.** Ela vale 10 questões medidas e **tem `trilha.md` desde 09/08/2026**, com dez passos tirados das dez questões da prova aplicada — não do palpite. *(Corrigido em 11/08/2026: até aqui este parágrafo dizia que ela não tinha trilha, e a frase governava a regra. Ela tem.)* O que falta é **material próprio**: nenhuma folha de passo, nenhuma aula, e cinco dos oito arquivos do padrão ausentes — a trilha roteia inteira para fonte externa (Código Eleitoral Anotado do TSE, QConcursos). Pela regra-mãe 8 ela é planejável **como questões e lei seca**, e não como leitura de material nosso: a primeira entrada dela num plano ou consome fonte externa, ou é trabalho de construção — nunca "abrir a folha do Passo 1", que não existe. A própria disciplina registra a ordem: não abrir antes de Controle Externo e Contabilidade, porque a régua anti-evitação proíbe duas matérias de nível 0 abrindo no mesmo mês, e abrir uma terceira frente porque ela é nova seria exatamente a evitação que a régua existe para impedir.
+**Direito Eleitoral: adiada para depois da prova do TCU** (decisão do Daniel, 11/08/2026, `0004 §1` — "não é o núcleo do Consultor nem a matéria fundante da carreira"). O registro de estado dela continua verdadeiro: tem `trilha.md` desde 09/08/2026 (dez passos tirados das dez questões da prova aplicada), e **falta material próprio** — nenhuma folha de passo, cinco dos oito arquivos do padrão ausentes, roteando inteira para fonte externa (Código Eleitoral Anotado do TSE, QConcursos). Quando voltar, entra pela regra-mãe 8 como questões e lei seca, nunca como "abrir a folha do Passo 1", que não existe.
 
 **Escalonamento dos níveis-0 (vale mais que a ordem fina):** nunca duas matérias nível 0 abrindo no mesmo mês. Cada uma entra pelo método anti-evitação (metodologias.md).
 
-**Processo Legislativo perdeu a justificativa de âncora.** Ele era P1 e desempatava por aderência porque o RISF valia ~19/70 na prova do **Analista** — cargo que saiu do portfólio. No Consultor, o Bloco I traz *Processo Legislativo Constitucional*, que é processo pela CF e não pelo Regimento. O RISF continua valendo por dois caminhos, e nenhum deles é a objetiva: a **discursiva** (parecer sobre proposição exige tramitação real) e o exercício do cargo. Tratar como leitura de apoio até haver medição.
+**Processo Legislativo é a única matéria do Senado que permanece na fila** (`0004`, fase 6 — possivelmente com o RISF, a confirmar com o Daniel). A âncora antiga caiu com o Analista: no Consultor, o Bloco I traz *Processo Legislativo Constitucional*, que é processo pela CF e não pelo Regimento. O RISF continua valendo pela **discursiva** (parecer sobre proposição exige tramitação real) e pelo exercício do cargo — e o parecer está fora do horizonte até depois da prova do TCU.
 
-## Eixos e pisos
+## Eixos e pisos — aposentados pelo pareamento de blocos
 
-| Eixo | Disciplinas | Piso por meso-ciclo |
-|---|---|---|
-| A — Jurídico-legislativo (Senado) | Constitucional, Administrativo, **Eleitoral**, Proc. Legislativo | — |
-| B — Controle e quantitativo (TCU) | Contabilidade, Controle Externo, AFO, Estatística, Adm. Pública & PP, TI & Dados | **≥ 30%** |
-| C — Instrumentais (os dois) | Português, RLM, Inglês, Discursiva | ≥ 20% |
+A tabela de eixos A/B/C com piso percentual existia para impedir que o alvo sem edital minguasse enquanto a atenção puxava para o que tinha data. **Em 11/08/2026 ela foi substituída por uma garantia estrutural** (`0004 §8`): cada fase pareia blocos **da mesma prova do TCU** (P1×P2), porque a régua que passou a importar é a eliminação por bloco — abaixo de 25 pontos em qualquer um, sem compensação —, e piso percentual por eixo não protege contra isso; o pareamento protege. O escalonamento dos níveis-0 (nunca duas matérias nível 0 abrindo no mesmo mês) continua valendo por cima das fases.
 
-**O piso mudou de eixo em 09/08/2026, e a razão importa.** Ele protegia o eixo A, quando a preocupação era o Processo Legislativo ficar magro. Hoje o eixo A carrega 46 das 70 questões específicas do Senado — um piso ali não protege nada, é **teto disfarçado de piso**. O risco real inverteu: o eixo B reúne as três disciplinas de maior incidência do TCU, todas em nível 0 ou não medidas, e é o que perde espaço porque a atenção puxa naturalmente para o alvo cujo edital já existe. **O piso protege o alvo mais distante**, que é o que a regra-mãe 5 manda — cortar pela coluna, nunca pela média.
-
-Direito Eleitoral entrou no eixo A: sem eixo, um plano podia satisfazer os três pisos e dar **zero** a uma disciplina de 10 questões sem que nada acusasse.
-
-A discursiva é fixa e não conta contra piso nenhum.
+A discursiva segue fixa, semanal, e não conta contra alocação nenhuma.
