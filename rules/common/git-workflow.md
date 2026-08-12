@@ -9,7 +9,23 @@
 
 Types: feat, fix, refactor, docs, test, chore, perf, ci
 
-Note: Attribution disabled globally via ~/.claude/settings.json.
+**Atribuição desligada, e agora as chaves existem** (11/08/2026). Em `settings.json`:
+`attribution: {commit: "", pr: ""}` — a forma atual — e `includeCoAuthoredBy: false`,
+que é depreciada e fica só para cobrir CLI mais antigo na outra máquina. As duas dizem
+a mesma coisa, então não têm como divergir; medido no binário 2.1.228, `attribution`
+vence quando definida e o `includeCoAuthoredBy` só vale na ausência dela.
+
+Até 11/08/2026 esta linha dizia "*Attribution disabled globally via
+`~/.claude/settings.json`*" e **nenhuma das duas chaves existia em lugar nenhum** — nem
+no `settings.json`, nem no `settings.local.json`, nem no `~/.claude.json`. O padrão do
+Claude Code é incluir o trailer, então a regra descrevia um estado que ninguém tinha
+ligado: **8 dos 50 commits anteriores levaram `Co-Authored-By`, dois deles no próprio
+dia 11/08**. Nada acusou, porque afirmação em prosa não é configuração — é a lição
+[`referencia-declarada-sem-validador`](../../skills/learned/referencia-declarada-sem-validador.md),
+e esta foi a quarta ocorrência dela em vinte e quatro horas.
+
+Por isso a linha nomeia as chaves em vez de dizer "via settings.json": nome de chave se
+confere com um `grep`, e alegação de estado não se confere com nada.
 
 ## Pull Request Workflow
 

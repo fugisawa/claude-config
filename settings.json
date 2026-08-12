@@ -52,6 +52,11 @@
     "type": "command",
     "command": "input=$(cat); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); printf 'daniel %s' \"$(basename \"$cwd\")\""
   },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,
     "ecc@ecc": false,
