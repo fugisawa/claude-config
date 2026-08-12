@@ -70,15 +70,23 @@ era o tamanho: o `browser_state/state.json` guardava **34 cookies** de `.google.
 carregava a mesma sessão autenticada. Uma skill de terceiro, trazida sem procedência,
 mantinha sessão viva da conta Google do Daniel parada no disco desde 04/04/2026.
 
-**`data/` foi apagado em 12/08/2026, por decisão dele.** Restam 140 MB, quase todos do
-`.venv`. Duas ressalvas ficam registradas porque não se leem do diretório. A primeira
+**`data/` foi apagado em 12/08/2026, por decisão dele.** Duas ressalvas ficam
+registradas porque não se leem do diretório. A primeira
 é que **apagar o arquivo local não revoga a sessão no Google** — quem revoga é a
 página de segurança da conta, e enquanto isso não for feito o cookie que já vazou (se
 vazou) continua valendo. A segunda é que restaurar a skill **não a faz funcionar de
 novo**: sem `data/`, ela pede autenticação do zero, e é assim que deve ser.
 
+**O `.venv` foi apagado no mesmo dia, e esse já estava quebrado.** O `mv` para
+`skills-archive/` deixou cinco console-scripts com shebang apontando para
+`skills/notebooklm/.venv/bin/python`, caminho que parou de existir — guardar 140 MB
+de ambiente virtual morto não preserva nada. O `requirements.txt` de nove linhas ficou,
+que é o que de fato reconstrói. A skill inteira caiu de **218 MB para 704 KB**.
+
 Voltar continua sendo
-`uv run --with pyyaml python scripts/apply_skills_archive.py --restore notebooklm`.
+`uv run --with pyyaml python scripts/apply_skills_archive.py --restore notebooklm`,
+e depois disso ela precisa de `uv pip install -r requirements.txt` e de autenticação
+nova antes de rodar.
 
 ## Índice — 296 skills
 
