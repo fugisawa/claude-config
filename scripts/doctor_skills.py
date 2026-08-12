@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 from registry_lint import (Finding, Report, Severity, duplicate_findings,
-                           read_frontmatter, render)
+                           read_frontmatter, registry_files, render)
 
 DEFAULT_ROOT = Path.home() / ".claude" / "skills"
 MAX_DESCRIPTION = 1500   # tripwire for pasted <example> blocks; currently unhit
@@ -40,7 +40,7 @@ def scan(root: Path) -> Report:
     findings: list[Finding] = []
     by_name: dict[str, list[str]] = {}
 
-    for path in sorted(root.rglob("SKILL.md")):
+    for path in registry_files(root, "SKILL.md"):
         rel = path.relative_to(root).as_posix()
         front = read_frontmatter(path.read_text(encoding="utf-8", errors="replace"))
 

@@ -148,6 +148,57 @@ Body.
         self.assertEqual(self.codes(Severity.WARN), ["long-description"])
         self.assertTrue(scan(self.root).ok)
 
+    def outside(self, name: str, text: str) -> Path:
+        """Cria uma skill FORA de root e devolve o diretório dela.
+
+        O alvo precisa ficar fora: a árvore real aponta para
+        `../vendor/mattpocock-skills/...` e `../../Documents/LifeOS/...`. Com o
+        alvo dentro de root, o `rglob` o acha pelo caminho real e o teste passa
+        sem nunca exercitar o seguimento do symlink.
+        """
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        d = Path(tmp.name) / name
+        d.mkdir(parents=True)
+        (d / "SKILL.md").write_text(text, encoding="utf-8")
+        return d
+
+    def test_finds_skills_reached_by_symlink(self) -> None:
+        # O CLAUDE.md manda instalar skill de terceiro como symlink relativo em
+        # skills/. Path.rglob NÃO desce em diretório symlinkado, e por isso o
+        # doctor enxergava 23 das 34 skills da árvore real — cego justamente
+        # para as instaladas do jeito documentado.
+        alvo = self.outside("upstream-skill",
+                            CLEAN.replace("alpha-tool", "upstream-skill"))
+        (self.root / "upstream-skill").symlink_to(alvo)
+
+        report = scan(self.root)
+        self.assertEqual(report.item_count, 1)
+        self.assertEqual(report.findings, [])
+
+    def test_duplicate_name_across_a_symlink_is_an_error(self) -> None:
+        # O defeito com consequência: o doctor existe para pegar nome duplicado,
+        # e um duplicado que envolvesse uma das 11 skills por symlink passava
+        # batido — "OK — registry is unambiguous" sobre um registro ambíguo.
+        alvo = self.outside("alpha-tool", CLEAN)
+        (self.root / "linked").symlink_to(alvo)
+        write(self.root, "alpha-tool/SKILL.md", CLEAN)
+
+        self.assertIn("duplicate-name", self.codes(Severity.ERROR))
+        self.assertFalse(scan(self.root).ok)
+
+    def test_symlink_pointing_at_an_ancestor_does_not_hang(self) -> None:
+        # Seguir symlink abre a porta para ciclo. O corte é por ancestralidade:
+        # só para quando o link aponta para dentro da própria cadeia.
+        write(self.root, "alpha-tool/SKILL.md", CLEAN)
+        (self.root / "alpha-tool" / "loop").symlink_to(self.root)
+        self.assertEqual(scan(self.root).item_count, 1)
+
+    def test_broken_symlink_is_ignored(self) -> None:
+        write(self.root, "alpha-tool/SKILL.md", CLEAN)
+        (self.root / "dangling").symlink_to(self.root / "nao-existe")
+        self.assertEqual(scan(self.root).findings, [])
+
     def test_ignores_non_skill_markdown(self) -> None:
         write(self.root, "alpha-tool/SKILL.md", CLEAN)
         write(self.root, "alpha-tool/reference.md", "# notes\n")

@@ -25,6 +25,8 @@ import re
 import sys
 from pathlib import Path
 
+from registry_lint import registry_files
+
 ROOT = Path(__file__).resolve().parent.parent
 REGRAS = ROOT / "rules" / "common" / "agents.md"
 SETTINGS = ROOT / "settings.json"
@@ -41,7 +43,7 @@ def nomes_com_frontmatter(base: Path) -> dict[str, Path]:
     achados: dict[str, Path] = {}
     if not base.is_dir():
         return achados
-    for p in sorted(base.rglob("*.md")):
+    for p in registry_files(base, "*.md"):
         try:
             texto = p.read_text(encoding="utf-8", errors="ignore")[:2000]
         except OSError:

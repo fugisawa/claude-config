@@ -13,6 +13,7 @@ from __future__ import annotations
 import enum
 import re
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
 
 import yaml
@@ -96,6 +97,41 @@ def read_frontmatter(text: str) -> Frontmatter | None:
     except yaml.YAMLError:
         pass
     return Frontmatter(_salvage(raw), strict=False)
+
+
+def registry_files(root: Path, pattern: str) -> list[Path]:
+    """Every file matching `pattern` under `root`, descending into symlinks.
+
+    `Path.rglob` does **not** descend into a directory that is a symlink, and
+    third-party skills enter this tree exactly as relative symlinks — the way
+    CLAUDE.md prescribes. Measured on 12/08/2026, that left the skill registry
+    seeing 23 of 34 skills, blind to the 11 installed as documented, and
+    therefore blind to any duplicate name involving one of them. A checker that
+    reads a third of the registry and prints "unambiguous" is worse than none.
+
+    Cycles are cut by ancestry: descent stops when a directory resolves to one
+    already on the current path. Two distinct links to the same target are both
+    walked, because that genuinely is two entries in the registry.
+    """
+    found: list[Path] = []
+
+    def walk(directory: Path, ancestry: frozenset[Path]) -> None:
+        try:
+            real = directory.resolve()
+            entries = sorted(directory.iterdir())
+        except OSError:
+            return
+        if real in ancestry:
+            return
+        deeper = ancestry | {real}
+        for entry in entries:
+            if entry.is_dir():
+                walk(entry, deeper)
+            elif entry.is_file() and fnmatch(entry.name, pattern):
+                found.append(entry)
+
+    walk(root, frozenset())
+    return sorted(found)
 
 
 def duplicate_findings(by_name: dict[str, list[str]], kind: str) -> list[Finding]:

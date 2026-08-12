@@ -14,10 +14,11 @@ harness e tools de MCP.
 
 Exit 1 = citação aponta para algo arquivado/aposentado/inexistente.
 """
-import os
 import re
 import sys
 from pathlib import Path
+
+from registry_lint import registry_files
 
 ROOT = Path(__file__).resolve().parent.parent
 ROUTER = ROOT / "skills" / "ask-daniel" / "SKILL.md"
@@ -43,7 +44,7 @@ def nomes_com_frontmatter(base: Path) -> set[str]:
     achados = set()
     if not base.is_dir():
         return achados
-    for p in base.rglob("*.md"):
+    for p in registry_files(base, "*.md"):
         try:
             m = re.search(r"^name:\s*(\S+)", p.read_text(encoding="utf-8", errors="replace"), re.M)
         except OSError:

@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 from registry_lint import (Finding, Report, Severity, duplicate_findings,
-                           read_frontmatter, render)
+                           read_frontmatter, registry_files, render)
 
 __all__ = ["Severity", "scan", "main"]
 
@@ -36,7 +36,7 @@ def scan(root: Path) -> Report:
     findings: list[Finding] = []
     by_name: dict[str, list[str]] = {}
 
-    for path in sorted(root.rglob("*.md")):
+    for path in registry_files(root, "*.md"):
         rel = path.relative_to(root).as_posix()
         front = read_frontmatter(path.read_text(encoding="utf-8", errors="replace"))
 
