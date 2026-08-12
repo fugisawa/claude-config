@@ -50,11 +50,11 @@ Os quatro blocos, na ordem em que a energia que eles exigem se degrada:
 > **Emenda de 12/08/2026, decisão do Daniel.** No dia útil o dia comporta **dois blocos de
 > teoria**, de matérias distintas; **três** só em feriado ou fim de semana sem simulado e
 > sem sessão pesada de discursiva. A trava anti-fuga vale para o **primeiro** bloco de
-> teoria; o teto de 2–3 matérias por dia e os tetos de foco continuam como estão. A
-> execução disso no `estudo/dia.py` entra junto com o modelo de vocabulário em avaliação
-> (relatório comparando MIT OCW, Coursera, Estudei e Gurujá, pedido dele) — o segundo
-> bloco de teoria e a unidade que o preenche são a mesma pergunta, e ela se responde uma
-> vez só.
+> teoria; o teto de 2–3 matérias por dia e os tetos de foco continuam como estão.
+> **Implementada no `estudo/dia.py` na mesma data**: a segunda teoria vem do cursor da
+> segunda matéria do rodízio — a unidade que a preenche é a que o cursor responde, seja
+> qual for o nome que o modelo de vocabulário (em decisão) lhe der; o lote e a triagem
+> seguem da matéria primária, e a terceira teoria de fim de semana segue manual.
 
 **O fim de semana é outro bicho.** Cinco horas seguidas não são dez janelas de trinta minutos, e tratá-las como se fossem desperdiça a única coisa que a semana não oferece. Reserve o contíguo para: discursiva de 90 min cronometrados · simulado em bloco fechado · **folha inteira** de um passo (em vez de uma seção por vez) · check-in de 40 min. O resto do fim de semana volta a ser fila normal, com a mesma ordem.
 
