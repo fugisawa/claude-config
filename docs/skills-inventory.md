@@ -35,7 +35,6 @@ o registro fica aqui, que é onde se procura "cadê a skill X".
 |---|---|---|
 | `trilha-carreira` | mapa de competências de uma carreira ou função — tronco comum + ramos por especialidade, a partir de documentos-fonte, renderizado em grafo HTML + MD do Obsidian + PDF, em `~/trilhas/<trilha>/` | `~/trilhas/` nunca existiu e não há um único artefato de trilha de carreira no disco. Capacidade aspiracional, sem uso em três semanas de trabalho denso |
 | `roadmapsh-creator` | publicar uma trilha no site roadmap.sh e minerar os roadmaps oficiais de lá | depende de `trilha-carreira` para ter o que publicar; e o próprio router registrava o custo — ~1 min de clique por nó, achatando os ramos |
-| `deep-research` | relatório profundo multi-fonte verificado | redundante: `research-orchestrator` já conduz o projeto inteiro (clarificação → `research-coordinator` → especialistas → `report-generator`), e o router agora aponta para ele |
 | `trilha-builder` | fila de estudo por disciplina (união IGEPP × QConcursos × verticalização) | a capacidade tem quatro donos corretos — `estrategista-concurso` (regra-mãe 8), `concurso-prep`, `~/manual_estudo/disciplinas/README.md` (formato v2) e a regra dura do CLAUDE.md do projeto. Uma quinta cópia seria a única capaz de divergir das outras quatro |
 
 **Gatilhos para reconsiderar.** `trilha-carreira` e `roadmapsh-creator`: quando
@@ -45,7 +44,33 @@ Daniel, e o texto original do router está em `git show 8fe0000^:skills/ask-dani
 do zero sob o protocolo 72h; aí as peças a fundir são o `disciplinas/README.md` e
 o `qconcursos-simulados` (colheita de `subject_ids`, tuning de link por banca).
 
-## Índice — 295 skills
+**Uma saiu desta tabela: a `deep-research` foi construída depois.** Em 08/08/2026 ela
+entrou aqui como redundante com o `research-orchestrator`; em 10/08/2026 ela foi
+escrita e versionada mesmo assim (`89855ef`), com `SKILL.md` e quatro referências, e
+hoje o `apply_skills_archive.py` a barra explicitamente por estar no git. O registro
+fica porque a decisão de 08/08 existiu — o que muda é que **a resposta a "cadê a
+`deep-research`" passou a ser `skills/deep-research/`**. Corrigido em 11/08/2026,
+depois de a linha ter sobrevivido três dias contradizendo o disco e o próprio script.
+
+## Arquivadas depois do lote (decisões individuais)
+
+O lote de 07/08/2026 aplicou o critério de massa. O que vier depois entra aqui com o
+seu próprio motivo, porque motivo individual não se lê da tabela de 295.
+
+**`notebooklm` — arquivada em 11/08/2026, por falta de procedência.** É clone de
+[`PleasePrompto/notebooklm-skill`](https://github.com/PleasePrompto/notebooklm-skill)
+(v1.3.0), trazido em 04/04/2026 como cópia solta: não é plugin, não é symlink para o
+submodule, não está no `.gitignore` curado e não aparecia em documento nenhum. O
+`CLAUDE.md` manda registrar a procedência de cópia solta justamente para este caso, e
+ela nunca foi registrada — este parágrafo paga essa dívida antes de arquivar.
+
+Pesa **218 MB em 1.417 arquivos**, dos quais 78 MB são `data/`, que guarda
+`auth_info.json` e um perfil de navegador com **sessão autenticada do Google**.
+Arquivar move, não apaga: esses dados continuam em `skills-archive/notebooklm/`, e
+apagá-los de vez é decisão separada desta. Voltar é
+`uv run --with pyyaml python scripts/apply_skills_archive.py --restore notebooklm`.
+
+## Índice — 296 skills
 
 | família | qtd |
 |---|---|
@@ -303,6 +328,7 @@ o `qconcursos-simulados` (colheita de `subject_ids`, tuning de link por banca).
 | `n8n-node-configuration` | n8n | Operation-aware node configuration guidance. Use when configuring nodes, understanding property dependencies, determining required |
 | `n8n-validation-expert` | n8n | Interpret validation errors and guide fixing them. Use when encountering validation errors, validation warnings, false positives,  |
 | `n8n-workflow-patterns` | n8n | Proven workflow architectural patterns from real n8n workflows. Use when building new workflows, designing workflow structure, cho |
+| `notebooklm` | — | Consulta cadernos do Google NotebookLM por automação de navegador, com respostas ancoradas nas fontes. Arquivada em 11/08/2026 — ver "Arquivadas depois do lote" |
 | `odoo-accounting-setup` | odoo | "Expert guide for configuring Odoo Accounting: chart of accounts, journals, fiscal positions, taxes, payment terms, and bank recon |
 | `odoo-automated-tests` | odoo | "Write and run Odoo automated tests using TransactionCase, HttpCase, and browser tour tests. Covers test data setup, mocking, and  |
 | `odoo-backup-strategy` | odoo | "Complete Odoo backup and restore strategy: database dumps, filestore backup, automated scheduling, cloud storage upload, and test |
