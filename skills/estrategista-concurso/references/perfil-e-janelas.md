@@ -4,6 +4,13 @@ Sumário: Regras do perfil · Orçamento e janelas · Dia furado e DMV · Protoc
 
 Fonte: *Plano de 18 Meses* e *Arranque* (jun/2026), com a forma do tempo revista em 08/08/2026. Estas regras valem em **qualquer** plano gerado — não são opcionais nem negociáveis semana a semana.
 
+> **Renome de 12/08/2026.** O item numerado da fila de cada matéria passou a se chamar
+> **tópico**, e a unidade de execução, **sessão** — decisões `0010` e `0011` do
+> `manual_estudo`. Onde este arquivo dizia "folha de passo", agora diz "folha do tópico".
+> A regra não mudou; o nome, sim. **A transcrição destas linhas no `estudo/dia.py` é
+> conferida por comando** (`python3 estudo/canone.py`, decisão `0012`): as duas pontas
+> não podem mais divergir em silêncio, que foi como esta própria linha envelheceu.
+
 > **O que mudou de nome, e por quê.** Este arquivo se chamava `perfil-e-semana.md` e trazia uma semana-modelo com hora cravada (pico 6h10, sala de manhã, Anki 19h45). A grade foi substituída em 08/08/2026: ela pressupunha rotina estável, e com o trabalho pesado o dia deixou de caber no molde. O perfil não mudou; a forma do tempo, sim.
 
 ## Regras do perfil (por que o plano tem esta forma)
@@ -32,13 +39,13 @@ Duas formas de tempo, e elas não se substituem:
 | Total | 3–4 h/dia | 5–5h30/dia |
 | Serve para | uma unidade completa por janela | o que não sobrevive a ser picado |
 
-**A unidade tem de caber inteira na janela.** Retomar pelo meio é o que faz perder o ponto de partida, e ponto de partida é justamente o que este perfil não pode perder (traço 2). Por isso a **seção da folha de passo** virou a unidade de teoria: a folha já nasce partida assim, um conceito e seu cue por seção.
+**A unidade tem de caber inteira na janela.** Retomar pelo meio é o que faz perder o ponto de partida, e ponto de partida é justamente o que este perfil não pode perder (traço 2). Por isso a **seção da folha do tópico** virou a unidade de teoria: a folha já nasce partida assim, um conceito e seu cue por seção.
 
 Os quatro blocos, na ordem em que a energia que eles exigem se degrada:
 
 | # | Bloco | Janela | Quando |
 |---|---|---|---|
-| 1 | Uma **seção da folha de passo** | 30–40 min | o momento mais fresco do dia |
+| 1 | Uma **seção da folha do tópico** | 30–40 min | o momento mais fresco do dia |
 | 2 | Um **lote de 20 questões** (banca do dia) | 30–40 min | cansaço médio |
 | 3 | **Triagem do caderno de erros** | 20–30 min | exige pouco |
 | 4 | **Anki e microdose** | 15–20 min | dia atropelado — e o dia conta como verde |
@@ -56,7 +63,7 @@ Os quatro blocos, na ordem em que a energia que eles exigem se degrada:
 > qual for o nome que o modelo de vocabulário (em decisão) lhe der; o lote e a triagem
 > seguem da matéria primária, e a terceira teoria de fim de semana segue manual.
 
-**O fim de semana é outro bicho.** Cinco horas seguidas não são dez janelas de trinta minutos, e tratá-las como se fossem desperdiça a única coisa que a semana não oferece. Reserve o contíguo para: discursiva de 90 min cronometrados · simulado em bloco fechado · **folha inteira** de um passo (em vez de uma seção por vez) · check-in de 40 min. O resto do fim de semana volta a ser fila normal, com a mesma ordem.
+**O fim de semana é outro bicho.** Cinco horas seguidas não são dez janelas de trinta minutos, e tratá-las como se fossem desperdiça a única coisa que a semana não oferece. Reserve o contíguo para: discursiva de 90 min cronometrados · simulado em bloco fechado · **folha inteira** de um tópico (em vez de uma seção por vez) · check-in de 40 min. O resto do fim de semana volta a ser fila normal, com a mesma ordem.
 
 Regras que sobreviveram à troca de forma: teoria difícil nunca depois de dia cansativo; a sala de trabalho é lugar de **questões**, nunca de teoria nova (interrupção do expediente trava e contamina o lugar); exercício que faz suar fica na manhã do fim de semana, nunca à noite, porque o batimento demora a baixar e rouba o sono. **Quinta é dia de terapia: meta = piso, por definição — está previsto, não é fracasso.**
 
