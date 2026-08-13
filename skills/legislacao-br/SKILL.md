@@ -298,4 +298,5 @@ Melhor uma procedência honestamente incompleta que uma página inventada.
 - `referencias/extrair-planalto.md` — os oito modos de corromper o texto ao
   extrair do Planalto, todos medidos. Leia **antes** de escrever parser: cada um
   falha em silêncio, e a implementação de referência já existe em
-  `~/manual_estudo/normas/` com 34 testes offline.
+  `~/manual_estudo/normas/` com 51 testes offline (medido em 12/08/2026; o número sai de
+  `pytest normas/tests --collect-only`, e não desta linha).

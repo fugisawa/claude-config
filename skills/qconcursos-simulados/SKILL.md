@@ -65,11 +65,11 @@ Input primário = **screenshots do usuário** (Gabarito Detalhado de cada cadern
 3. **C/E colapsado:** o "Mapa de questão" lateral dá certo/errado por número. Linhas colapsadas **truncam o enunciado** — para texto integral (ficha de erro), pedir screenshot da questão expandida; **nunca inferir** o item ou o gabarito literal.
 4. **Cruzar caderno×QC letra a letra.** Divergência é sinal real de transcrição (25/07: 3 em 30 na FGV; uma custou 1 ponto) — **confirmar com o usuário antes de classificar o tipo de erro**; para o placar, **o QC é o registro oficial**. Num caderno "C/E" pode haver questão MC legítima (banco Cebraspe tem MC antigas): letra A–E ali não é anomalia.
 5. **Gotcha visual:** screenshots longos do QC podem ter coluna fantasma sobreposta (fragmentos de outras questões) — ler só os cards numerados da coluna principal.
-6. **Saídas e fronteira:** erros × confiança → **conf 4–5 = ponto cego (★) → ficha** no formato `manual_estudo/caderno-erros-a4/ficha-fv-exemplo.typ` (conf 1–3 → log); placar por banca×disciplina → check-in do `estrategista-concurso`. Esta skill **extrai e cruza**; interpretar zonas e realocar é do estrategista. Registro: análise vira MD companion em `build/` (ex.: `build/simulado_diagnostico_analise.md`).
+6. **Saídas e fronteira:** erros × confiança → **conf 4–5 = ponto cego (★) → ficha** no formato `manual_estudo/caderno-erros-a4/ficha-fv-exemplo.typ` (conf 1–3 → log); placar por banca×disciplina → check-in do `estrategista-concurso`. Esta skill **extrai e cruza**; interpretar zonas e realocar é do estrategista. Registro: análise vira MD companion em `build/` (ex.: `build/analise-simulado-diagnostico.md`).
 
 ## Uso geral da plataforma — vereditos (análise 24/07/2026)
 
-Fonte canônica: `manual_estudo/build/guia_qconcursos_geral.md` (matriz recurso a recurso). Regras duras para o agente:
+Fonte canônica: `manual_estudo/build/guia-qconcursos-uso-geral.md` (matriz recurso a recurso). Regras duras para o agente:
 
 - **Nunca sugerir** ao Daniel os recursos de sequenciamento/comparação do QC (Trilha da Semana, Mini Simulados automáticos, Treinador, Ranking, Resumão, cursos/teoria): conflitam com trilhas próprias, IGEPP, check-in e o perfil anti-vanity-metrics.
 - **Meu Desempenho** (filtra por banca) = conferência rápida FGV×Cebraspe entre check-ins; nunca fonte-mestre (sem tipo de erro nem calibração; % da comunidade enviesado p/ cima).
