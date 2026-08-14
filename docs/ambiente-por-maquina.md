@@ -97,6 +97,18 @@ tender à estável mais nova e o terminal entrega v24 — mas quem entrega é o 
 acreditava não ter instalado. Medir era a única forma de saber, e a coincidência do
 resultado não valida o palpite.
 
+**A GPU desta máquina derruba aplicação Qt/Chromium nova, e o sintoma não diz isso
+(14/08/2026).** A placa é uma **Quadro M4000**, de 2015, e o driver dela não oferece a
+extensão Vulkan que a Qt 6.11 pede. Quem paga é toda aplicação que embute o QtWebEngine: o
+Anki 26.08.1 instalou sem erro, imprimiu `Install complete`, e **abortou com core dump** na
+primeira abertura. O rastro diz `GLOzone not found for unknown` depois de o EGL falhar nos
+dois caminhos, OpenGL e OpenGLES — nenhuma das linhas nomeia a placa nem sugere o conserto,
+e o `coredumpctl` não registrou nada. O conserto é escolher o renderizador por software no
+perfil do próprio aplicativo (no Anki, `Preferências → driver de vídeo`, que se materializa
+em `~/.local/share/Anki2/gldriver6`). Registrado aqui porque é traço de **hardware**, e vai
+reaparecer na próxima aplicação Electron/Qt que chegar — e porque o perfil não é versionado,
+de modo que trocar de perfil ou reinstalar traz o defeito de volta sem aviso nenhum.
+
 ---
 
 ## O que já é comum às duas
