@@ -80,12 +80,12 @@ Ubuntu 24.04.4 LTS, sem rede corporativa no caminho — o apt resolve direto.
 ```decl
 machine-id: 8b4740ec
 rotulo: casa · Dell Precision Tower 5810
-medido-em: 2026-08-11
+medido-em: 2026-08-14
 node-interativo: nvm v24
 node-nao-interativo: apt v18
 node-apt: apt v18
-presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew
-ausentes: bat, fd, conda, magick, convert
+presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, convert
+ausentes: bat, fd, conda, magick
 ```
 
 **Armadilha desta máquina, e é a mesma do trabalho com outro elenco:** o `node` do terminal
@@ -115,8 +115,11 @@ de modo que trocar de perfil ou reinstalar traz o defeito de volta sem aviso nen
 
 Com a Máquina B medida em 11/08/2026, o comum passa a ser isto, e só isto:
 
-`uv`, `pyenv`, `bun`, `brew`, `rg`, `fdfind` e **`nvm`** existem nas duas; `conda`, `magick`
-e `convert` não existem em nenhuma. O `node` do terminal interativo é **v24 pelo nvm** nos
+`uv`, `pyenv`, `bun`, `brew`, `rg`, `fdfind` e **`nvm`** existem nas duas; `conda` e
+`magick` não existem em nenhuma. **O `convert` deixou de ser comum: em 14/08/2026 o
+doutor mediu `/usr/bin/convert` na máquina de casa** — ImageMagick 6.9.12, a interface
+antiga —, e continua ausente na de trabalho. Quem escrever script compartilhado que
+dependa dele confere com `command -v`, como já vale para `bat`×`batcat`. O `node` do terminal interativo é **v24 pelo nvm** nos
 dois lados.
 
 **Dois achados que só apareceram com as duas medidas na mesa.** O primeiro é que a
