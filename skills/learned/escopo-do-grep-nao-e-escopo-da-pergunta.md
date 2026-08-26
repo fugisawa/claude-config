@@ -7,6 +7,11 @@ metadata:
   confidence: alta (bronca explícita do usuário; a resposta inteira saiu do dia errado)
 ---
 
+> **Estendida por [[resultado-de-busca-nao-e-veredito]] em 26/08/2026**, com dois
+> mecanismos novos: contar ocorrências não diz nada sobre o SENTIDO delas, e a
+> ferramenta certa pode responder com precisão à pergunta errada. A extensão não
+> contradiz nada daqui — acrescenta.
+
 **O padrão.** A busca por palavra-chave devolve um acerto só, e o acerto único **se disfarça
 de confirmação**: se houvesse outro lugar, teria aparecido. Não teria — o outro lugar diz a
 mesma coisa com outras palavras, ou diz o mesmo número em outro formato. Quando a pergunta

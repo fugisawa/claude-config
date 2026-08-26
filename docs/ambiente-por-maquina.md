@@ -80,13 +80,23 @@ Ubuntu 24.04.4 LTS, sem rede corporativa no caminho — o apt resolve direto.
 ```decl
 machine-id: 8b4740ec
 rotulo: casa · Dell Precision Tower 5810
-medido-em: 2026-08-14
+medido-em: 2026-08-26
 node-interativo: nvm v24
-node-nao-interativo: apt v18
+node-nao-interativo: outro v26
 node-apt: apt v18
 presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, convert
 ausentes: bat, fd, conda, magick
 ```
+
+> **Correção medida em 26/08/2026.** O `node-nao-interativo` era `apt v18` e passou a ser
+> `outro v26`: instalou-se um node v26 em `~/.local/bin`, que precede o `/usr/bin` no PATH.
+> O `apt v18` continua no disco e continua declarado na linha `node-apt` — o que mudou foi
+> **quem responde** quando um script chama `node` sem shell interativo. A declaração não é
+> histórico: ela diz o que a máquina é hoje, e por isso o doutor a reprovou até bater.
+>
+> ⚠ O dono é `outro` e não `local` porque o doutor classifica por caminho — `nvm`, `brew`,
+> `apt`, e `outro` para o resto. Escrever `local` faria a declaração parecer certa e
+> continuar reprovando.
 
 **Armadilha desta máquina, e é a mesma do trabalho com outro elenco:** o `node` do terminal
 é v24, servido pelo nvm, e o de dentro de um script é v18, do apt. Seis versões de diferença
