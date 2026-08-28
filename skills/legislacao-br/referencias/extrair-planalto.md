@@ -99,6 +99,45 @@ Para detectar mudança real o Planalto oferece caminho melhor: manda `ETag` e
 `Last-Modified`, e responde **304 com 0 bytes** a `If-Modified-Since`. (O endpoint de
 binário do `normas.leg.br` **não** manda nenhum dos dois — ali é hash do conteúdo.)
 
+## 9. Etiqueta de navegação do site vira texto da lei
+
+O Planalto pendura, ao lado do dispositivo, âncoras cujo texto é só `Regulamento`,
+`Vigência` ou `Vigência encerrada` — links para o decreto que o regulamentou e para a regra
+de vigência. Elas entram no texto e vão para o vade mecum **como se fossem lei**: quem lê o
+inciso IV do art. 6º da Lei 14.133 lê *"…ofertados no Sistema de Compras Expressas (Sicx).
+Regulamento Vigência"*.
+
+Medido em 28/08/2026 num corpus de 24 normas: **26 dispositivos em 3 normas** (21 na
+14.133, 2 no Decreto 7.724, 1 na LC 200 — só as capturadas do Planalto; o `normas.leg.br`
+não serve essas âncoras).
+
+Foi achado por acaso, e vale registrar como: a conferência de deriva acusou a 14.133
+crescendo 120 bytes, e o que crescera era a palavra `Vigência` que o site acrescentara a um
+inciso. **Sem verificação de deriva, esse defeito não tem quem o denuncie** — ele não
+quebra nada, só corrompe o texto devagar.
+
+**Identifique pelo HTML, nunca por regex sobre a prosa.** O Planalto também linka as
+remissões que a própria lei faz — `art. 23 desta Lei`, 46 delas só na 14.133 — e essas
+**são** texto da norma. Uma regra que caçasse palavra solta no fim do dispositivo mutilaria
+a lei, e mutilar em silêncio é pior que a etiqueta sobrando: a etiqueta se vê, a frase
+truncada parece redação.
+
+O critério que separa os dois casos é o texto da âncora ser **exatamente** uma etiqueta de
+um conjunto fechado:
+
+```python
+ETIQUETAS_DE_NAVEGACAO = frozenset({
+    "Regulamento", "Vigência", "Vigência encerrada", "Vide",
+    "Mensagem de veto", "Promulgação partes vetadas",
+})
+```
+
+Não apague a etiqueta: **envolva em parênteses**. Ela passa a seguir o mesmo caminho da
+procedência (`(Incluído pela Lei nº …)`) e sai para o campo de anotação, de onde o render a
+discretiza sem perder a informação. Um dispositivo regulamentado por decreto, ou de vigência
+diferida, diz isso a quem estuda — o defeito nunca foi a etiqueta existir, foi ela se passar
+por texto da lei.
+
 ## Implementação de referência
 
 `~/manual_estudo/normas/` implementa tudo isto com 34 testes offline sobre HTML salvo:
