@@ -88,6 +88,66 @@ Voltar continua sendo
 e depois disso ela precisa de `uv pip install -r requirements.txt` e de autenticação
 nova antes de rodar.
 
+## Consolidação tentada e revertida — `continuous-learning-v2` (08/09/2026)
+
+Registro de uma mudança que **não ficou**, escrito porque a razão de ela não ficar não
+se lê do diretório, e a próxima sessão que achar "duas instalações da mesma skill" vai
+querer consolidar de novo.
+
+**O estado, que continua.** Há duas instalações do `continuous-learning-v2`. A cópia em
+`skills/continuous-learning-v2/` (versionada aqui, 12 arquivos, trazida em 11/08/2026) é
+chamada por duas entradas de `settings.json` e grava em `~/.local/share/ecc-homunculus/`;
+é ela que tem observador vivo e os 17 instintos. O plugin `everything-claude-code` 1.8.0
+traz a mesma skill, chamada pelo `hooks.json` dele, gravando em `~/.claude/homunculus/`,
+com observador desligado. Os dois ganchos disparam em toda chamada de ferramenta, cada um
+no seu cofre; os comandos de barra do plugin leem o cofre do plugin.
+
+**O que se tentou, às 07:58 de 08/09/2026, por decisão do Daniel ("às 8am comece 2"):**
+consolidar no plugin, porque o `CLAUDE.md` prefere plugin a cópia solta. Os 17 instintos
+foram copiados para o cofre do plugin (formato idêntico; o de projeto já trazia o hash
+`6449c545aa6d`, que o plugin usa), o observador do plugin foi ligado e iniciado, as duas
+entradas saíram de `settings.json`, a cópia foi para `skills-archive/` e os quatro doctors
+passaram. **Tudo isso foi desfeito 25 minutos depois**, por três defeitos do observador do
+plugin, todos medidos e nenhum visível na descrição dele:
+
+1. **Ele não consegue gravar.** O loop chama `claude --model haiku --max-turns 3 --print`
+   sem `--allowedTools`, e nesse modo o Write é negado — uma sonda pedindo para escrever um
+   arquivo devolveu *"Permission requested to write the file"* e não escreveu. O loop da
+   cópia passa `--allowedTools Read,Write`. Ligado como vem, o plugin observa e nunca
+   aprende.
+2. **Ele analisa a cada chamada de ferramenta, sem tempo de espera.** O `observe.sh` do
+   plugin manda `USR1` ao observador em toda observação, e o tratador de `USR1` do loop
+   dispara a análise na hora, contornando o intervalo de 5 minutos, sempre que o arquivo
+   tiver 20 registros ou mais. Com o acúmulo de 7.279 observações que o cofre do plugin
+   guardava, cada chamada de ferramenta desta sessão e da sessão irmã abriu um processo do
+   Haiku sobre 1,5 MB, com um vigia de 120 s cada: **117 análises em 4 min 36 s**
+   (08:04:32 a 08:09:08, no `observer.log` do plugin), 39 processos ao mesmo tempo e
+   **carga 68** numa máquina de trabalho. A cópia tem o `session-guardian.sh` — janela
+   08h–23h, espera entre ciclos, detecção de ociosidade — que existe para impedir
+   exatamente isso.
+3. **Nada o religa.** O `observe.sh` da cópia reinicia o observador quando o acha morto;
+   o do plugin não, e o `hooks.json` do plugin não tem `SessionStart` para isso. Depois
+   de reiniciar a máquina, o observador do plugin ficaria parado até alguém rodar o
+   `start-observer.sh` à mão, de dentro do projeto.
+
+Os dois primeiros se consertam com uma linha cada no cache do plugin, e é por isso que
+não foram consertados: o cache é reescrito na próxima atualização do plugin, e o
+conserto sumiria calado. **A cópia versionada é, hoje, a implementação melhor**, e a
+regra "plugin antes de cópia solta" pressupõe que o plugin faça a mesma coisa. Ele não
+faz.
+
+**O que ficou da tentativa, de propósito:** os 17 instintos também estão no cofre do
+plugin (assim `/instinct-status` deixa de dizer que nada foi aprendido), e o acúmulo de
+7.279 observações antigas do plugin foi para `observations.archive/`, de modo que, se o
+observador dele for ligado um dia, ele não recomeça sobre 1,5 MB. O `config.json` do
+plugin voltou a `enabled: false` e o loop dele voltou ao texto original.
+
+**Se a consolidação voltar à pauta**, o caminho que este episódio deixa: levar a
+consolidação para o **outro** lado — desligar os dois ganchos de observação do plugin
+pelo mecanismo de perfis dele (`scripts/hooks/check-hook-enabled.js`), e deixar a cópia
+versionada como a única instalação, porque é a que tem guarda. Ou esperar uma versão do
+plugin em que os três itens acima não existam, e medir de novo antes de trocar.
+
 ## Índice — 296 skills
 
 | família | qtd |
