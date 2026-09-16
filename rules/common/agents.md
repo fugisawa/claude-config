@@ -15,17 +15,31 @@ The `Provider` column below is a declaration, and `scripts/doctor_rules.py`
 checks it against the disk on every commit. Change a provider here without the
 disk agreeing and the hook fails.
 
+**Update 08/09/2026:** the ECC plugin marketplace is cloned on this work
+machine (`plugins/marketplaces/ecc/`) but never made it into
+`installed_plugins.json` — the corporate network blocks the install step, the
+exact fallback this file already named. The eight agents below are now copied
+as local files under `~/.claude/agents/`, so `doctor_rules.py` passes here on
+`local`. **Why:** a plugin that cannot install cannot serve an agent, and the
+guard does not accept a provider the disk contradicts. **How to apply:** if
+the home machine still has `everything-claude-code@everything-claude-code`
+enabled, its plugin agents now share a `name:` with these local files — a
+duplicate the registry doctor (`scripts/doctor_agents.py`) is built to catch,
+not this one. Resolve it there by disabling the plugin at home too, or by
+treating the local file as the one true copy and leaving the plugin enabled
+only for the agents outside this table.
+
 | Agent | Provider | Purpose | When to Use |
 |-------|----------|---------|-------------|
-| planner | ecc | Implementation planning | Complex features, refactoring |
-| architect | ecc | System design | Architectural decisions |
-| tdd-guide | ecc | Test-driven development | New features, bug fixes |
+| planner | local | Implementation planning | Complex features, refactoring |
+| architect | local | System design | Architectural decisions |
+| tdd-guide | local | Test-driven development | New features, bug fixes |
 | code-reviewer | local | Code review | After writing code |
-| security-reviewer | ecc | Security analysis | Before commits |
-| build-error-resolver | ecc | Fix build errors | When build fails |
-| e2e-runner | ecc | E2E testing | Critical user flows |
-| refactor-cleaner | ecc | Dead code cleanup | Code maintenance |
-| doc-updater | ecc | Documentation | Updating docs |
+| security-reviewer | local | Security analysis | Before commits |
+| build-error-resolver | local | Fix build errors | When build fails |
+| e2e-runner | local | E2E testing | Critical user flows |
+| refactor-cleaner | local | Dead code cleanup | Code maintenance |
+| doc-updater | local | Documentation | Updating docs |
 
 When an agent named here does not resolve, do not silently substitute another
 one and do not pretend the step ran. Say which agent is missing and why the
