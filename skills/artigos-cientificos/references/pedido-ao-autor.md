@@ -16,6 +16,10 @@ rota A. O pedido é curto, diz por que o artigo interessa e não pede nada além
 3. **A pendência vai para o material.** `artigo.py abrir <doi> --pendencia "<a linha que o
    pedido imprime>" --reavaliar-em <data>` põe no recibo o nome do autor, a data e a data antes
    da qual não se repete.
+4. **Quando o Daniel enviar**, a linha da pendência troca "rascunhado" por "enviado", no recibo e
+   no material; a data antes da qual não se repete não muda. Foi o que aconteceu em 16/09/2026
+   com o pedido a T. Tharumalingam, enviado pelo `send_message` do conector com o `draftId` do
+   rascunho, depois do "pode enviar" explícito.
 
 ## As regras
 
