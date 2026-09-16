@@ -55,6 +55,20 @@ Origem: `~/manual_estudo/decisoes/0007-git-com-duas-sessoes.md`. Valem em dobro 
 - **Gancho é versionado em `githooks/` e se instala uma vez por clone:**
   `git config core.hooksPath githooks`. Mantenha-o em ~1s — gancho lento vira gancho
   desligado com `--no-verify` na primeira pressa. Suíte longa vai no `pre-push`.
+- **Fetch antes de qualquer trabalho; push logo depois do commit.** Medido em 16/09/2026: as
+  duas máquinas commitaram no mesmo dia sem sincronizar no meio, e o primeiro `git push`
+  custou **14 minutos** — rebase de quatro commits sobre três, regeneração da cascata de
+  derivados e duas passagens de gancho. Só uns 4 minutos eram custo do projeto; o resto foi
+  deliberação em passos separados. Desde então o gancho `hooks/sync-on-start.sh`
+  (SessionStart, em `settings.json`) faz o `fetch` e avança o clone quando é seguro; se ele
+  reportar "DIVERGIU" ou "à frente", `/repo-sync` **antes de tocar em arquivo**, em três
+  chamadas e sem pedir confirmação quando não há conflito. Commit que fica sem push é a
+  semente da próxima divergência.
+- **Árvore suja de outra sessão: nunca `stash`, nunca `--autostash`, nunca rebase por cima.**
+  Mais de uma sessão pode estar aberta no mesmo clone (é o caso normal aqui). Commite só os
+  seus caminhos e reconcilie por `merge`, que aceita árvore suja em arquivo que ele não toca;
+  rebase recusa árvore suja e o `--autostash` re-aplica o trabalho alheio por cima do remoto,
+  que é como se empaca. Se o remoto tocar um arquivo sujo que não é seu, pare e mostre.
 
 Já registradas em `skills/learned/`, não repetir aqui:
 [`git-desfazer-restaura-do-indice`](../../skills/learned/git-desfazer-restaura-do-indice.md)
