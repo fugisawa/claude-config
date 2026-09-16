@@ -12,8 +12,9 @@ chamadas de Crossref, OpenAlex e Unpaywall, e `fontes.http_get` o barra por host
 
 O que esta escada NÃO faz, de propósito: Sci-Hub, LibGen, Anna's Archive ou qualquer
 espelho que redistribua sem licença. O que ela não abre vira instrução para os degraus
-manuais (cópia do autor, conectores, navegador da app, pedido ao autor, acesso institucional),
-que ficam em `references/escada-de-acesso.md`.
+manuais (cópia do autor, conectores, navegador da app, o acesso do perfil, pedido ao autor), que
+ficam em `references/escada-de-acesso.md`. A cópia que um degrau manual trouxe entra pela
+`registrar_manual`, com a etiqueta (A, B ou C) que quem a obteve declara; D não se registra.
 """
 from __future__ import annotations
 
@@ -168,6 +169,10 @@ def baixar(cand: Candidato, *, obter=fontes.http_get):
     return None
 
 
+def _agora() -> str:
+    return dt.datetime.now().astimezone().isoformat(timespec="seconds")
+
+
 def _meta_serializavel(meta: Registro | None) -> dict | None:
     return {**asdict(meta), "autores": list(meta.autores)} if meta else None
 
@@ -181,7 +186,8 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
     `nao_aberto` (nenhum candidato rendeu texto; o diário diz o que cada um respondeu)."""
     candidatos, meta, diario = coletar(doi, email, buscar=buscar, obter=obter)
     base = {"doi": doi, "status": "nao_aberto", "meta": _meta_serializavel(meta),
-            "candidatos": [asdict(c) for c in candidatos], "diario": diario}
+            "candidatos": [asdict(c) for c in candidatos], "diario": diario,
+            "tentado_em": agora or _agora()}
     if apenas_listar:
         return {**base, "status": "listado" if candidatos else "nao_aberto"}
     if not candidatos:
@@ -203,9 +209,44 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
             **base, "status": "aberto", "arquivo": str(arquivo), "texto": str(texto),
             "formato": formato, "degrau": cand.degrau, "url": cand.url, "url_final": final,
             "versao": cand.versao, "licenca": cand.licenca,
+            "etiqueta": procedencia.etiqueta_do_degrau(cand.degrau),
             "sha256": leitura.sha256_de(arquivo), "paginas": info.get("paginas"),
             "produtor": info.get("produtor", ""),
-            "baixado_em": agora or dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+            "baixado_em": agora or _agora(),
             "diario": diario + [f"{cand.degrau}: aberto como {formato} a partir de {final}"],
         }
     return {**base, "diario": diario}
+
+
+# ── a cópia que veio de degrau manual ─────────────────────────────────────────────────────
+
+VERSAO_DECLARADA = {"publicada": "publishedVersion", "aceita": "acceptedVersion",
+                    "submetida": "submittedVersion", "": ""}
+
+
+def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta: str,
+                     versao: str = "", meta=None, extrair=leitura.extrair_texto,
+                     info=leitura.pdfinfo, agora: str | None = None) -> dict:
+    """A cópia obtida por degrau manual (site do autor, pedido atendido, biblioteca) ganha a mesma
+    procedência do `abrir`: texto extraído, hash, páginas, data — e a etiqueta que quem a obteve
+    declara, porque o script não tem como saber de onde ela veio. Rota D não se registra."""
+    if etiqueta not in procedencia.ETIQUETAS_REGISTRAVEIS:
+        raise RuntimeError(f"etiqueta {etiqueta!r} não se registra: só A, B ou C (D está fora da escada)")
+    if versao not in VERSAO_DECLARADA:
+        raise RuntimeError(f"versão {versao!r}: use publicada, aceita ou submetida")
+    formato = arquivo.suffix.lower().lstrip(".")
+    if formato not in ("pdf", "xml"):
+        raise RuntimeError(f"{arquivo.name}: só se registra PDF ou XML JATS")
+    if formato == "pdf" and not eh_pdf(arquivo.read_bytes()[:1024]):
+        raise RuntimeError(f"{arquivo.name} não é um PDF (falta o cabeçalho %PDF-)")
+    texto = extrair(arquivo, formato)
+    dados = info(arquivo) if formato == "pdf" else {}
+    quando = agora or _agora()
+    return {
+        "doi": doi, "status": "aberto", "meta": meta if isinstance(meta, dict) else _meta_serializavel(meta),
+        "candidatos": [], "diario": [f"manual: {origem}, em {url}"], "tentado_em": quando,
+        "arquivo": str(arquivo), "texto": str(texto), "formato": formato, "degrau": "manual",
+        "origem": origem, "url": url, "url_final": url, "versao": VERSAO_DECLARADA[versao],
+        "licenca": "", "etiqueta": etiqueta, "sha256": leitura.sha256_de(arquivo),
+        "paginas": dados.get("paginas"), "produtor": dados.get("produtor", ""), "baixado_em": quando,
+    }

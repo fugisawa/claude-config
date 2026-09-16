@@ -60,6 +60,9 @@ class Registro:
     pmid: str = ""
     pmcid: str = ""
     fonte: str = ""
+    correspondente: str = ""
+    pais_correspondente: str = ""
+    correspondente_marcado: bool = False
 
 
 @dataclass(frozen=True)
@@ -215,6 +218,17 @@ def normalizar_pmcid(valor: str | None) -> str:
     return limpo if limpo.startswith("PMC") else f"PMC{limpo}"
 
 
+def _correspondente(authorships: list) -> tuple[str, str, bool]:
+    """Nome e país do autor de correspondência que o OpenAlex marca (`is_corresponding`); sem a
+    marca, o primeiro autor, e a flag diz que foi só um palpite a conferir na primeira página."""
+    marcados = [a for a in authorships if a.get("is_corresponding")]
+    escolhido = marcados[0] if marcados else (authorships[0] if authorships else {})
+    nome = (escolhido.get("author") or {}).get("display_name") or ""
+    paises = [p for p in (escolhido.get("countries") or []) if p] or [
+        i.get("country_code") for i in escolhido.get("institutions") or [] if i.get("country_code")]
+    return nome, (paises[0] if paises else ""), bool(marcados)
+
+
 def normalizar_openalex(obj: dict) -> Registro:
     ids = obj.get("ids") or {}
     local = obj.get("primary_location") or {}
@@ -224,6 +238,7 @@ def normalizar_openalex(obj: dict) -> Registro:
     paginas = "-".join(p for p in (biblio.get("first_page"), biblio.get("last_page")) if p)
     autores = tuple(
         (a.get("author") or {}).get("display_name") or "" for a in obj.get("authorships") or [])
+    correspondente, pais, marcado = _correspondente(list(obj.get("authorships") or []))
     return Registro(
         doi=_id_curto(obj.get("doi"), "https://doi.org/").lower(),
         titulo=obj.get("title") or "",
@@ -242,6 +257,9 @@ def normalizar_openalex(obj: dict) -> Registro:
         pmid=_id_curto(ids.get("pmid"), "https://pubmed.ncbi.nlm.nih.gov/"),
         pmcid=normalizar_pmcid(_id_curto(ids.get("pmcid"), "https://www.ncbi.nlm.nih.gov/pmc/articles/")),
         fonte="openalex",
+        correspondente=correspondente,
+        pais_correspondente=pais,
+        correspondente_marcado=marcado,
     )
 
 

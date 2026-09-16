@@ -20,6 +20,10 @@ exemplo "search_literature", "read_fulltext", "get_full_text_article").
 | Conector **Consensus** (`search`) | busca com resumo, contagem de citações, quartil do periódico, tipo de estudo | sem texto integral no plano gratuito; não aplique filtros que o pedido não pediu |
 | Conector de corpus (`semanticSearch`) | passagens com citação autor-ano e DOI para uma pergunta em linguagem natural | o corpus não é declarado; trate a passagem como pista para achar o DOI, nunca como leitura do artigo |
 | Agente `academic-researcher` | achar e sintetizar literatura com rigor de citação | não tem `Bash`: ele acha e devolve DOIs; abrir e conferir é com esta skill |
+| Conector **Gmail** (`create_draft`, `list_drafts`, `get_draft`) | o pedido ao autor como RASCUNHO, com o `to`, `subject` e `body` do `artigo.py pedido` | só rascunho: `send_message` não entra na skill, e quem envia é o Daniel. O conector não acha o e-mail do autor; ele vem da primeira página do artigo ou da página do DOI |
+| Conector **Hugging Face** (`hf_fs`) | `cat hf://papers/<arxiv-id>/paper.md` devolve o texto do artigo do arXiv que o Hub indexa, para ler sem baixar | só arXiv, e é pré-publicação: o recibo diz isso |
+| CORE (`api.core.ac.uk`) e Open Policy Finder (`v2.sherpa.ac.uk`) | agregador de repositórios; política de compartilhamento e embargo por periódico | medido em 16/09/2026: os dois respondem o desafio do Cloudflare ou 403 a script desta máquina, com ou sem chave; consulte o embargo pelo navegador da app |
+| COMUT (IBICT) | cópia paga de artigo pela rede de bibliotecas parceiras | ativo: 971 pedidos em 2025, 61% atendidos, pelo balanço do IBICT de janeiro de 2026; entra só com biblioteca e orçamento no perfil do `SKILL.md` |
 
 ## Padrões de uso que funcionam
 
@@ -50,3 +54,9 @@ que muitas vezes é aberto mesmo quando o artigo não é.
 `https://api.osf.io/v2/nodes/<id>/files/osfstorage/` lista os arquivos; cada um tem `links.download`.
 Com os dados dá para recomputar o resultado, o que é uma conferência mais forte que reler o
 número, e não substitui a leitura do texto.
+
+**O pedido ao autor, sem enviar nada.**
+`artigo.py pedido <doi> --tema "…" --para <e-mail> --json` devolve `to`, `subject` e `body`; passe-os
+ao `create_draft` do conector Gmail e diga ao Daniel onde o rascunho está. A pendência que o mesmo
+comando imprime (`pedido ao autor rascunhado em …; sem resposta, não repetir antes de …`) vai para o
+recibo do material com `artigo.py abrir <doi> --pendencia "…" --reavaliar-em <data>`.

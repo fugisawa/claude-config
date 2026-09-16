@@ -38,12 +38,14 @@ O `abrir` imprime o parágrafo `Fonte:` já no padrão. A forma:
 
 > Fonte: Tharumalingam e col. (2025), "Increasing Video Lecture Playback Speed Can Impair Test
 > Performance – A Meta-Analysis", *Educational Psychology Review* 37(2), 35, DOI
-> 10.1007/s10648-025-10003-9. Cópia obtida por Unpaywall em <url>, versão publicada, 27 páginas,
-> SHA-256 fece3dafc697…; valores conferidos no texto em 2026-09-16.
+> 10.1007/s10648-025-10003-9. Cópia obtida em <url>, por Unpaywall (rota A, licenciada), versão
+> publicada, 27 páginas, SHA-256 fece3dafc697…; valores conferidos no texto em 2026-09-16.
 
-Quando a cópia veio de degrau manual (site do autor, navegador, pedido), o script não sabe
-disso: escreva a origem à mão, com o endereço e o que provou que é a versão publicada. Exemplo
-do caso de 16/09/2026, gravado em `disciplinas/_infra/videoaulas.md`:
+Quando a cópia veio de degrau manual (site do autor, pedido atendido), `artigo.py registrar`
+grava a mesma procedência com a etiqueta que você declara (A para repositório ou cópia
+enviada pelo autor, C para o PDF da editora no site do autor) e imprime o parágrafo; o que
+ainda se escreve à mão é a prova de que é a versão publicada. Exemplo do caso de
+16/09/2026, gravado em `disciplinas/_infra/videoaulas.md`:
 
 > A página da Springer mostra só o resumo; a conferência foi feita no PDF da versão publicada
 > que o coautor Brady Roberts deposita no site dele (bradyrtroberts.ca), com o cabeçalho, o
@@ -57,7 +59,8 @@ No corpo, a frase que carrega o número diz que foi conferida: "valores conferid
 A bandeira fica: `⚑ não conferido em fonte primária`. Fonte secundária entra rotulada como
 secundária ("segundo o resumo", "segundo Fulano (2026), que cita"). Não se escreve o número
 com a confiança de quem leu. E registre o que foi tentado, com data, para que a próxima sessão
-não repita a escada do zero: o diário do `abrir` serve para isso.
+não repita a escada do zero: o diário do `abrir` serve para isso, e o recibo que ele imprime quando nada abre carrega, com
+`--pendencia` e `--reavaliar-em`, o pedido rascunhado e a data de voltar.
 
 ## O que vai para o repositório
 
