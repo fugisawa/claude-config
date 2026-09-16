@@ -60,6 +60,12 @@
             "command": "~/.claude/hooks/sync-on-start.sh",
             "timeout": 30,
             "statusMessage": "sync: fetch e fast-forward seguro do repositório"
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/scripts/definir_email_artigos.py --gancho",
+            "timeout": 5,
+            "statusMessage": "ambiente: ARTIGOS_EMAIL está definido nesta máquina?"
           }
         ]
       }

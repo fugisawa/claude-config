@@ -73,8 +73,9 @@ degrau pulado, sem perguntar e sem tentar credencial nenhuma. Segredo não entra
 - Assinatura do pedido ao autor: `ARTIGOS_ASSINATURA`, ou "Daniel Fugisawa"
 - E-mail para as APIs de cortesia (Crossref, OpenAlex, Unpaywall): `ARTIGOS_EMAIL`, autorizado pelo
   Daniel em 16/09/2026 para esses três serviços e para mais nenhum. Mora no bloco `env` do
-  `~/.claude/settings.local.json`, que não é versionado: cada máquina precisa da sua linha, e sem
-  ela o Unpaywall é pulado e o diário diz isso
+  `~/.claude/settings.local.json`, que não é versionado porque o repositório é público. Cada
+  máquina grava a sua com `python3 ~/.claude/scripts/definir_email_artigos.py <e-mail>`; o gancho
+  de SessionStart avisa a máquina onde ela falta, e sem ela o Unpaywall é pulado e o diário diz isso
 
 ## Cinco pedidos, cinco rotas
 
