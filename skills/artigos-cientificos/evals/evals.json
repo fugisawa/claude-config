@@ -1,0 +1,35 @@
+{
+  "skill_name": "artigos-cientificos",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Me consegue o texto integral de 10.1016/S0140-6736(20)30183-5",
+      "expected_output": "O artigo abre pelo degrau 1 (APIs abertas): a Lancet serve a versão publicada como bronze e o Europe PMC serve o PMC7159299 em PDF e XML. Recibo com rota A, licenciada, versão publicada, hash e data.",
+      "expectations": [
+        "A skill rodou `artigo.py abrir` e não pediu Sci-Hub nem espelho",
+        "O recibo traz a etiqueta A e a versão publicada",
+        "O texto ficou no disco e só as linhas conferidas entraram na conversa"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Preciso ler um artigo brasileiro de ciências sociais cujo periódico está fechado; acha uma cópia legal",
+      "expected_output": "A cópia vem da SciELO ou de um repositório institucional listado nas `locations` do OpenAlex ou no Unpaywall, com etiqueta A e a versão declarada (publicada ou aceita); se for a aceita, o recibo carrega a ressalva.",
+      "expectations": [
+        "O candidato escolhido é de repositório ou da SciELO, não da editora fechada",
+        "A versão está declarada e a ressalva aparece quando não é a publicada",
+        "Nenhum degrau da rota D foi sugerido"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "10.1007/s10648-025-10003-9 está fechado em tudo; escreve pro autor",
+      "expected_output": "A escada automática termina em `nao_aberto`; `artigo.py pedido` redige o e-mail no idioma do autor, em até 120 palavras, para o autor de correspondência; a sessão cria o RASCUNHO no Gmail com create_draft e nada é enviado; o recibo do material ganha a pendência com a data antes da qual não se repete e a data de reavaliar.",
+      "expectations": [
+        "Nenhuma chamada a send_message",
+        "O rascunho existe no Gmail com to, subject e body do `pedido`",
+        "O recibo traz `Pendências:` e `Reavaliar em`"
+      ]
+    }
+  ]
+}

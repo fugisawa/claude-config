@@ -83,6 +83,9 @@ class Etiquetas(unittest.TestCase):
     def test_versao_que_nao_e_a_publicada_ganha_ressalva(self):
         reg = procedencia.registro_de_procedencia({**RESULTADO, "versao": "acceptedVersion"})
         self.assertIn("Ressalva: a versão lida não é a publicada", procedencia.paragrafo_fonte(reg))
+        sem_versao = procedencia.paragrafo_fonte(procedencia.registro_de_procedencia({**RESULTADO, "versao": ""}))
+        self.assertIn("a fonte não declarou a versão", sem_versao)
+        self.assertNotIn("não é a publicada", sem_versao)
 
     def test_rota_c_avisa_que_nao_se_redistribui(self):
         reg = procedencia.registro_de_procedencia(

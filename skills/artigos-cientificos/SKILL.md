@@ -130,7 +130,8 @@ script contorna pelo REST do Europe PMC (XML) quando há PMCID.
 | **D** excluída | redistribuição sem licença, credencial alheia, contorno de medida técnica (art. 107) | biblioteca-sombra e espelhos; a skill não usa, não cita endereço, não instrui |
 
 Degrau automático é sempre A; degrau manual é A ou C, e quem registra declara. O recibo mostra a
-etiqueta, e a base legal de cada uma, conferida em 16/09/2026, está em
+etiqueta. A base legal de cada uma, com o estado de verificação item a item (Brasil e direito
+comparado), está em `references/mapa-juridico.md`; o resumo brasileiro, em
 `references/escada-de-acesso.md`.
 
 ## A escada, resumida (o detalhe está em `references/escada-de-acesso.md`)

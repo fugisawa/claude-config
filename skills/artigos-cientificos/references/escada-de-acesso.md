@@ -175,11 +175,9 @@ está marcado, e entra como "não conferido" até alguém abrir a fonte.
   Bench e Digital Policy Alert): bloqueio do Sci-Hub, do Sci-Net e dos espelhos na Índia, com
   prazo de 72 horas. A "extensão aos espelhos em dezembro de 2025" que circula **não foi
   encontrada**; a ordem de agosto já os alcança.
-- **Direito comparado citado no prompt de 16/09/2026** (CCH v. Law Society of Upper Canada, SCC
-  2004; Authors Guild v. HathiTrust, 2d Cir. 2014; UrhG § 60c; CDPA s. 29 e 29A; Diretiva (UE)
-  2019/790, art. 3; Copyright Act indiano, s. 52(1)(i), e o caso da fotocópia da Universidade
-  de Delhi): **não conferido**. Vale como argumento persuasivo, nunca como licença no Brasil; a
-  Suíça, que admite cópia privada de fonte ilícita, tampouco muda a lei daqui.
+- **Direito comparado** (Canadá, Estados Unidos, Alemanha, Reino Unido, União Europeia, Índia,
+  Suíça): item a item, com o estado de verificação, em `mapa-juridico.md`. Vale como argumento
+  persuasivo, nunca como licença no Brasil.
 - **CF, art. 5º, XIV e XXVII, e art. 218; PIDESC, art. 15.1.b (Decreto 591/1992)**: citados no
   ensaio abaixo; **o texto não foi aberto hoje**. Reforma da LDA promulgada: **não conferi**.
 

@@ -155,7 +155,11 @@ def paragrafo_fonte(reg: dict) -> str:
     frase = (f"Fonte: {citacao} Cópia obtida em {reg.get('url_final') or reg.get('url')}, por {origem}"
              f"{rota_txt}, versão {versao}{tamanho}, SHA-256 {hash_curto}…; valores conferidos no texto "
              f"em {data}.")
-    if reg.get("versao_do_texto") != "publishedVersion":
+    versao_declarada = reg.get("versao_do_texto", "")
+    if not versao_declarada:
+        frase += (" Ressalva: a fonte não declarou a versão; decida pelo cabeçalho da primeira página"
+                  " e escreva o que decidiu.")
+    elif versao_declarada != "publishedVersion":
         frase += " Ressalva: a versão lida não é a publicada, e o número pode diferir da versão de registro."
     if reg.get("etiqueta") == "C":
         frase += " Cópia para leitura pessoal; não redistribuir."
