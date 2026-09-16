@@ -49,6 +49,7 @@ e é a razão de este mapa poder ser curto sem esconder nada de você.
 - Relatório profundo multi-fonte verificado: agente `research-orchestrator` — conduz o projeto inteiro (clarificação da pergunta → alocação por `research-coordinator` → especialistas → `report-generator`). Vence `ecc:search-first` e o `research` do mp.
 - Big Tech / economia política de plataformas: `bigtech-analyst`.
 - Acadêmico: agente `academic-researcher`; técnico/repos: `technical-researcher`; web geral: `search-specialist`.
+- **Artigo científico para ACHAR, ABRIR ou CONFERIR** (DOI, "paper", meta-análise, "os números batem com o artigo?", barreira de pagamento, pedido de Sci-Hub): `artigos-cientificos` (16/09/2026) — quatro comandos (resolver, buscar, abrir, conferir), a escada de acesso legítimo em sete degraus (APIs abertas, cópia do autor, pré-publicação, conectores scite/PubMed/Consensus, navegador da app, dados no OSF, pedido ao autor e CAPES), o registro de procedência e o parágrafo "Fonte:" que entra no material. Sci-Hub não é degrau, e a skill diz por quê. O `academic-researcher` acha e sintetiza (sem Bash, não abre nem confere); abrir e conferir é nela. Nasceu da conferência de Tharumalingam e col. (2025), em que o WebFetch bateu no portão da Springer, o Tavily estava sem cota e a cópia veio do site de um coautor.
 
 ## Domínios do Daniel
 

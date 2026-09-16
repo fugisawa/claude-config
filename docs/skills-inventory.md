@@ -148,6 +148,16 @@ pelo mecanismo de perfis dele (`scripts/hooks/check-hook-enabled.js`), e deixar 
 versionada como a única instalação, porque é a que tem guarda. Ou esperar uma versão do
 plugin em que os três itens acima não existam, e medir de novo antes de trocar.
 
+**Feita em 16/09/2026 a primeira metade desse caminho: os dois ganchos de observação do plugin
+estão desligados**, por `ECC_DISABLED_HOOKS=pre:observe,post:observe` em `settings.json > env`,
+que o `run-with-flags-shell.sh` do plugin honra (medido: a chamada do `observe.sh` do plugin caiu
+de 0,6 s para 0,04 s, duas vezes por chamada de ferramenta). A cópia versionada continua sendo
+chamada pelas duas entradas de `settings.json` e continua gravando em `~/.local/share/ecc-homunculus/`;
+o cofre do plugin para de acumular observação que ninguém lê (904 registros só em 16/09). A
+variável vale nas duas máquinas, porque `settings.json` é versionado. A medição nasceu de outra
+pergunta — por que um `/compact` levou dez minutos — e a resposta não estava em gancho nenhum:
+`skills/learned/compactacao-herda-o-raciocinio-da-sessao.md`.
+
 ## Índice — 296 skills
 
 | família | qtd |

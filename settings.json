@@ -95,6 +95,9 @@
     }
   },
   "effortLevel": "xhigh",
+  "env": {
+    "ECC_DISABLED_HOOKS": "pre:observe,post:observe"
+  },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "voiceEnabled": true,

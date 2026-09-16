@@ -31,6 +31,7 @@
 # tanto quanto diretório. Skill nova só é versionada se ganhar linha aqui.
 skills/*
 !skills/agent-development
+!skills/artigos-cientificos
 !skills/ask-daniel
 !skills/bigtech-analyst
 !skills/briefing-designer
