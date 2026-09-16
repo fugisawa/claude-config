@@ -55,7 +55,8 @@ quê e o que entra no lugar.
   teste o garante.
 - **O e-mail do Daniel só vai para Crossref, OpenAlex e Unpaywall**, que o usam como
   identificação de cortesia (o Unpaywall o exige), e só se `ARTIGOS_EMAIL` estiver definido ou
-  `--email` for passado. Nunca fixado no código, nunca em outro serviço.
+  `--email` for passado. Nunca fixado no código, nunca em outro serviço. Desde 16/09/2026 a
+  variável mora no `env` do `~/.claude/settings.local.json`, fora do git.
 - **Nada de despejar o artigo no contexto.** O texto extraído fica no disco; o que entra na
   conversa são as linhas que o `conferir` devolve, ou uma janela de `grep -n -C`. Um artigo de
   27 páginas vale ~25 mil tokens, e cada despejo entra na próxima compactação.
@@ -70,6 +71,10 @@ degrau pulado, sem perguntar e sem tentar credencial nenhuma. Segredo não entra
 - Bibliotecas com cadastro (empréstimo entre bibliotecas, COMUT): nenhuma
 - Orçamento para compra ou aluguel de artigo: nenhum; a skill cita o preço e não compra
 - Assinatura do pedido ao autor: `ARTIGOS_ASSINATURA`, ou "Daniel Fugisawa"
+- E-mail para as APIs de cortesia (Crossref, OpenAlex, Unpaywall): `ARTIGOS_EMAIL`, autorizado pelo
+  Daniel em 16/09/2026 para esses três serviços e para mais nenhum. Mora no bloco `env` do
+  `~/.claude/settings.local.json`, que não é versionado: cada máquina precisa da sua linha, e sem
+  ela o Unpaywall é pulado e o diário diz isso
 
 ## Cinco pedidos, cinco rotas
 
@@ -85,7 +90,7 @@ degrau pulado, sem perguntar e sem tentar credencial nenhuma. Segredo não entra
 
 ```bash
 S=~/.claude/skills/artigos-cientificos/scripts
-export ARTIGOS_EMAIL="…"          # opcional: liga o Unpaywall e o polite pool (Daniel decide)
+# ARTIGOS_EMAIL vem do bloco env do ~/.claude/settings.local.json (autorizado em 16/09/2026): liga o Unpaywall e o polite pool
 python3 $S/artigo.py resolver "https://doi.org/10.1007/s10648-025-10003-9"     # metadados (Crossref + OpenAlex)
 python3 $S/artigo.py buscar "video lecture playback speed test performance" --desde 2020 -n 10
 python3 $S/artigo.py abrir 10.1007/s10648-025-10003-9 --destino <scratch>/artigos --listar    # só lista os candidatos
