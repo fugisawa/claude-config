@@ -1,0 +1,49 @@
+{
+  "skill_name": "fichamento",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Responde pela fonte: o que Stone & Opel (2000), FT-stone-opel-2000, dizem sobre o retorno ambiental e o excesso de confiança?",
+      "expected_output": "Um bloco no modo responder gravado em docs/leituras/FT-stone-opel-2000.md, seção Do modelo, com rótulo `misto` (o retorno ambiental piorou o excesso de confiança, mas o efeito só foi significativo para os slides fáceis), o trecho literal com página (p. 299 e p. 300), o contexto (84 estudantes, slides de arte, pré e pós) e duas ou três perguntas ao autor.",
+      "expectations": [
+        "A skill rodou fichar.py localizar e mapa antes de ler, e leu por janela, não o arquivo inteiro",
+        "O rótulo é misto ou sustentada com ressalva, e não um sim seco",
+        "Todo trecho tem página; nenhum número veio do resumo",
+        "O bloco foi validado antes de gravar e nada fora da seção Do modelo mudou"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Confere se Kelly & Mandel (2024), FT-kelly-mandel-2024, sustentam que o treino de calibração deslocou o viés dos analistas sem melhorar o monitoramento metacognitivo",
+      "expected_output": "Um bloco no modo verificar: tipo de fonte (experimento com analistas, sem sorteio entre condições, apreciado com ROBINS-I ou como quase-experimento), evidência a favor e contra com página, veredito em um dos cinco graus com o que mudaria, nível da checagem, e a proposta de AF no formato do registro com destino sugerido.",
+      "expectations": [
+        "A alegação foi escrita na forma mais forte antes do teste",
+        "Há ao menos uma linha 'contra ou ressalva' com página",
+        "O veredito é um dos cinco graus e vem com 'o que mudaria esta avaliação'",
+        "A proposta de AF, colada num registro de teste, passa em verificar_registro.py"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Explora Tetlock & Mellers (2011), FT-tetlock-mellers-2011, contra o argumento em docs/argumento.md",
+      "expected_output": "Um bloco no modo explorar: tipo de fonte (ensaio em periódico revisado), mapa com página da prova, conexões candidatas rotuladas apoia/contraria/menciona ligadas a afirmações do argumento (por exemplo as métricas de acurácia como variável-critério e a seção 4 do argumento), o que a fonte cobre e o argumento não (responsabilização e transparência diante das elites), e perguntas ao autor.",
+      "expectations": [
+        "O alvo foi declarado antes de abrir a fonte",
+        "Toda conexão tem rótulo, trecho curto e página da prova ('p. N da cópia' ou 'da prova'), nunca 542-554",
+        "Nada foi apresentado como conferido: são candidatos",
+        "A leitura ficou na primeira passada; não leu o texto inteiro"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Sintetiza as leituras de Meissner & Kassin, Lynn & Barrett e Stone & Opel contra a seção 4 do argumento (o construto)",
+      "expected_output": "Uma nota de síntese com um bloco por afirmação da seção 4 tocada pelas três notas: o que sustenta, restringe e contradiz, com FT e página vindos dos blocos já gravados, a força em números e o que falta ler.",
+      "expectations": [
+        "Nenhuma fonte foi aberta; só as notas",
+        "Blocos do autor tiveram precedência sobre os do modelo",
+        "As afirmações sem fonte nas notas aparecem como lacuna, com o modo sugerido",
+        "O bloco não redige a seção do artigo"
+      ]
+    }
+  ]
+}

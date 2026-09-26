@@ -32,6 +32,7 @@
 skills/*
 !skills/agent-development
 !skills/artigos-cientificos
+!skills/fichamento
 !skills/ask-daniel
 !skills/bigtech-analyst
 !skills/briefing-designer

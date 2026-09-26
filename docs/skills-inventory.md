@@ -172,6 +172,14 @@ variável vale nas duas máquinas, porque `settings.json` é versionado. A medi�
 pergunta — por que um `/compact` levou dez minutos — e a resposta não estava em gancho nenhum:
 `skills/learned/compactacao-herda-o-raciocinio-da-sessao.md`.
 
+## Skills próprias com peças adaptadas de terceiros
+
+Skill escrita aqui, mas cujo método ou formato veio de fora, entra nesta seção com a origem e a licença de cada peça, para que a procedência não se perca. Detalhe por peça, com URL, no `references/pesquisa/` da própria skill.
+
+| Skill | Data | Peças adaptadas (origem; licença) | O que não entrou |
+|---|---|---|---|
+| `fichamento` | 26/09/2026 | ledger alegação–evidência (`diwad-code/legit-sources-research`; MIT); níveis E/S/I/G de checagem de citação (`fkguo/nullius`; tríade de `nano-scientist`); cartão com âncora de página e critério "canário" (`aznikline/academic-skills`); leitura contra o argumento existente (`andrehuang/researcher-pack`); vetores de ataque, veredito em graus e "o que mudaria" (`radarist/structured-analytic-skills`, MIT; `AeonTK/scientific-writing`; `rayh/research-team`); fechar com perguntas ao autor (`anthropics/skills` `discernment-nudge`); leitura em três passadas (Keshav, 2007); listas de apreciação por tipo de fonte (RoB 2, ROBINS-I, JBI, PRISMA, STROBE, Toulmin, Walton, Mayo, Lipton); taxas de erro de citação (Jergas & Baethge 2015; Baethge & Jergas 2025; Mogull 2017; Cumberledge e col. 2023); forma do SKILL.md (`anthropics/skills` template e spec; `obra/superpowers` `writing-skills`) | pipelines inteiros (ARS, PaperJury, arXiv), verificadores como dependência (RefChecker, Hallucinator), conteúdo biomédico sem adaptação, e a skill `Imbad0202/academic-research-skills` (CC BY-NC), da qual só o conceito de âncora foi aproveitado |
+
 ## Índice — 296 skills
 
 | família | qtd |
