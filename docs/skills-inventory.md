@@ -24,6 +24,20 @@ apontada pelo `doctor_skills.py` como impossível de rotear, OU duplicata
 literal de outra. Preservados: as 36 curadas, `gsd-*` (67, integrado a 33
 arquivos versionados), `tavily-*` e `hugging-*`.
 
+## De onde vêm as `gsd-*` (25/09/2026)
+
+As 67 skills `gsd-*`, a pasta `get-shit-done/` e o `gsd-sdk` **não são
+versionados**: cada máquina os instala com `npx get-shit-done-cc@1.42.3`
+(escolhas: Claude Code, global em `~/.claude`). O que viaja pelo git são os
+agentes `gsd-*` e os 12 ganchos `hooks/gsd-*`, que existem no disco mas
+**nunca foram ligados** no `settings.json`; o GSD funciona sem eles, e ligá-los
+é decisão a tomar nas duas máquinas de uma vez, com comando portável, nunca com
+o caminho absoluto de `node` que o instalador grava. A linha 1.42.x está
+descontinuada no npm desde 23/05/2026; o projeto continua como
+`@opengsd/gsd-core` (github.com/open-gsd/gsd-core). A migração fica para quando
+as duas máquinas puderem migrar juntas, com o `.planning/` dos projetos
+verificado antes e depois.
+
 ## Citadas pelo router e nunca construídas (08/08/2026)
 
 Categoria diferente das arquivadas: **estas não estão em `skills-archive/` porque

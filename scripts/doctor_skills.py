@@ -26,6 +26,10 @@ from registry_lint import (Finding, Report, Severity, duplicate_findings,
                            read_frontmatter, registry_files, render)
 
 DEFAULT_ROOT = Path.home() / ".claude" / "skills"
+# The desktop app mirrors claude.ai skills into skills/synced/<session>/ and the
+# loader registers them under the `anthropic-skills:` namespace, so a name there
+# never collides with a top-level skill of the same name.
+APP_MANAGED = {"synced"}
 MAX_DESCRIPTION = 1500   # tripwire for pasted <example> blocks; currently unhit
 MIN_DESCRIPTION = 25     # below this there is nothing to route on
 SLUG = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
@@ -42,6 +46,8 @@ def scan(root: Path) -> Report:
 
     for path in registry_files(root, "SKILL.md"):
         rel = path.relative_to(root).as_posix()
+        if rel.split("/", 1)[0] in APP_MANAGED:
+            continue
         front = read_frontmatter(path.read_text(encoding="utf-8", errors="replace"))
 
         if front is None:

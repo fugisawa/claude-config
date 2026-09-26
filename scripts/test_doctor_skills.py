@@ -199,6 +199,20 @@ Body.
         (self.root / "dangling").symlink_to(self.root / "nao-existe")
         self.assertEqual(scan(self.root).findings, [])
 
+    def test_app_synced_mirror_is_not_a_duplicate(self) -> None:
+        # O aplicativo de desktop espelha as skills do claude.ai em
+        # skills/synced/<sessão>/<nome>/ e o loader as registra como
+        # `anthropic-skills:<nome>`. Desde 17/09/2026 a árvore real tinha oito
+        # nomes assim, e o doctor reprovava todo commit por uma colisão que o
+        # loader não tem.
+        write(self.root, "alpha-tool/SKILL.md", CLEAN)
+        write(self.root, "synced/d4bf0ba9_ec364e5d/alpha-tool/SKILL.md", CLEAN)
+        write(self.root, "synced/d4bf0ba9_ec364e5d/manifest.json", "{}")
+
+        report = scan(self.root)
+        self.assertEqual(report.findings, [])
+        self.assertEqual(report.item_count, 1, "o espelho não conta como skill")
+
     def test_ignores_non_skill_markdown(self) -> None:
         write(self.root, "alpha-tool/SKILL.md", CLEAN)
         write(self.root, "alpha-tool/reference.md", "# notes\n")
