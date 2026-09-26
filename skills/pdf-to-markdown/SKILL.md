@@ -40,7 +40,8 @@ que há marca d'água, que a página 12 tem tabela, que a 30 é um diagrama. Doi
 economizam a conversão inteira.
 
 Cobertura de texto < 100% no `validate_pdf` significa página sem camada de texto: é
-digitalização, e o caminho passa por OCR (`pdf-processing-pro/OCR.md`), não por aqui.
+digitalização, e o caminho passa por OCR (`ocr-com-evidencia`: renderize as páginas com
+`pdftoppm` e siga o método de lá), não por aqui.
 
 ### 2. Escolha o extrator medindo, não por hábito
 

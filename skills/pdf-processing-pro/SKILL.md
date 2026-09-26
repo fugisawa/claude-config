@@ -1,6 +1,6 @@
 ---
 name: pdf-processing-pro
-description: Production-ready PDF processing with forms, tables, OCR, validation, and batch operations. Use when working with complex PDF workflows in production environments, processing large volumes of PDFs, or requiring robust error handling and validation.
+description: Production-ready PDF processing with forms, tables, validation, and batch operations. Use when working with complex PDF workflows in production environments, processing large volumes of PDFs, or requiring robust error handling and validation.
 ---
 
 # PDF Processing Pro
@@ -16,7 +16,8 @@ description: Production-ready PDF processing with forms, tables, OCR, validation
 >
 > **Para converter PDF de terceiro em Markdown fiel, esta não é a skill** — use
 > `pdf-to-markdown`, que cuida do método (marca d'água, mobília, ênfase, tabela, QA). Esta
-> aqui cuida da mecânica do arquivo: formulário, merge, split, validação, tabela, OCR.
+> aqui cuida da mecânica do arquivo: formulário, merge, split, validação, tabela. **OCR de página
+> sem camada de texto é `ocr-com-evidencia`**, não esta skill — `OCR.md` só aponta para lá.
 
 Production-ready PDF processing toolkit with pre-built scripts, comprehensive error handling, and support for complex workflows.
 
@@ -69,7 +70,6 @@ All scripts include:
 
 - **PDF Forms**: Complete form processing pipeline
 - **Table Extraction**: Advanced table detection and extraction
-- **OCR Processing**: Scanned PDF text extraction
 - **Batch Operations**: Process multiple PDFs efficiently
 - **Validation**: Pre and post-processing validation
 
@@ -99,14 +99,8 @@ See [TABLES.md](TABLES.md)
 
 ### OCR Processing
 
-For scanned PDFs and image-based documents:
-- Tesseract integration
-- Language support
-- Image preprocessing
-- Confidence scoring
-- Batch OCR
-
-See [OCR.md](OCR.md)
+Not here. `validate_pdf.py` tells you which pages lack a text layer; from there the
+method, the engines and the review loop are the `ocr-com-evidencia` skill (see [OCR.md](OCR.md)).
 
 ## Included scripts
 
@@ -237,15 +231,7 @@ else:
 All scripts require:
 
 ```bash
-pip install pdfplumber pypdf pillow pytesseract pandas
-```
-
-Optional for OCR:
-```bash
-# Install tesseract-ocr system package
-# macOS: brew install tesseract
-# Ubuntu: apt-get install tesseract-ocr
-# Windows: Download from GitHub releases
+pip install pdfplumber pypdf pillow pandas
 ```
 
 ## Performance tips
@@ -273,11 +259,6 @@ Optional for OCR:
 **"Module not found" errors**:
 ```bash
 pip install -r requirements.txt
-```
-
-**Tesseract not found**:
-```bash
-# Install tesseract system package (see Dependencies)
 ```
 
 **Memory errors with large PDFs**:

@@ -43,7 +43,8 @@ DEFAULT_DECL = Path.home() / ".claude" / "docs" / "ambiente-por-maquina.md"
 # Comandos cujo NOME varia por distro/instalação — a classe de fato que já
 # produziu instrução impossível de seguir (`batcat`).
 COMANDOS = ("bat", "batcat", "fd", "fdfind", "rg", "nvm", "conda",
-            "uv", "pyenv", "bun", "brew", "magick", "convert")
+            "uv", "pyenv", "bun", "brew", "magick", "convert",
+            "tesseract", "pdftoppm")
 
 BLOCO = re.compile(r"^```decl\s*\n(.*?)^```", re.MULTILINE | re.DOTALL)
 CONTEXTOS_NODE = ("interativo", "nao-interativo", "apt")

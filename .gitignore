@@ -60,6 +60,7 @@ skills/*
 !skills/learned
 !skills/legislacao-br
 !skills/obsidian-note
+!skills/ocr-com-evidencia
 !skills/pdf-processing-pro
 !skills/pdf-to-markdown
 !skills/readme-de-repositorio
@@ -69,6 +70,7 @@ skills/*
 !skills/seo-optimizer
 !skills/streamlit-apps
 !skills/teach
+!skills/texto-para-impressao
 !skills/training-protocol
 !skills/vault-review
 !skills/vault-search

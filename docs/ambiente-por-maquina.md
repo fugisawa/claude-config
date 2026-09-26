@@ -40,7 +40,7 @@ echo "rotulo: $(cat /sys/devices/virtual/dmi/id/sys_vendor) $(cat /sys/devices/v
 bash -ic 'command -v node; node --version'          # interativo (o do terminal)
 command -v node && node --version                    # não-interativo (o dos scripts)
 /usr/bin/node --version 2>/dev/null                  # o do apt
-for c in bat batcat fd fdfind rg conda uv pyenv bun brew magick convert; do
+for c in bat batcat fd fdfind rg conda uv pyenv bun brew magick convert tesseract pdftoppm; do
   printf '%s: %s\n' "$c" "$(command -v $c >/dev/null && echo presente || echo AUSENTE)"; done
 [ -s ~/.nvm/nvm.sh ] && echo "nvm: presente" || echo "nvm: AUSENTE"
 ```
@@ -80,13 +80,21 @@ Ubuntu 24.04.4 LTS, sem rede corporativa no caminho — o apt resolve direto.
 ```decl
 machine-id: 8b4740ec
 rotulo: casa · Dell Precision Tower 5810
-medido-em: 2026-08-26
+medido-em: 2026-09-06
 node-interativo: nvm v24
 node-nao-interativo: outro v26
 node-apt: apt v18
-presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, convert
+presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, convert, tesseract, pdftoppm
 ausentes: bat, fd, conda, magick
 ```
+
+> **Tesseract sem `sudo` (06/09/2026).** O `tesseract` desta seção não veio do apt: a árvore dos
+> `.deb` do Ubuntu 24.04 (`tesseract-ocr` 5.3.4, `libtesseract5`, `liblept5`, pacotes `eng` e
+> `por`) foi extraída com `dpkg -x` em `~/.local/opt/tesseract`, e quem responde ao `command -v`
+> é um wrapper em `~/.local/bin/tesseract` que exporta `LD_LIBRARY_PATH` e `TESSDATA_PREFIX`
+> antes do `exec`. Reinstalar o sistema ou limpar `~/.local` o leva junto. A receita, e o
+> diagnóstico de máquina nova, estão em `skills/ocr-com-evidencia/scripts/preflight.py` — é ele
+> que se roda na máquina do trabalho e no laptop antes de declarar `tesseract` lá.
 
 > **Correção medida em 26/08/2026.** O `node-nao-interativo` era `apt v18` e passou a ser
 > `outro v26`: instalou-se um node v26 em `~/.local/bin`, que precede o `/usr/bin` no PATH.
