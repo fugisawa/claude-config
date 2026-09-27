@@ -519,3 +519,13 @@ Skill escrita aqui, mas cujo método ou formato veio de fora, entra nesta seçã
 | `wordpress-plugin-development` | wordpress | "WordPress plugin development workflow covering plugin architecture, hooks, admin interfaces, REST API, and security best practice |
 | `wordpress-theme-development` | wordpress | "WordPress theme development workflow covering theme architecture, template hierarchy, custom post types, block editor support, an |
 | `wordpress-woocommerce-development` | wordpress | "WooCommerce store development workflow covering store setup, payment integration, shipping configuration, and customization." |
+
+## Cópias soltas com procedência (fora do git, documentadas aqui)
+
+Skill de terceiro copiada para `skills/` sem passar por plugin. Não é versionada (lista branca do `.gitignore`), então a outra máquina a reinstala com o comando registrado.
+
+| Skill | Origem | Versão | Instalada em | Como reinstalar | Como remover |
+|---|---|---|---|---|---|
+| `zotero-cli` | [54yyyu/zotero-mcp](https://github.com/54yyyu/zotero-mcp), subcomando `install-skill` | 0.13.1 | 27/09/2026 | `uv tool install "git+https://github.com/54yyyu/zotero-mcp@v0.13.1" && zotero-mcp install-skill --target claude-user` | `rm -r ~/.claude/skills/zotero-cli && uv tool uninstall zotero-mcp-server` |
+
+A mesma instalação registra o servidor MCP `zotero` no escopo do usuário (`claude mcp add -s user zotero -e ZOTERO_LOCAL=true -- zotero-mcp serve`), que lê a biblioteca pela API local do Zotero. A API local é uma preferência do Zotero (Editar, Configurações, Avançado) que só o Daniel liga; sem ela, skill e servidor respondem 403 e não há o que ler.
