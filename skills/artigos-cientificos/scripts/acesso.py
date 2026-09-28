@@ -15,11 +15,16 @@ espelho que redistribua sem licença. O que ela não abre vira instrução para 
 manuais (cópia do autor, conectores, navegador da app, o acesso do perfil, pedido ao autor), que
 ficam em `references/escada-de-acesso.md`. A cópia que um degrau manual trouxe entra pela
 `registrar_manual`, com a etiqueta (A, B ou C) que quem a obteve declara; D não se registra.
+
+Nas duas entradas, o PDF cuja p. 1 é a capa do ResearchGate vira cópia de leitura sem ela, e o
+PDF obtido fica guardado em `originais/`, ao lado; o recibo segue com o hash e as páginas dele.
 """
 from __future__ import annotations
 
 import datetime as dt
+import os
 import re
+import shutil
 import urllib.parse
 from dataclasses import asdict
 from pathlib import Path
@@ -177,13 +182,64 @@ def _meta_serializavel(meta: Registro | None) -> dict | None:
     return {**asdict(meta), "autores": list(meta.autores)} if meta else None
 
 
+# ── a capa do ResearchGate ────────────────────────────────────────────────────────────────
+
+def _guardado(arquivo: Path) -> Path:
+    """Onde fica o PDF obtido quando a cópia de leitura é ele sem a capa: `originais/`, com o mesmo nome."""
+    return arquivo.parent / "originais" / arquivo.name
+
+
+def _tem_capa(arquivo: Path) -> bool:
+    return leitura.eh_capa_do_researchgate(leitura.texto_da_pagina(arquivo, 1))
+
+
+def retirar_capa(arquivo: Path, *, info=leitura.pdfinfo) -> dict:
+    """Guarda o PDF obtido em `originais/`, com o mesmo nome e a data que tinha, e grava no lugar dele a
+    cópia de leitura, sem a p. 1 e com a data de agora: o transporte entre as máquinas só troca arquivo
+    por outro mais novo, e é assim que a cópia cortada substitui a que ainda tem capa na outra máquina.
+    O PDF obtido se copia antes de a cópia de leitura tomar o lugar dele, e nada se perde se um dos
+    passos falhar. Devolve o que o recibo diz da cópia de leitura."""
+    guardado = _guardado(arquivo)
+    if guardado.exists() and leitura.sha256_de(guardado) != leitura.sha256_de(arquivo):
+        raise RuntimeError(f"{guardado} já existe e é outro PDF; mova-o antes, ou mantenha a capa com --manter-capa")
+    provisoria = arquivo.with_name(f".{arquivo.stem}.sem-capa.pdf")
+    try:
+        ferramenta = leitura.sem_a_primeira_pagina(arquivo, provisoria)
+        guardado.parent.mkdir(exist_ok=True)
+        shutil.copy2(arquivo, guardado)
+        os.replace(provisoria, arquivo)
+    finally:
+        provisoria.unlink(missing_ok=True)
+    return {"retirada": "capa do ResearchGate", "pagina_retirada": 1, "paginas": info(arquivo).get("paginas"),
+            "sha256": leitura.sha256_de(arquivo), "pdf_obtido": str(guardado), "ferramenta": ferramenta}
+
+
+def _linha_da_capa(copia: dict, paginas_do_obtido) -> str:
+    return (f"{copia['retirada']} (p. {copia['pagina_retirada']} do PDF obtido) retirada com {copia['ferramenta']}; "
+            f"a cópia de leitura, neste caminho, tem {copia['paginas'] or '?'} páginas e SHA-256 {copia['sha256']}; "
+            f"o PDF obtido, de {paginas_do_obtido or '?'} páginas e com o SHA-256 deste recibo, está em "
+            f"{copia['pdf_obtido']}; o texto é o da cópia de leitura")
+
+
+def _capa_no_abrir(arquivo: Path, formato: str, manter_capa: bool) -> tuple[dict | None, list[str]]:
+    """No `abrir`, o download já está no disco quando a capa aparece: a que não sai fica, e o diário diz
+    por quê, em vez de a abertura inteira falhar."""
+    if formato != "pdf" or manter_capa or not _tem_capa(arquivo):
+        return None, []
+    try:
+        return retirar_capa(arquivo), []
+    except RuntimeError as erro:
+        return None, [f"capa do ResearchGate mantida na p. 1: {erro}"]
+
+
 def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: bool = False,
-          obter=fontes.http_get, buscar=fontes.http_json, extrair=leitura.extrair_texto,
-          agora: str | None = None) -> dict:
+          manter_capa: bool = False, obter=fontes.http_get, buscar=fontes.http_json,
+          extrair=leitura.extrair_texto, agora: str | None = None) -> dict:
     """Roda a escada para um DOI e devolve o resultado como dicionário serializável.
 
     `status` é `aberto` (texto no disco), `listado` (só a lista de candidatos, com `--listar`) ou
-    `nao_aberto` (nenhum candidato rendeu texto; o diário diz o que cada um respondeu)."""
+    `nao_aberto` (nenhum candidato rendeu texto; o diário diz o que cada um respondeu). A capa do
+    ResearchGate sai da cópia de leitura, salvo com `manter_capa`."""
     candidatos, meta, diario = coletar(doi, email, buscar=buscar, obter=obter)
     base = {"doi": doi, "status": "nao_aberto", "meta": _meta_serializavel(meta),
             "candidatos": [asdict(c) for c in candidatos], "diario": diario,
@@ -203,17 +259,20 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
         corpo, final, formato = baixado
         arquivo = destino / f"{slug}.{formato}"
         arquivo.write_bytes(corpo)
+        copia, nota = _capa_no_abrir(arquivo, formato, manter_capa)
+        obtido = Path(copia["pdf_obtido"]) if copia else arquivo
         texto = extrair(arquivo, formato)
-        info = leitura.pdfinfo(arquivo) if formato == "pdf" else {}
+        info = leitura.pdfinfo(obtido) if formato == "pdf" else {}
         return {
             **base, "status": "aberto", "arquivo": str(arquivo), "texto": str(texto),
             "formato": formato, "degrau": cand.degrau, "url": cand.url, "url_final": final,
             "versao": cand.versao, "licenca": cand.licenca,
             "etiqueta": procedencia.etiqueta_do_degrau(cand.degrau),
-            "sha256": leitura.sha256_de(arquivo), "paginas": info.get("paginas"),
-            "produtor": info.get("produtor", ""),
+            "sha256": leitura.sha256_de(obtido), "paginas": info.get("paginas"),
+            "produtor": info.get("produtor", ""), "copia_de_leitura": copia,
             "baixado_em": agora or _agora(),
-            "diario": diario + [f"{cand.degrau}: aberto como {formato} a partir de {final}"],
+            "diario": diario + [f"{cand.degrau}: aberto como {formato} a partir de {final}"]
+                      + ([_linha_da_capa(copia, info.get("paginas"))] if copia else nota),
         }
     return {**base, "diario": diario}
 
@@ -249,17 +308,34 @@ def _texto_a_extrair(arquivo: Path, formato: str, texto: Path | None, sobrescrev
     return alvo
 
 
+def _capa_a_retirar(arquivo: Path, formato: str, manter_capa: bool) -> bool:
+    """Se a p. 1 do PDF é a capa do ResearchGate. Sem capa, o PDF que tem um homônimo guardado em
+    `originais/` é, quase certamente, a cópia de leitura de um corte anterior, e registrá-lo como PDF
+    obtido gravaria no recibo um hash que não confere com a URL; isso se recusa."""
+    if formato != "pdf" or manter_capa:
+        return False
+    if _tem_capa(arquivo):
+        return True
+    guardado = _guardado(arquivo)
+    if guardado.exists():
+        raise RuntimeError(f"{guardado} existe, e {arquivo.name} parece a cópia de leitura de um corte anterior, "
+                           "sem a capa e com outro hash: para registrar de novo, devolva o PDF obtido ao lugar dela, "
+                           "ou passe --manter-capa se esta é mesmo a cópia obtida")
+    return False
+
+
 def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta: str,
                      versao: str = "", meta=None, texto: Path | None = None, anterior: dict | None = None,
-                     sobrescrever_texto: bool = False, extrair=leitura.extrair_texto,
-                     info=leitura.pdfinfo, agora: str | None = None) -> dict:
+                     sobrescrever_texto: bool = False, manter_capa: bool = False,
+                     extrair=leitura.extrair_texto, info=leitura.pdfinfo, agora: str | None = None) -> dict:
     """A cópia obtida por degrau manual (site do autor, pedido atendido, biblioteca) ganha a mesma
     procedência do `abrir`: texto extraído, hash, páginas, data — e a etiqueta que quem a obteve
     declara, porque o script não tem como saber de onde ela veio. Rota D não se registra.
 
     `texto` é o texto já extraído da página HTML, que entra sem reextração. `anterior` é o recibo que
     já estava no destino: se ele registra uma tentativa que falhou, o diário dela e a data em que foi
-    feita passam para este, porque é a mesma busca que agora terminou."""
+    feita passam para este, porque é a mesma busca que agora terminou. A capa do ResearchGate sai da
+    cópia de leitura, salvo com `manter_capa`, e só depois de todas as verificações."""
     if etiqueta not in procedencia.ETIQUETAS_REGISTRAVEIS:
         raise RuntimeError(f"etiqueta {etiqueta!r} não se registra: só A, B ou C (D está fora da escada)")
     if versao not in VERSAO_DECLARADA:
@@ -269,23 +345,28 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
         raise RuntimeError(f"{arquivo.name}: só se registra PDF, XML JATS ou página HTML com o texto já extraído")
     if formato == "pdf" and not eh_pdf(arquivo.read_bytes()[:1024]):
         raise RuntimeError(f"{arquivo.name} não é um PDF (falta o cabeçalho %PDF-)")
+    com_capa = _capa_a_retirar(arquivo, formato, manter_capa)
     texto = Path(texto) if texto is not None else None
     substituido = _texto_a_extrair(arquivo, formato, texto, sobrescrever_texto)
+    copia = retirar_capa(arquivo, info=info) if com_capa else None
+    obtido = Path(copia["pdf_obtido"]) if copia else arquivo
     if formato != "html":
         texto = extrair(arquivo, formato)
     avisos = [f"{substituido} existia e foi substituído pelo texto extraído de {arquivo.name}"] if substituido else []
-    dados = info(arquivo) if formato == "pdf" else {}
+    dados = info(obtido) if formato == "pdf" else {}
     quando = agora or _agora()
     diario, tentado_em = [f"manual: {origem}, em {url}"], quando
     if anterior and anterior.get("status") != "aberto":
         diario = list(anterior.get("diario") or []) + diario
         tentado_em = anterior.get("tentado_em") or quando
+    if copia:
+        diario = diario + [_linha_da_capa(copia, dados.get("paginas"))]
     return {
         "doi": doi, "status": "aberto", "meta": meta if isinstance(meta, dict) else _meta_serializavel(meta),
         "candidatos": [], "diario": diario, "tentado_em": tentado_em,
         "arquivo": str(arquivo), "texto": str(texto), "formato": formato, "degrau": "manual",
         "origem": origem, "url": url, "url_final": url, "versao": VERSAO_DECLARADA[versao],
-        "licenca": "", "etiqueta": etiqueta, "sha256": leitura.sha256_de(arquivo),
-        "paginas": dados.get("paginas"), "produtor": dados.get("produtor", ""), "baixado_em": quando,
-        "avisos": avisos,
+        "licenca": "", "etiqueta": etiqueta, "sha256": leitura.sha256_de(obtido),
+        "paginas": dados.get("paginas"), "produtor": dados.get("produtor", ""), "copia_de_leitura": copia,
+        "baixado_em": quando, "avisos": avisos,
     }

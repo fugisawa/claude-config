@@ -59,7 +59,10 @@ ainda se escreve à mão é a prova de que é a versão publicada. A página HTM
 Central, entra com `--texto`, o texto que já se extraiu dela, e o registro não o refaz nem o
 sobrescreve. O `.txt` que já está ao lado de um PDF ou XML também só se sobrescreve com
 `--sobrescrever-texto`: em 28/09/2026, o XML do PMC ao lado da página de Mandel e Barnes (2014)
-tinha só a folha de rosto, e registrá-lo teria trocado o texto completo pelo dela. Exemplo do caso de
+tinha só a folha de rosto, e registrá-lo teria trocado o texto completo pelo dela. Quando a p. 1
+do PDF é a capa do ResearchGate, o registro a tira da cópia de leitura e guarda o PDF obtido em
+`originais/`; o parágrafo mantém o hash e as páginas do PDF obtido e acrescenta a frase que diz
+que a cópia de leitura é ele sem a capa, com quantas páginas ela ficou. Exemplo do caso de
 16/09/2026, gravado em `disciplinas/_infra/videoaulas.md`:
 
 > A página da Springer mostra só o resumo; a conferência foi feita no PDF da versão publicada
@@ -85,4 +88,5 @@ não repita a escada do zero: o diário do `abrir` serve para isso, e o recibo q
 - A cópia do artigo: só quando a licença permite redistribuir (CC BY, CC BY-SA, domínio
   público), e aí pelas regras das decisões 0019 e 0020 do `manual_estudo` (fonte incorporada
   e o que ela pesa). Cópia sob licença exclusiva da editora, inclusive a que o autor deposita
-  no site dele, **não entra**: o repositório guarda o endereço, o hash e a data.
+  no site dele, **não entra**: o repositório guarda o endereço, o hash e a data. O PDF obtido
+  que o registro guarda em `originais/`, quando tira a capa do ResearchGate, segue a mesma regra.

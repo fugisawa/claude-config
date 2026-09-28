@@ -11,7 +11,7 @@ import json
 import re
 from pathlib import Path
 
-VERSAO_DA_SKILL = "1.1"
+VERSAO_DA_SKILL = "1.2"   # 1.2: o recibo diz, em copia_de_leitura, quando o arquivo é o PDF obtido sem a capa
 NOME_DA_VERSAO = {
     "publishedVersion": "publicada",
     "acceptedVersion": "aceita (manuscrito do autor, antes da diagramação)",
@@ -100,6 +100,7 @@ def registro_de_procedencia(resultado: dict, conferido_em: str | None = None, *,
         "produtor_do_pdf": resultado.get("produtor", ""),
         "arquivo": resultado.get("arquivo", ""),
         "texto": resultado.get("texto", ""),
+        "copia_de_leitura": resultado.get("copia_de_leitura"),
         "tentado_em": resultado.get("tentado_em", ""),
         "baixado_em": resultado.get("baixado_em", ""),
         "conferido_em": conferido_em or "",
@@ -138,6 +139,17 @@ def _recibo_nao_obtido(reg: dict, citacao: str) -> str:
     return frase
 
 
+def _frase_da_copia_de_leitura(copia: dict | None) -> str:
+    """Quando o arquivo lido é o PDF obtido sem a capa, a frase que diz isso e de quem é o hash. O PDF
+    obtido aparece como `originais/<nome>`, sem o resto do caminho, que muda de uma máquina para outra."""
+    if not copia:
+        return ""
+    guardado = "/".join(Path(copia.get("pdf_obtido") or "").parts[-2:])
+    return (f" A cópia de leitura é o PDF obtido sem a p. {copia.get('pagina_retirada')}, a {copia.get('retirada')}, "
+            f"e tem {copia.get('paginas') or '?'} páginas; o SHA-256 e as páginas acima são os do PDF obtido, "
+            f"guardado em {guardado}.")
+
+
 def paragrafo_fonte(reg: dict) -> str:
     """O parágrafo `Fonte:` no padrão do material: citação, de onde veio a cópia e por qual rota,
     versão, hash e data. Quando não abriu, o recibo do que foi tentado."""
@@ -155,6 +167,7 @@ def paragrafo_fonte(reg: dict) -> str:
     frase = (f"Fonte: {citacao} Cópia obtida em {reg.get('url_final') or reg.get('url')}, por {origem}"
              f"{rota_txt}, versão {versao}{tamanho}, SHA-256 {hash_curto}…; valores conferidos no texto "
              f"em {data}.")
+    frase += _frase_da_copia_de_leitura(reg.get("copia_de_leitura"))
     versao_declarada = reg.get("versao_do_texto", "")
     if not versao_declarada:
         frase += (" Ressalva: a fonte não declarou a versão; decida pelo cabeçalho da primeira página"

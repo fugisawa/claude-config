@@ -4,10 +4,10 @@
     python3 artigo.py resolver <doi | url | citação>        metadados (Crossref + OpenAlex)
     python3 artigo.py buscar "<consulta>" [--desde 2020] [-n 10]
     python3 artigo.py abrir <doi> [--destino DIR] [--listar] [--conferido-em AAAA-MM-DD]
-                                  [--pendencia "…"]... [--reavaliar-em AAAA-MM-DD]
+                                  [--pendencia "…"]... [--reavaliar-em AAAA-MM-DD] [--manter-capa]
     python3 artigo.py registrar <doi> --arquivo copia.pdf --url URL --origem "…" --etiqueta A|B|C
                                   [--versao publicada|aceita|submetida] [--conferido-em …] [--destino DIR]
-                                  [--texto pagina.txt] [--sobrescrever-texto]
+                                  [--texto pagina.txt] [--sobrescrever-texto] [--manter-capa]
     python3 artigo.py pedido <doi> --tema "…" [--para EMAIL] [--idioma auto|pt|en] [--assinatura "…"]
     python3 artigo.py conferir <arquivo.txt|.pdf> "<expressão>" ["<expressão>" ...]
 
@@ -20,6 +20,12 @@ mesma procedência do `abrir`, com a etiqueta que você declara (A, B ou C; D n�
 A página HTML entra com `--texto`, o texto já extraído dela, que não se reextrai; o `.txt` que
 já existe ao lado da cópia só se sobrescreve com `--sobrescrever-texto`; e o recibo de uma
 tentativa que falhou, se estiver no destino, passa ao novo o diário e a data da tentativa.
+
+No `abrir` e no `registrar`, o PDF cuja p. 1 é a capa do ResearchGate vira cópia de leitura sem
+ela, com a data de agora, e o PDF obtido fica em `originais/`, ao lado, com o nome e a data que
+tinha. O recibo e o parágrafo `Fonte:` seguem com o hash e as páginas do PDF obtido e dizem que a
+cópia de leitura é ele sem a capa; `--manter-capa` deixa a cópia como veio. O corte usa o `pypdf`.
+
 `pedido` redige o e-mail ao autor e imprime o que o conector Gmail `create_draft` precisa;
 nada aqui envia e-mail.
 
@@ -150,6 +156,15 @@ def _imprimir_cabecalho(resultado: dict, doi: str) -> None:
         print(f"    - {linha}")
 
 
+def _imprimir_arquivos(resultado: dict) -> None:
+    print(f"  arquivo:     {resultado['arquivo']}")
+    copia = resultado.get("copia_de_leitura")
+    if copia:
+        print(f"  PDF obtido:  {copia['pdf_obtido']} (o arquivo acima é ele sem a {copia['retirada']})")
+    print(f"  texto:       {resultado['texto']}")
+    print(f"  procedência: {resultado['procedencia']}")
+
+
 def _imprimir_candidatos(resultado: dict) -> None:
     print(f"  candidatos ({len(resultado['candidatos'])}):")
     for c in resultado["candidatos"]:
@@ -161,7 +176,8 @@ def cmd_abrir(args) -> int:
     if not doi:
         return 1
     destino = Path(args.destino or ".")
-    resultado = acesso.abrir(doi, destino, email=_email(args), apenas_listar=args.listar)
+    resultado = acesso.abrir(doi, destino, email=_email(args), apenas_listar=args.listar,
+                             manter_capa=args.manter_capa)
     reg = procedencia.registro_de_procedencia(resultado, args.conferido_em,
                                               pendencias=args.pendencia or [],
                                               reavaliar_em=args.reavaliar_em)
@@ -180,9 +196,7 @@ def cmd_abrir(args) -> int:
         print(f"  ABERTO via {resultado['degrau']} ({resultado['formato']}, "
               f"{resultado.get('paginas') or '?'} páginas, versão {resultado['versao'] or '?'}, "
               f"{procedencia.nome_da_etiqueta(reg['etiqueta'])})")
-        print(f"  arquivo:     {resultado['arquivo']}")
-        print(f"  texto:       {resultado['texto']}")
-        print(f"  procedência: {resultado['procedencia']}")
+        _imprimir_arquivos(resultado)
         print("\n" + resultado["recibo"])
         return 0
     if args.listar:
@@ -210,7 +224,7 @@ def cmd_registrar(args) -> int:
     resultado = acesso.registrar_manual(doi, arquivo, url=args.url, origem=args.origem,
                                         etiqueta=args.etiqueta, versao=args.versao,
                                         texto=Path(args.texto) if args.texto else None, anterior=anterior,
-                                        sobrescrever_texto=args.sobrescrever_texto,
+                                        sobrescrever_texto=args.sobrescrever_texto, manter_capa=args.manter_capa,
                                         meta=_metadados(doi, _email(args)))
     for aviso in resultado.get("avisos") or []:
         print(f"aviso: {aviso}", file=sys.stderr)
@@ -224,9 +238,7 @@ def cmd_registrar(args) -> int:
     print(f"DOI {doi}: registrado como {procedencia.nome_da_etiqueta(args.etiqueta)} "
           f"({resultado['formato']}, {resultado.get('paginas') or '?'} páginas, "
           f"versão {resultado['versao'] or 'não declarada'})")
-    print(f"  arquivo:     {resultado['arquivo']}")
-    print(f"  texto:       {resultado['texto']}")
-    print(f"  procedência: {resultado['procedencia']}")
+    _imprimir_arquivos(resultado)
     print("\n" + resultado["recibo"])
     return 0
 
@@ -299,6 +311,8 @@ def montar_parser() -> argparse.ArgumentParser:
     a.add_argument("--pendencia", action="append", default=None,
                    help="pendência para o recibo, repetível: pedido rascunhado, embargo…")
     a.add_argument("--reavaliar-em", default=None, help="data de voltar a tentar, para o recibo")
+    a.add_argument("--manter-capa", action="store_true",
+                   help="não tira da cópia de leitura a capa do ResearchGate da p. 1")
 
     g = sub.add_parser("registrar", help="procedência de uma cópia obtida por degrau manual")
     g.add_argument("doi")
@@ -307,6 +321,8 @@ def montar_parser() -> argparse.ArgumentParser:
                    help="só para página HTML, e obrigatório nela: o texto já extraído, que entra sem reextração")
     g.add_argument("--sobrescrever-texto", action="store_true",
                    help="troca o .txt que já existe ao lado da cópia pelo texto extraído dela")
+    g.add_argument("--manter-capa", action="store_true",
+                   help="não tira da cópia de leitura a capa do ResearchGate da p. 1")
     g.add_argument("--url", required=True, help="de onde a cópia veio")
     g.add_argument("--origem", required=True,
                    help="quem a serviu: 'repositório da USP', 'site do coautor X', 'enviada pelo autor'")

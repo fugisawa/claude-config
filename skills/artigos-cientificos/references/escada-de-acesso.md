@@ -65,6 +65,8 @@ Brady Roberts guarda o PDF da versão publicada em `bradyrtroberts.ca`.
 - Achou um PDF: baixe-o com `WebFetch` ou `curl -L -o`, confira o cabeçalho antes de acreditar
   na versão (periódico, DOI, datas, paginação) e registre:
   `artigo.py registrar <doi> --arquivo copia.pdf --url <de onde veio> --origem "site do coautor X" --etiqueta C --versao publicada`.
+  O PDF que saiu do ResearchGate, mesmo hospedado em outro site, abre com uma capa dele na p. 1;
+  o `registrar` a tira da cópia de leitura sozinho e guarda o PDF obtido em `originais/`.
 
 **Pare aqui** quando o cabeçalho confirmar a versão. Cópia sem cabeçalho de periódico é versão
 aceita ou pré-publicação, e o recibo carrega a ressalva.
