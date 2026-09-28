@@ -68,6 +68,14 @@ ao lado de um PDF ou XML só se sobrescreve com `--sobrescrever-texto`. Em 28/09
 PMC tinha o mesmo nome da página de Mandel e Barnes (2014) e só a folha de rosto, com os
 metadados e o resumo, e registrá-lo teria trocado o texto completo da página pelo do XML.
 
+O `abrir` também não troca a cópia aberta. Com o recibo dela no destino, ele para antes de
+consultar a rede, e só `--substituir` deixa a cópia que a escada abrir tomar o lugar da antiga.
+No mesmo dia 28/09/2026, as cópias de Marrin (2012), enviada pelo autor, e de Mandel e Barnes
+(2014), lida no PubMed Central, tinham recibo do `registrar`. Um novo `abrir` na pasta das cópias
+trocaria o recibo das duas pelo de "não obtido", se a escada falhasse, ou, se ela abrisse,
+escreveria o PDF da escada por cima da cópia de Marrin, que tinha sido gravada com o nome do DOI, o
+mesmo que o `abrir` dá ao arquivo que baixa.
+
 Quando a p. 1 do PDF é a capa do ResearchGate, o registro a tira da cópia de leitura e guarda o
 PDF obtido em `originais/`. O parágrafo `Fonte:` mantém o hash e as páginas do PDF obtido, que
 são o que se confere contra a URL, e acrescenta a frase que diz que a cópia de leitura é o PDF
@@ -82,7 +90,12 @@ A bandeira fica: `⚑ não conferido em fonte primária`. Fonte secundária entr
 secundária ("segundo o resumo", "segundo Fulano (2026), que cita"). Não se escreve o número
 com a confiança de quem leu. E registre o que foi tentado, com data, para que a próxima sessão
 não repita a escada do zero: o diário do `abrir` serve para isso, e o recibo que ele imprime quando nada abre carrega, com
-`--pendencia` e `--reavaliar-em`, o pedido rascunhado e a data de voltar.
+`--pendencia` e `--reavaliar-em`, o pedido rascunhado e a data de voltar. Rodar o `abrir` de novo
+sobre esse recibo não o apaga: a nova tentativa herda o diário e a data da primeira, e o diário
+novo entra depois da linha `nova tentativa em <data>`, ou fica só nessa linha, com "com o mesmo
+resultado", quando repete o da tentativa anterior. Se a escada falhar de novo, as pendências e a
+data de reavaliar ficam, salvo o campo que o novo comando trouxer: um `--pendencia` substitui a
+lista inteira de pendências, e um `--reavaliar-em`, a data.
 
 ## O que vai para o repositório
 

@@ -13,13 +13,18 @@ rota A. O pedido é curto, diz por que o artigo interessa e não pede nada além
 2. **A sessão cria o rascunho** com o conector Gmail, `create_draft`, e diz ao Daniel onde
    está. `send_message` não entra na skill, por decisão e por teste: quem envia é o Daniel,
    depois de ler.
-3. **A pendência vai para o material.** `artigo.py abrir <doi> --pendencia "<a linha que o
-   pedido imprime>" --reavaliar-em <data>` põe no recibo o nome do autor, a data e a data antes
-   da qual não se repete.
+3. **A pendência vai para o material.** `artigo.py abrir <doi> --destino <a pasta do recibo>
+   --pendencia "<a linha que o pedido imprime>" --reavaliar-em <data>` põe no recibo o nome do
+   autor, a data do pedido e a data antes da qual ele não se repete. Esse `abrir` roda a escada de
+   novo; se as APIs responderem como na primeira tentativa, o recibo guarda o diário dela,
+   acrescido só da linha `nova tentativa em <data>, com o mesmo resultado`.
 4. **Quando o Daniel enviar**, a linha da pendência troca "rascunhado" por "enviado", no recibo e
    no material; a data antes da qual não se repete não muda. Foi o que aconteceu em 16/09/2026
    com o pedido a T. Tharumalingam, enviado pelo `send_message` do conector com o `draftId` do
-   rascunho, depois do "pode enviar" explícito.
+   rascunho, depois do "pode enviar" explícito. No recibo, a troca se faz com `abrir <doi>
+   --destino <a pasta do recibo> --pendencia "<a linha com 'enviado'>"`, que mantém a data de
+   reavaliar; se o recibo tiver outras pendências, repita-as no comando, porque o `--pendencia`
+   novo substitui a lista inteira.
 
 ## As regras
 

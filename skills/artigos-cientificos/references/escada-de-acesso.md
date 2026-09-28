@@ -140,8 +140,9 @@ ResearchGate.
 
 O `abrir` imprime `⚑ Texto integral não obtido por via legal em <data>`, com o diário do que
 cada API respondeu; `--pendencia "<a linha que o pedido imprime>"` e `--reavaliar-em <data>`
-completam o recibo, e `--destino` o grava. A fonte secundária entra rotulada como secundária, e
-a próxima sessão começa do degrau 8, não do 1. A data de reavaliar é o fim do embargo quando a
+completam o recibo, e `--destino` o grava. Um novo `abrir` sobre esse recibo acrescenta ao diário
+a nova tentativa, com a data dela, e mantém a data da primeira. A fonte secundária entra rotulada
+como secundária, e a próxima sessão começa do degrau 8, não do 1. A data de reavaliar é o fim do embargo quando a
 política da editora o diz (Open Policy Finder, pelo navegador da app: a API responde 403 a
 script desta máquina) ou, sem embargo declarado, a data em que o pedido ao autor pode ser
 repetido.

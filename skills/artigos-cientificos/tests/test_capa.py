@@ -267,12 +267,12 @@ class FalhaNoMeioDoCorte(Pasta):
             self.registrar(extrair=extracao_que_falha)
         self.assertNadaMudou()
 
-    def test_no_abrir_a_extracao_que_falha_depois_do_corte_deixa_o_pdf_obtido_no_lugar(self):
-        with self.assertRaises(subprocess.CalledProcessError):
+    def test_no_abrir_a_extracao_que_falha_depois_do_corte_deixa_o_destino_como_estava(self):
+        # até 28/09/2026 o PDF baixado ficava no destino, sem recibo; agora nada fica, e o erro diz de onde ele veio
+        with self.assertRaisesRegex(RuntimeError, "https://rep/x.pdf não deu texto"):
             acesso.abrir("10.1/x", self.pasta, buscar=falso_buscar(), obter=falso_obter(), agora=QUANDO,
                          extrair=extracao_que_falha)
-        self.assertEqual(sorted(p.name for p in self.pasta.iterdir()), ["10-1-x.pdf"])
-        self.assertEqual((self.pasta / "10-1-x.pdf").read_bytes(), COM_CAPA)
+        self.assertEqual(list(self.pasta.iterdir()), [])
 
 
 def falso_buscar():

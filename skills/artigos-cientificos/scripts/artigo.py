@@ -5,6 +5,7 @@
     python3 artigo.py buscar "<consulta>" [--desde 2020] [-n 10]
     python3 artigo.py abrir <doi> [--destino DIR] [--listar] [--conferido-em AAAA-MM-DD]
                                   [--pendencia "…"]... [--reavaliar-em AAAA-MM-DD] [--manter-capa]
+                                  [--substituir]
     python3 artigo.py registrar <doi> --arquivo copia.pdf --url URL --origem "…" --etiqueta A|B|C
                                   [--versao publicada|aceita|submetida] [--conferido-em …] [--destino DIR]
                                   [--texto pagina.txt] [--sobrescrever-texto] [--manter-capa]
@@ -20,6 +21,16 @@ mesma procedência do `abrir`, com a etiqueta que você declara (A, B ou C; D n�
 A página HTML entra com `--texto`, o texto já extraído dela, que não se reextrai; o `.txt` que
 já existe ao lado da cópia só se sobrescreve com `--sobrescrever-texto`; e o recibo de uma
 tentativa que falhou, se estiver no destino, passa ao novo o diário e a data da tentativa.
+
+O `abrir` lê, antes de rodar a escada, o recibo que está no destino. Se o recibo registra uma cópia
+aberta, venha ela da escada ou do `registrar`, o `abrir` se interrompe antes de consultar a rede;
+com `--substituir`, a cópia que a escada abrir toma o lugar da antiga, e a escada que falha deixa
+tudo como estava. Se o recibo registra uma tentativa que falhou, a nova tentativa herda dele o
+diário e a data da primeira: o diário novo entra depois da linha "nova tentativa em <data>", e a
+tentativa que repete o resultado da anterior fica só nessa linha, com "com o mesmo resultado". Se a
+escada falhar de novo, as pendências e a data de reavaliar do recibo antigo ficam, salvo o campo
+que o novo comando trouxer: um `--pendencia` substitui a lista inteira, e um `--reavaliar-em`, a
+data.
 
 No `abrir` e no `registrar`, o PDF cuja p. 1 é a capa do ResearchGate vira cópia de leitura sem
 ela, com a data de agora, e o PDF obtido fica em `originais/`, ao lado, com o nome e a data que
@@ -171,19 +182,34 @@ def _imprimir_candidatos(resultado: dict) -> None:
         print(f"    - [{c['degrau']}] {c['tipo']} {c['versao'] or 'versão ?'} {c['url']}")
 
 
+def _pendencias(args, anterior: dict | None, resultado: dict) -> tuple[list[str], str | None]:
+    """As pendências e a data de reavaliar do recibo: as que vieram no comando ou, na tentativa que falha de
+    novo sobre um recibo de 'não obtido', as dele, porque o pedido rascunhado e a data de voltar continuam
+    valendo. Cada campo que vier no comando toma o lugar do antigo inteiro."""
+    pendencias, reavaliar_em = list(args.pendencia or []), args.reavaliar_em
+    if procedencia.tentativa_que_falhou(anterior) and resultado["status"] != "aberto":
+        pendencias = pendencias or list(anterior.get("pendencias") or [])
+        reavaliar_em = reavaliar_em or anterior.get("reavaliar_em") or None
+    return pendencias, reavaliar_em
+
+
 def cmd_abrir(args) -> int:
     doi = _doi_ou_erro(args.doi)
     if not doi:
         return 1
     destino = Path(args.destino or ".")
+    slug = procedencia.slug_de_doi(doi)
+    anterior = None if args.listar else procedencia.ler(destino, slug)
     resultado = acesso.abrir(doi, destino, email=_email(args), apenas_listar=args.listar,
-                             manter_capa=args.manter_capa)
-    reg = procedencia.registro_de_procedencia(resultado, args.conferido_em,
-                                              pendencias=args.pendencia or [],
-                                              reavaliar_em=args.reavaliar_em)
-    if resultado["status"] == "aberto" or (args.destino and not args.listar):
+                             manter_capa=args.manter_capa, anterior=anterior, substituir=args.substituir)
+    pendencias, reavaliar_em = _pendencias(args, anterior, resultado)
+    reg = procedencia.registro_de_procedencia(resultado, args.conferido_em, pendencias=pendencias,
+                                              reavaliar_em=reavaliar_em)
+    if procedencia.copia_aberta(anterior) and resultado["status"] != "aberto":
+        resultado = {**resultado, "recibo_mantido": str(procedencia.caminho_do_recibo(destino, slug))}
+    elif resultado["status"] == "aberto" or (args.destino and not args.listar):
         destino.mkdir(parents=True, exist_ok=True)
-        caminho = procedencia.gravar(destino, procedencia.slug_de_doi(doi), reg)
+        caminho = procedencia.gravar(destino, slug, reg)
         resultado = {**resultado, "procedencia": str(caminho)}
     resultado = {**resultado, "etiqueta": reg["etiqueta"], "recibo": procedencia.paragrafo_fonte(reg)}
     if args.json:
@@ -201,6 +227,10 @@ def cmd_abrir(args) -> int:
         return 0
     if args.listar:
         return 0 if resultado["status"] == "listado" else 2
+    if resultado.get("recibo_mantido"):
+        print(f"  NÃO OBTIDO pelos degraus automáticos; a cópia aberta que o recibo {resultado['recibo_mantido']} "
+              "registra fica como estava, e o recibo também.")
+        return 2
     print("  NÃO OBTIDO por via legal pelos degraus automáticos. Siga os manuais, nesta ordem:")
     for linha in MANUAIS:
         print(f"    {linha}")
@@ -313,6 +343,9 @@ def montar_parser() -> argparse.ArgumentParser:
     a.add_argument("--reavaliar-em", default=None, help="data de voltar a tentar, para o recibo")
     a.add_argument("--manter-capa", action="store_true",
                    help="não tira da cópia de leitura a capa do ResearchGate da p. 1")
+    a.add_argument("--substituir", action="store_true",
+                   help="a cópia que a escada abrir toma o lugar da que o recibo no destino registra como "
+                        "aberta; se a escada falhar, nada muda")
 
     g = sub.add_parser("registrar", help="procedência de uma cópia obtida por degrau manual")
     g.add_argument("doi")

@@ -179,8 +179,22 @@ def paragrafo_fonte(reg: dict) -> str:
     return frase
 
 
+def caminho_do_recibo(destino: Path, slug: str) -> Path:
+    return destino / f"{slug}.procedencia.json"
+
+
+def copia_aberta(reg: dict | None) -> bool:
+    """Se o recibo registra uma cópia aberta, venha ela da escada ou do `registrar`."""
+    return bool(reg) and reg.get("status") == "aberto"
+
+
+def tentativa_que_falhou(reg: dict | None) -> bool:
+    """Se o recibo registra uma tentativa em que nenhum degrau abriu."""
+    return bool(reg) and reg.get("status") != "aberto"
+
+
 def gravar(destino: Path, slug: str, reg: dict) -> Path:
-    caminho = destino / f"{slug}.procedencia.json"
+    caminho = caminho_do_recibo(destino, slug)
     caminho.write_text(json.dumps(reg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return caminho
 
@@ -188,7 +202,7 @@ def gravar(destino: Path, slug: str, reg: dict) -> Path:
 def ler(destino: Path, slug: str) -> dict | None:
     """O recibo que `gravar` deixou no destino, ou None se não há nenhum. O que existe e não se lê é
     erro, e não ausência: seguir em frente o sobrescreveria sem que ninguém soubesse o que ele dizia."""
-    caminho = destino / f"{slug}.procedencia.json"
+    caminho = caminho_do_recibo(destino, slug)
     if not caminho.exists():
         return None
     try:

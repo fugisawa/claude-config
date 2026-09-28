@@ -170,6 +170,27 @@ cópia), o `registrar` substitui esse recibo e herda dele o diário e a data em 
 foi feita, porque é a mesma busca que terminou. No `registrar`, o `.txt` que já está ao lado da
 cópia não se sobrescreve sem `--sobrescrever-texto`.
 
+O `abrir` também lê o recibo que está no destino antes de rodar a escada. Quando esse recibo
+registra uma cópia aberta, venha ela da escada ou do `registrar`, o `abrir` para sem consultar a
+rede e sem tocar em arquivo. Sem essa parada, a escada que abrisse escreveria `<slug>.pdf` e
+`<slug>.txt` (o nome que o script tira do DOI) por cima da cópia, e a que falhasse poria o recibo
+de "não obtido" no lugar do dela; nesse segundo caso, o `fichar.py` da skill `fichamento`, que acha
+o texto pelo campo `texto` do recibo, perderia a cópia. Há três maneiras de seguir: `--substituir`,
+quando a cópia que a escada abrir deve tomar o lugar da antiga (se a escada falhar, nada muda);
+`--listar`, que só mostra os candidatos; e outro `--destino`. O recibo que não se lê também
+interrompe o `abrir`, como já interrompia o `registrar`, e o interrompe ainda, mesmo com
+`--substituir`, o recibo de outro DOI com o mesmo nome de arquivo, o que acontece quando dois DOIs
+só diferem na pontuação. Quando o texto não sai da cópia baixada, o `abrir` apaga o que gravou e
+devolve ao lugar a cópia e o texto que já estavam no destino, e o erro diz de onde veio a cópia
+que falhou.
+
+Quando o recibo registra uma tentativa que falhou, a nova herda dele o diário e a data da primeira
+tentativa. O diário novo entra depois da linha `nova tentativa em <data>`, e a tentativa que repete
+o resultado da anterior, como a do `abrir --pendencia` rodado logo depois do pedido ao autor, fica
+só nessa linha, com "com o mesmo resultado" no fim. Se a escada falhar de novo, as pendências e a
+data de reavaliar do recibo antigo ficam, salvo o campo que o novo comando trouxer: um
+`--pendencia` substitui a lista inteira de pendências, e um `--reavaliar-em`, a data.
+
 Quando a p. 1 do PDF é a capa do ResearchGate, o `abrir` e o `registrar` a tiram da cópia de
 leitura, que fica no lugar do PDF obtido, e guardam o PDF obtido em `originais/`, ao lado, com o
 mesmo nome e a data que tinha. O hash e as páginas do recibo e do parágrafo `Fonte:` continuam

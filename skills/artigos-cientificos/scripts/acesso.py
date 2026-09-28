@@ -18,13 +18,19 @@ ficam em `references/escada-de-acesso.md`. A cópia que um degrau manual trouxe 
 
 Nas duas entradas, o PDF cuja p. 1 é a capa do ResearchGate vira cópia de leitura sem ela, e o
 PDF obtido fica guardado em `originais/`, ao lado; o recibo segue com o hash e as páginas dele.
+
+Antes de rodar a escada, o `abrir` lê o recibo que já está no destino. Se o recibo registra uma
+cópia aberta, o `abrir` não a troca sem `substituir`; se registra uma tentativa que falhou, o
+`abrir` herda dele o diário.
 """
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import os
 import re
 import shutil
+import subprocess
 import urllib.parse
 from dataclasses import asdict
 from pathlib import Path
@@ -178,6 +184,26 @@ def _agora() -> str:
     return dt.datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+@contextlib.contextmanager
+def _desfaz_se_falhar(*caminhos: Path):
+    """Põe de lado, com nome provisório, os arquivos que o bloco pode sobrescrever. Se o bloco falha, apaga o
+    que ele deixou nesses caminhos e devolve os antigos ao lugar; se dá certo, apaga os antigos. É o que impede
+    que a extração que falha depois do download deixe a cópia baixada no lugar da que já estava."""
+    anteriores = {caminho: caminho.with_name(f".{caminho.name}.anterior") for caminho in caminhos if caminho.exists()}
+    for caminho, anterior in anteriores.items():
+        os.replace(caminho, anterior)
+    try:
+        yield
+    except BaseException:
+        for caminho in caminhos:
+            caminho.unlink(missing_ok=True)
+        for caminho, anterior in anteriores.items():
+            os.replace(anterior, caminho)
+        raise
+    for anterior in anteriores.values():
+        anterior.unlink(missing_ok=True)
+
+
 def _meta_serializavel(meta: Registro | None) -> dict | None:
     return {**asdict(meta), "autores": list(meta.autores)} if meta else None
 
@@ -242,14 +268,10 @@ def _capa_no_abrir(arquivo: Path, formato: str, manter_capa: bool,
         return None, None, [f"capa do ResearchGate mantida na p. 1: {erro}"]
 
 
-def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: bool = False,
-          manter_capa: bool = False, obter=fontes.http_get, buscar=fontes.http_json,
-          extrair=leitura.extrair_texto, agora: str | None = None) -> dict:
-    """Roda a escada para um DOI e devolve o resultado como dicionário serializável.
-
-    `status` é `aberto` (texto no disco), `listado` (só a lista de candidatos, com `--listar`) ou
-    `nao_aberto` (nenhum candidato rendeu texto; o diário diz o que cada um respondeu). A capa do
-    ResearchGate sai da cópia de leitura, salvo com `manter_capa`."""
+def _escada(doi: str, destino: Path, *, email: str | None, apenas_listar: bool, manter_capa: bool,
+            obter, buscar, extrair, agora: str | None) -> dict:
+    """A escada em si, sem olhar recibo nenhum: reúne os candidatos, baixa o primeiro que é texto de verdade e
+    devolve o resultado."""
     candidatos, meta, diario = coletar(doi, email, buscar=buscar, obter=obter)
     base = {"doi": doi, "status": "nao_aberto", "meta": _meta_serializavel(meta),
             "candidatos": [asdict(c) for c in candidatos], "diario": diario,
@@ -268,10 +290,15 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
             continue
         corpo, final, formato = baixado
         arquivo = destino / f"{slug}.{formato}"
-        arquivo.write_bytes(corpo)
-        copia, texto, nota = _capa_no_abrir(arquivo, formato, manter_capa, extrair)
+        try:
+            with _desfaz_se_falhar(arquivo, arquivo.with_suffix(".txt")):
+                arquivo.write_bytes(corpo)
+                copia, texto, nota = _capa_no_abrir(arquivo, formato, manter_capa, extrair)
+                texto = texto or extrair(arquivo, formato)
+        except (RuntimeError, subprocess.CalledProcessError) as erro:
+            raise RuntimeError(f"{cand.degrau}: a cópia baixada de {final} não deu texto ({erro}); "
+                               "o destino ficou como estava") from erro
         obtido = Path(copia["pdf_obtido"]) if copia else arquivo
-        texto = texto or extrair(arquivo, formato)
         info = leitura.pdfinfo(obtido) if formato == "pdf" else {}
         return {
             **base, "status": "aberto", "arquivo": str(arquivo), "texto": str(texto),
@@ -285,6 +312,73 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
                       + ([_linha_da_capa(copia, info.get("paginas"))] if copia else nota),
         }
     return {**base, "diario": diario}
+
+
+# ── o recibo que já estava no destino ─────────────────────────────────────────────────────
+
+MARCA_DA_TENTATIVA = "nova tentativa em "
+MESMO_RESULTADO = ", com o mesmo resultado"
+
+
+def _repetida(linha: str) -> bool:
+    return linha.startswith(MARCA_DA_TENTATIVA) and linha.endswith(MESMO_RESULTADO)
+
+
+def _ultimo_resultado(diario: list[str]) -> list[str]:
+    """As linhas da última tentativa registrada no diário: as que vêm depois da última linha que marca uma
+    tentativa de resultado novo, sem as linhas do fim que só dizem que ele se repetiu."""
+    fim = len(diario)
+    while fim and _repetida(diario[fim - 1]):
+        fim -= 1
+    marcas = [i for i in range(fim) if diario[i].startswith(MARCA_DA_TENTATIVA)]
+    return diario[marcas[-1] + 1 if marcas else 0:fim]
+
+
+def _herdar_tentativa(anterior: dict | None, resultado: dict) -> dict:
+    """O recibo de 'não obtido' que estava no destino passa ao resultado da nova tentativa o diário dele e a
+    data da primeira tentativa, porque é a mesma busca que continua. O diário novo entra depois da linha que
+    marca a tentativa, com a data dela; se ele repete o da última tentativa, fica só a linha, dizendo isso. O
+    recibo de cópia aberta não se emenda."""
+    if not procedencia.tentativa_que_falhou(anterior):
+        return resultado
+    antigo, novo = list(anterior.get("diario") or []), resultado["diario"]
+    marca = f"{MARCA_DA_TENTATIVA}{resultado['tentado_em'][:10]}"
+    diario = antigo + ([marca + MESMO_RESULTADO] if novo == _ultimo_resultado(antigo) else [marca, *novo])
+    return {**resultado, "diario": diario, "tentado_em": anterior.get("tentado_em") or resultado["tentado_em"]}
+
+
+def _recusa_da_copia_aberta(caminho: Path, anterior: dict) -> str:
+    return (f"o recibo {caminho} registra a cópia aberta {anterior.get('arquivo') or '(sem arquivo declarado)'}, "
+            "e o abrir não a troca sem que se peça: passe --substituir se a cópia que a escada abrir deve tomar o "
+            "lugar dela e do recibo, --listar para só ver os candidatos, ou outro --destino")
+
+
+def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: bool = False,
+          manter_capa: bool = False, anterior: dict | None = None, substituir: bool = False,
+          obter=fontes.http_get, buscar=fontes.http_json, extrair=leitura.extrair_texto,
+          agora: str | None = None) -> dict:
+    """Roda a escada para um DOI e devolve o resultado como dicionário serializável.
+
+    `status` é `aberto` (texto no disco), `listado` (só a lista de candidatos, com `--listar`) ou
+    `nao_aberto` (nenhum candidato rendeu texto; o diário diz o que cada um respondeu). A capa do
+    ResearchGate sai da cópia de leitura, salvo com `manter_capa`.
+
+    `anterior` é o recibo que já estava no destino. Se ele é de outro DOI com o mesmo nome de arquivo, a
+    abertura se interrompe antes de qualquer consulta. Se registra uma cópia aberta, ela também se
+    interrompe, porque o download escreveria por cima da cópia e o recibo novo tomaria o lugar do dela; só
+    com `substituir` ela segue. Se registra uma tentativa que falhou, o resultado herda dele o diário e a
+    data da primeira tentativa (`_herdar_tentativa`). Quando o texto não sai da cópia baixada, o destino
+    fica como estava (`_desfaz_se_falhar`)."""
+    if anterior and not apenas_listar:
+        caminho = procedencia.caminho_do_recibo(destino, procedencia.slug_de_doi(doi))
+        if (anterior.get("doi") or doi).lower() != doi.lower():
+            raise RuntimeError(f"o recibo {caminho} é do DOI {anterior['doi']}, e não de {doi}, que dá o mesmo nome "
+                               "de arquivo: use outro --destino")
+        if procedencia.copia_aberta(anterior) and not substituir:
+            raise RuntimeError(_recusa_da_copia_aberta(caminho, anterior))
+    resultado = _escada(doi, destino, email=email, apenas_listar=apenas_listar, manter_capa=manter_capa,
+                        obter=obter, buscar=buscar, extrair=extrair, agora=agora)
+    return resultado if apenas_listar else _herdar_tentativa(anterior, resultado)
 
 
 # ── a cópia que veio de degrau manual ─────────────────────────────────────────────────────
@@ -375,7 +469,7 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
     dados = info(obtido) if formato == "pdf" else {}
     quando = agora or _agora()
     diario, tentado_em = [f"manual: {origem}, em {url}"], quando
-    if anterior and anterior.get("status") != "aberto":
+    if procedencia.tentativa_que_falhou(anterior):
         diario = list(anterior.get("diario") or []) + diario
         tentado_em = anterior.get("tentado_em") or quando
     if copia:
