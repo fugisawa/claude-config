@@ -4,7 +4,8 @@
 O que ele faz, e só isso: acha o texto extraído de uma fonte a partir do identificador FT do
 registro (ou de um DOI, ou de um caminho); dá o mapa de páginas e de seções; devolve janelas do
 texto por página, por termo ou por seção, para que o texto integral fique no disco e só a janela
-entre no contexto; calcula a página impressa a partir do form feed e do intervalo do registro;
+entre no contexto; calcula a página impressa a partir do form feed, do intervalo do registro e das
+páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório);
 grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar em mais nada;
 e valida um bloco contra o contrato da skill antes de gravá-lo.
 
@@ -20,6 +21,7 @@ import json
 import re
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -61,6 +63,8 @@ class Fonte:
     versao_copia: str
     txt: Path | None
     procedencia: Path | None
+    deslocamento: int = 0             # páginas da cópia antes da primeira impressa: capa da editora, folha de rosto
+    aviso: str = ""                   # o registro e os cabeçalhos da cópia discordam sobre o deslocamento
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -124,8 +128,10 @@ def localizar(ft: str, raiz: Path) -> Fonte:
     ref = _campo(bloco, "Referência"); doi = _doi_de(ref)
     proc = _procedencias(raiz / "fontes" / "copias").get(doi)
     txt = _txt_de(proc, raiz) if proc else None
-    return Fonte(ft=ft, doi=doi, referencia=ref, paginas=_paginas_de(ref), versao_copia=_campo(bloco, "Versão da cópia"),
-                 txt=txt, procedencia=proc)
+    pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
+    deslocamento, aviso = _deslocamento(versao, pags, txt)
+    return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao,
+                 txt=txt, procedencia=proc, deslocamento=deslocamento, aviso=aviso)
 
 
 # ---------------------------------------------------------------- páginas e mapa
@@ -152,18 +158,85 @@ def paginas(txt: str) -> list[str]:
     return txt.split(FF)
 
 
+_NUMERO_SOLTO = re.compile(r"(?<!\S)\d{1,5}(?!\S)")
+
+
+def _sem_paginacao(versao: str) -> bool:
+    """A versão lida não tem a paginação do periódico: prova, manuscrito, pré-publicação."""
+    return versao.lower().startswith(("prova", "manuscrito", "pré"))
+
+
+def _deslocamento(versao: str, intervalo: tuple[int, int] | None, txt: Path | None) -> tuple[int, str]:
+    """Quantas páginas a cópia traz antes da primeira impressa, e o aviso se houver. Vale o que o
+    registro declara, porque é pela regra dele que as AF citam; senão, o que os cabeçalhos da cópia
+    mostram; senão, zero, que é supor que a cópia começa na primeira página do artigo."""
+    if not intervalo or _sem_paginacao(versao):
+        return 0, ""
+    p0, p1 = intervalo
+    pags = paginas(txt.read_text(encoding="utf-8", errors="replace")) if txt else []
+    declarado = _deslocamento_declarado(versao, p0)
+    achado = _deslocamento_achado(intervalo, pags)
+    if declarado is not None:
+        if achado is not None and achado != declarado:
+            return declarado, (f"a Versão da cópia do registro põe a p. {p0} na página {declarado + 1} da cópia, e os "
+                               f"cabeçalhos da cópia a põem na página {achado + 1}; vale o registro, porque as AF citam pela regra dele")
+        return declarado, ""
+    if achado is not None:
+        return achado, ""
+    com_texto = sum(1 for p in pags if p.strip())
+    if com_texto > p1 - p0 + 1:
+        return 0, (f"a cópia tem {com_texto} páginas com texto e o intervalo {p0}–{p1} do registro tem {p1 - p0 + 1}, e nem os "
+                   f"cabeçalhos nem a Versão da cópia dizem onde o artigo começa; supõe-se que na primeira página da cópia. "
+                   f"Se houver capa antes dele, declare na Versão da cópia \"a página N do PDF é a página {p0}\"")
+    return 0, ""
+
+
+def _deslocamento_declarado(versao: str, p0: int) -> int | None:
+    """O que o campo 'Versão da cópia' declara, nas formas em que o registro o escreve:
+    'a página 2 do PDF é a página 268' e 'a página impressa é a do PDF mais 229' (ou 'menos 1')."""
+    m = re.search(r"página (\d+) do PDF é a página (\d+)", versao)
+    if m:
+        return int(m.group(1)) - 1 - (int(m.group(2)) - p0)
+    m = re.search(r"página impressa é a do PDF (mais|menos) (\d+)", versao)
+    if not m:
+        return None
+    soma = int(m.group(2)) if m.group(1) == "mais" else -int(m.group(2))
+    return p0 - soma - 1
+
+
+def _deslocamento_achado(intervalo: tuple[int, int], pags: list[str]) -> int | None:
+    """O deslocamento que os cabeçalhos da cópia mostram. Cada número do intervalo que aparece solto
+    nas três primeiras ou nas três últimas linhas da página i, onde ficam o cabeçalho e o pé, vota
+    em i - (n - p0). Vence o mais votado se tiver três votos ao menos e nenhum empate: um número
+    solto no texto não basta, nem dois alinhados por acaso, e sem indício a resposta é None."""
+    p0, p1 = intervalo
+    votos = Counter()
+    for i, pag in enumerate(pags):
+        linhas = [l for l in pag.split("\n") if l.strip()]
+        numeros = {int(n) for l in linhas[:3] + linhas[-3:] for n in _NUMERO_SOLTO.findall(l)}
+        votos.update({i - (n - p0) for n in numeros if p0 <= n <= p1})
+    ordem = votos.most_common(2)
+    if not ordem or ordem[0][1] < 3 or (len(ordem) > 1 and ordem[1][1] == ordem[0][1]):
+        return None
+    return ordem[0][0]
+
+
 def pagina_impressa(indice: int, fonte: Fonte | None) -> str:
-    """Página como o manuscrito a cita: a impressa, se o registro traz o intervalo; senão 'da cópia'."""
-    if fonte and fonte.paginas and not fonte.versao_copia.lower().startswith(("prova", "manuscrito", "pré")):
-        return f"p. {fonte.paginas[0] + indice}"
+    """Página como o manuscrito a cita: a impressa, se o registro traz o intervalo e a página cai
+    dentro do artigo; senão 'da cópia', que é também o rótulo da capa e do que vem depois do artigo."""
+    if fonte and fonte.paginas and not _sem_paginacao(fonte.versao_copia):
+        p = fonte.paginas[0] + indice - fonte.deslocamento
+        if fonte.paginas[0] <= p <= fonte.paginas[1]:
+            return f"p. {p}"
     return f"p. {indice + 1} da cópia"
 
 
 _TITULO = re.compile(r"^\s*(?:[0-9]+(?:\.[0-9]+)*\.?\s+)?([A-ZÀ-Ú][A-Za-zÀ-ú' ,:\-]{2,70})\s*$")
 
 
-def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
-    """Cabeçalhos prováveis: linha curta, sem ponto final, entre linhas em branco, com inicial maiúscula."""
+def _cabecalhos(txt: str) -> list[tuple[int, int, str]]:
+    """Cabeçalhos prováveis, com o índice da página na cópia: linha curta, sem ponto final, entre
+    linhas em branco, com inicial maiúscula."""
     saida = []
     for i, pag in enumerate(paginas(txt)):
         linhas = pag.split("\n")
@@ -174,15 +247,20 @@ def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
             antes = linhas[j - 1].strip() if j > 0 else ""
             depois = linhas[j + 1].strip() if j + 1 < len(linhas) else ""
             if antes == "" and depois == "" and (_TITULO.match(s) or s.isupper()):
-                saida.append((pagina_impressa(i, fonte), j + 1, s))
+                saida.append((i, j + 1, s))
     return saida
+
+
+def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
+    """Os cabeçalhos prováveis, com a página como o manuscrito a cita."""
+    return [(pagina_impressa(i, fonte), linha, titulo) for i, linha, titulo in _cabecalhos(txt)]
 
 
 def indice_de_pagina(pagina: int, fonte: Fonte | None, total: int) -> int:
     """Traduz o que o usuário pediu para o índice na cópia: página impressa se o registro dá o
     intervalo e o número cai nele; senão, índice a partir de 1."""
-    if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not fonte.versao_copia.lower().startswith(("prova", "manuscrito", "pré")):
-        return pagina - fonte.paginas[0]
+    if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not _sem_paginacao(fonte.versao_copia):
+        return pagina - fonte.paginas[0] + fonte.deslocamento
     return pagina - 1
 
 
@@ -269,18 +347,13 @@ def _emendar(linhas: list[str]) -> tuple[str, list[int]]:
 
 
 def janela_secao(txt: str, titulo: str, fonte: Fonte | None = None, max_linhas: int = 120) -> str:
-    cab = mapa(txt, fonte)
+    cab = _cabecalhos(txt)
     alvo = [c for c in cab if titulo.lower() in c[2].lower()]
     if not alvo:
         return f"seção não achada: {titulo}; cabeçalhos vistos: " + "; ".join(c[2] for c in cab[:30])
-    pag, linha, _ = alvo[0]
-    # posição absoluta
-    pags = paginas(txt); idx = [i for i, c in enumerate(cab) if c is alvo[0]][0]
-    ini_pag = int(re.search(r"\d+", pag).group(0))
-    base = ini_pag - (fonte.paginas[0] if fonte and fonte.paginas and pag.startswith("p. ") and "da cópia" not in pag else 1)
-    linhas = pags[base].split("\n")
-    trecho = linhas[linha - 1: linha - 1 + max_linhas]
-    return f"[{pag}] {alvo[0][2]}\n" + "\n".join(trecho)
+    indice, linha, nome = alvo[0]
+    trecho = paginas(txt)[indice].split("\n")[linha - 1: linha - 1 + max_linhas]
+    return f"[{pagina_impressa(indice, fonte)}] {nome}\n" + "\n".join(trecho)
 
 
 # ---------------------------------------------------------------- gravar e validar
@@ -414,8 +487,10 @@ def main(argv: list[str] | None = None) -> int:
         print("gravado:", gravar(nota, a.modo, bloco, a.data, a.ferramenta), "em", nota.relative_to(raiz)); return 0
 
     f = localizar(a.ft, raiz)
+    if f.aviso:
+        print(f"aviso: {f.ft}: {f.aviso}", file=sys.stderr)
     if a.cmd == "localizar":
-        print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "versao_copia": f.versao_copia,
+        print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento, "versao_copia": f.versao_copia,
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
                           "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
         if not f.txt:
@@ -427,7 +502,12 @@ def main(argv: list[str] | None = None) -> int:
     txt = origem.read_text(encoding="utf-8", errors="replace")
     if a.cmd == "mapa":
         print(f"texto: {origem.relative_to(raiz)}")
-        print(f"{len(paginas(txt))} páginas na cópia; {pagina_impressa(0, f)} é a primeira")
+        n, d = len(paginas(txt)), f.deslocamento
+        if d > 0 and not pagina_impressa(d, f).endswith("da cópia"):
+            print(f"{n} páginas na cópia; a {pagina_impressa(d, f)} é a {d + 1}ª delas, e o que vem antes não é do artigo "
+                  "(capa, folha de rosto) e leva o rótulo 'da cópia'")
+        else:
+            print(f"{n} páginas na cópia; {pagina_impressa(0, f)} é a primeira")
         for pag, linha, titulo in mapa(txt, f):
             print(f"{pag:>16}  L{linha:<5} {titulo}")
         return 0

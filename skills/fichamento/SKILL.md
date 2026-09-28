@@ -71,13 +71,28 @@ orçamento de leitura.
 
 ## O procedimento comum
 
-1. **Localize.** `fichar.py localizar <FT>` diz o DOI, a cópia, o texto extraído e o intervalo
-   de páginas impressas. Sem cópia local, pare: a rota é `artigo.py abrir` ou `registrar` da
+1. **Localize.** `fichar.py localizar <FT>` diz o DOI, a cópia, o texto extraído, o intervalo
+   de páginas impressas e o deslocamento, que é o número de páginas que a cópia traz antes do
+   artigo. Sem cópia local, pare: a rota é `artigo.py abrir` ou `registrar` da
    `artigos-cientificos`, e ler o resumo no lugar do texto não é opção.
 2. **Mapeie.** `fichar.py mapa <FT>` lista as páginas e os cabeçalhos prováveis. É o índice que
-   evita ler o arquivo inteiro. Se o texto veio em duas colunas embaralhadas pelo
-   `pdftotext -layout` (o mapa mostra linhas com duas frases coladas), use `--corrido` no `mapa`
-   e na `janela`: o script reextrai o PDF sem `-layout` uma vez, ao lado da cópia, fora do git.
+   evita ler o arquivo inteiro. A primeira linha diz em que página da cópia está a primeira
+   página impressa: a capa da editora, a folha de rosto do repositório e a errata, quando vêm
+   antes do artigo, não ganham número impresso e levam `(p. N da cópia)`.
+
+   O deslocamento sai do campo *Versão da cópia* do registro, quando ele declara "a página 2 do
+   PDF é a página 268" ou "a página impressa é a do PDF mais 229" (ou "menos 1"); se o registro
+   não declara, sai dos números de página que a cópia imprime no cabeçalho e no pé, desde que ao
+   menos três páginas concordem; sem nenhum dos dois, supõe-se que a cópia começa na primeira
+   página do artigo. O script imprime um aviso em dois casos, e o aviso vai para o autor: quando
+   o registro e a cópia discordam, caso em que vale o registro, porque as AF citam pela regra
+   dele; e quando a cópia tem mais páginas que o intervalo e nada diz onde o artigo começa, caso
+   em que a página citada pode estar deslocada até que a *Versão da cópia* declare a
+   correspondência.
+
+   Se o texto veio em duas colunas embaralhadas pelo `pdftotext -layout` (o mapa mostra linhas
+   com duas frases coladas), use `--corrido` no `mapa` e na `janela`: o script reextrai o PDF sem
+   `-layout` uma vez, ao lado da cópia, fora do git.
 3. **Leia pelo orçamento do modo.** `explorar` lê resumo, introdução, cabeçalhos e conclusão;
    `responder` lê a seção provável e as janelas dos termos; `verificar` lê o método, os
    resultados e a discussão inteiros, por página, o que num artigo curto é quase tudo: a regra
