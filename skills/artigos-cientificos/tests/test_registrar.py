@@ -13,6 +13,7 @@ from unittest import mock
 import _caminho  # noqa: F401
 import acesso
 import artigo
+import fontes
 import procedencia
 
 DOI = "10.1073/pnas.1406138111"
@@ -80,6 +81,16 @@ class PaginaHtml(Pasta):
             self.registrar(html)
         with self.assertRaisesRegex(RuntimeError, "nao-existe.txt"):
             self.registrar(html, texto=self.pasta / "nao-existe.txt")
+
+    def test_texto_vazio_ou_que_e_a_propria_pagina_e_recusado(self):
+        html = self.pasta / "pagina.html"
+        html.write_bytes(HTML)
+        vazio = self.pasta / "pagina.txt"
+        vazio.write_text("", encoding="utf-8")
+        with self.assertRaisesRegex(RuntimeError, "vazio"):
+            self.registrar(html, texto=vazio)
+        with self.assertRaisesRegex(RuntimeError, "a própria cópia"):
+            self.registrar(html, texto=html)
 
     def test_o_texto_ja_extraido_so_vale_para_pagina_html(self):
         xml = self.pasta / "copia.xml"
@@ -168,6 +179,39 @@ class CliRegistrar(Pasta):
         self.assertEqual(codigo, 0)
         self.assertIn("aviso:", erro)
         self.assertIn("mandel-barnes-2014-pmc.txt", erro)
+
+    def test_o_recibo_anterior_se_le_no_destino_quando_ele_nao_e_a_pasta_da_copia(self):
+        copias, recibos = self.pasta / "copias", self.pasta / "recibos"
+        copias.mkdir()
+        recibos.mkdir()
+        html = copias / "mandel-barnes-2014-pmc.html"
+        html.write_bytes(HTML)
+        txt = copias / "mandel-barnes-2014-pmc.txt"
+        txt.write_text(TEXTO_COMPLETO, encoding="utf-8")
+        procedencia.gravar(recibos, procedencia.slug_de_doi(DOI), recibo_da_falha())
+        codigo, _, _ = self.rodar("--arquivo", str(html), "--texto", str(txt), "--destino", str(recibos))
+        self.assertEqual(codigo, 0)
+        gravado = json.loads((recibos / f"{procedencia.slug_de_doi(DOI)}.procedencia.json").read_text(encoding="utf-8"))
+        self.assertEqual((gravado["tentado_em"], gravado["diario"][:3]), (TENTADO, DIARIO_DA_FALHA))
+        self.assertEqual(sorted(p.name for p in copias.iterdir()), ["mandel-barnes-2014-pmc.html", "mandel-barnes-2014-pmc.txt"])
+
+    def test_registro_recusado_nao_consulta_a_rede_e_o_aceito_consulta(self):
+        html = self.pasta / "pagina.html"
+        html.write_bytes(HTML)
+        txt = self.pasta / "pagina-texto.txt"
+        txt.write_text(TEXTO_COMPLETO, encoding="utf-8")
+        consultas = []
+
+        def http_json(url, **kw):
+            consultas.append(url)
+            return 404, None
+        argv = ["registrar", DOI, "--arquivo", str(html), "--url", PMC, "--origem", "PubMed Central", "--etiqueta", "A"]
+        with mock.patch.object(fontes, "http_json", http_json), contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(artigo.main(argv), 1)          # página HTML sem --texto
+            self.assertEqual(consultas, [])
+            self.assertEqual(artigo.main(argv + ["--texto", str(txt)]), 0)
+        self.assertTrue(consultas)
 
     def test_recibo_anterior_ilegivel_para_o_registro_e_fica_como_estava(self):
         html = self.pasta / "pagina.html"

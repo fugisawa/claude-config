@@ -294,7 +294,11 @@ def _texto_a_extrair(arquivo: Path, formato: str, texto: Path | None, sobrescrev
             raise RuntimeError(f"{arquivo.name}: página HTML só se registra com --texto, o texto já extraído "
                                "dela, porque o script não extrai texto de HTML")
         if not texto.is_file():
-            raise RuntimeError(f"o texto {texto} não existe")
+            raise RuntimeError(f"o texto {texto} não existe ou não é um arquivo")
+        if texto.resolve() == arquivo.resolve():
+            raise RuntimeError(f"--texto aponta para a própria cópia, {arquivo.name}; passe o texto extraído dela")
+        if texto.stat().st_size == 0:
+            raise RuntimeError(f"o texto {texto} está vazio")
         return None
     if texto is not None:
         raise RuntimeError("--texto vale só para página HTML; o texto de PDF e de XML se extrai da cópia")
@@ -332,10 +336,12 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
     procedência do `abrir`: texto extraído, hash, páginas, data — e a etiqueta que quem a obteve
     declara, porque o script não tem como saber de onde ela veio. Rota D não se registra.
 
-    `texto` é o texto já extraído da página HTML, que entra sem reextração. `anterior` é o recibo que
-    já estava no destino: se ele registra uma tentativa que falhou, o diário dela e a data em que foi
-    feita passam para este, porque é a mesma busca que agora terminou. A capa do ResearchGate sai da
-    cópia de leitura, salvo com `manter_capa`, e só depois de todas as verificações."""
+    `meta` são os metadados, ou a função que os busca, chamada só depois das verificações, para que o
+    registro recusado não gaste consulta às APIs. `texto` é o texto já extraído da página HTML, que
+    entra sem reextração. `anterior` é o recibo que já estava no destino: se ele registra uma tentativa
+    que falhou, o diário dela e a data em que foi feita passam para este, porque é a mesma busca que
+    agora terminou. A capa do ResearchGate sai da cópia de leitura, salvo com `manter_capa`, e só
+    depois de todas as verificações."""
     if etiqueta not in procedencia.ETIQUETAS_REGISTRAVEIS:
         raise RuntimeError(f"etiqueta {etiqueta!r} não se registra: só A, B ou C (D está fora da escada)")
     if versao not in VERSAO_DECLARADA:
@@ -348,6 +354,7 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
     com_capa = _capa_a_retirar(arquivo, formato, manter_capa)
     texto = Path(texto) if texto is not None else None
     substituido = _texto_a_extrair(arquivo, formato, texto, sobrescrever_texto)
+    meta = meta() if callable(meta) else meta
     copia = retirar_capa(arquivo, info=info) if com_capa else None
     obtido = Path(copia["pdf_obtido"]) if copia else arquivo
     if formato != "html":

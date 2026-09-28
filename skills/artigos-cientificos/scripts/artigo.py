@@ -225,7 +225,7 @@ def cmd_registrar(args) -> int:
                                         etiqueta=args.etiqueta, versao=args.versao,
                                         texto=Path(args.texto) if args.texto else None, anterior=anterior,
                                         sobrescrever_texto=args.sobrescrever_texto, manter_capa=args.manter_capa,
-                                        meta=_metadados(doi, _email(args)))
+                                        meta=lambda: _metadados(doi, _email(args)))
     for aviso in resultado.get("avisos") or []:
         print(f"aviso: {aviso}", file=sys.stderr)
     reg = procedencia.registro_de_procedencia(resultado, args.conferido_em)
