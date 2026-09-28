@@ -98,12 +98,18 @@ def _procedencias(copias: Path) -> dict[str, Path]:
     return por_doi
 
 
-def _txt_de(procedencia: Path) -> Path | None:
+def _absoluto(caminho: str | Path, raiz: Path) -> Path:
+    """O recibo pode gravar o caminho da cópia relativo à raiz do projeto; aqui ele vira absoluto."""
+    c = Path(caminho)
+    return c if c.is_absolute() else (raiz / c)
+
+
+def _txt_de(procedencia: Path, raiz: Path) -> Path | None:
     d = json.load(open(procedencia, encoding="utf-8"))
     arq = d.get("arquivo") or ""
     if not arq:
         return None
-    cands = [Path(arq).with_suffix(".txt"), procedencia.with_name(procedencia.name.replace(".procedencia.json", ".txt"))]
+    cands = [_absoluto(arq, raiz).with_suffix(".txt"), procedencia.with_name(procedencia.name.replace(".procedencia.json", ".txt"))]
     for c in cands:
         if c.exists():
             return c
@@ -117,7 +123,7 @@ def localizar(ft: str, raiz: Path) -> Fonte:
         raise SystemExit(f"{ft} não está no registro")
     ref = _campo(bloco, "Referência"); doi = _doi_de(ref)
     proc = _procedencias(raiz / "fontes" / "copias").get(doi)
-    txt = _txt_de(proc) if proc else None
+    txt = _txt_de(proc, raiz) if proc else None
     return Fonte(ft=ft, doi=doi, referencia=ref, paginas=_paginas_de(ref), versao_copia=_campo(bloco, "Versão da cópia"),
                  txt=txt, procedencia=proc)
 
@@ -130,7 +136,7 @@ def texto_corrido(fonte: Fonte) -> Path:
     if not fonte.procedencia:
         raise SystemExit("sem procedência: não há PDF de onde reextrair")
     d = json.load(open(fonte.procedencia, encoding="utf-8"))
-    pdf = Path(d.get("arquivo") or "")
+    pdf = _absoluto(d.get("arquivo") or "", fonte.procedencia.resolve().parents[2])
     if not pdf.exists() or pdf.suffix.lower() != ".pdf":
         raise SystemExit(f"a cópia não é PDF ou não existe: {pdf}")
     alvo = pdf.with_suffix(".corrido.txt")
