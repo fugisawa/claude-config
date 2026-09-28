@@ -55,7 +55,11 @@ O `abrir` imprime o parágrafo `Fonte:` já no padrão. A forma:
 Quando a cópia veio de degrau manual (site do autor, pedido atendido), `artigo.py registrar`
 grava a mesma procedência com a etiqueta que você declara (A para repositório ou cópia
 enviada pelo autor, C para o PDF da editora no site do autor) e imprime o parágrafo; o que
-ainda se escreve à mão é a prova de que é a versão publicada. Exemplo do caso de
+ainda se escreve à mão é a prova de que é a versão publicada. A página HTML, como a do PubMed
+Central, entra com `--texto`, o texto que já se extraiu dela, e o registro não o refaz nem o
+sobrescreve. O `.txt` que já está ao lado de um PDF ou XML também só se sobrescreve com
+`--sobrescrever-texto`: em 28/09/2026, o XML do PMC ao lado da página de Mandel e Barnes (2014)
+tinha só a folha de rosto, e registrá-lo teria trocado o texto completo pelo dela. Exemplo do caso de
 16/09/2026, gravado em `disciplinas/_infra/videoaulas.md`:
 
 > A página da Springer mostra só o resumo; a conferência foi feita no PDF da versão publicada

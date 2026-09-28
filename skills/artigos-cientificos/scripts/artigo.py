@@ -7,6 +7,7 @@
                                   [--pendencia "…"]... [--reavaliar-em AAAA-MM-DD]
     python3 artigo.py registrar <doi> --arquivo copia.pdf --url URL --origem "…" --etiqueta A|B|C
                                   [--versao publicada|aceita|submetida] [--conferido-em …] [--destino DIR]
+                                  [--texto pagina.txt] [--sobrescrever-texto]
     python3 artigo.py pedido <doi> --tema "…" [--para EMAIL] [--idioma auto|pt|en] [--assinatura "…"]
     python3 artigo.py conferir <arquivo.txt|.pdf> "<expressão>" ["<expressão>" ...]
 
@@ -16,6 +17,9 @@ Saída humana por padrão; `--json` devolve o dicionário inteiro.
 
 `registrar` é para a cópia que veio de degrau manual (site do autor, pedido atendido): grava a
 mesma procedência do `abrir`, com a etiqueta que você declara (A, B ou C; D não se registra).
+A página HTML entra com `--texto`, o texto já extraído dela, que não se reextrai; o `.txt` que
+já existe ao lado da cópia só se sobrescreve com `--sobrescrever-texto`; e o recibo de uma
+tentativa que falhou, se estiver no destino, passa ao novo o diário e a data da tentativa.
 `pedido` redige o e-mail ao autor e imprime o que o conector Gmail `create_draft` precisa;
 nada aqui envia e-mail.
 
@@ -201,12 +205,18 @@ def cmd_registrar(args) -> int:
         print(f"Arquivo não existe: {arquivo}", file=sys.stderr)
         return 1
     destino = Path(args.destino) if args.destino else arquivo.parent
+    slug = procedencia.slug_de_doi(doi)
+    anterior = procedencia.ler(destino, slug)
     resultado = acesso.registrar_manual(doi, arquivo, url=args.url, origem=args.origem,
                                         etiqueta=args.etiqueta, versao=args.versao,
+                                        texto=Path(args.texto) if args.texto else None, anterior=anterior,
+                                        sobrescrever_texto=args.sobrescrever_texto,
                                         meta=_metadados(doi, _email(args)))
+    for aviso in resultado.get("avisos") or []:
+        print(f"aviso: {aviso}", file=sys.stderr)
     reg = procedencia.registro_de_procedencia(resultado, args.conferido_em)
     destino.mkdir(parents=True, exist_ok=True)
-    caminho = procedencia.gravar(destino, procedencia.slug_de_doi(doi), reg)
+    caminho = procedencia.gravar(destino, slug, reg)
     resultado = {**resultado, "procedencia": str(caminho), "recibo": procedencia.paragrafo_fonte(reg)}
     if args.json:
         print(json.dumps(resultado, ensure_ascii=False, indent=2))
@@ -292,7 +302,11 @@ def montar_parser() -> argparse.ArgumentParser:
 
     g = sub.add_parser("registrar", help="procedência de uma cópia obtida por degrau manual")
     g.add_argument("doi")
-    g.add_argument("--arquivo", required=True, help="o PDF ou XML JATS que você obteve")
+    g.add_argument("--arquivo", required=True, help="o PDF, o XML JATS ou a página HTML que você obteve")
+    g.add_argument("--texto", default=None,
+                   help="só para página HTML, e obrigatório nela: o texto já extraído, que entra sem reextração")
+    g.add_argument("--sobrescrever-texto", action="store_true",
+                   help="troca o .txt que já existe ao lado da cópia pelo texto extraído dela")
     g.add_argument("--url", required=True, help="de onde a cópia veio")
     g.add_argument("--origem", required=True,
                    help="quem a serviu: 'repositório da USP', 'site do coautor X', 'enviada pelo autor'")

@@ -77,4 +77,5 @@ O valor fica com a bandeira `⚑ não conferido em fonte primária`, o recibo ca
 e o material diz de onde veio o número que está lá (resumo, fonte secundária). A resposta
 costuma vir em dias; quando vier, `artigo.py registrar <doi> --arquivo <a cópia> --url
 "e-mail do autor" --origem "enviada pelo autor" --etiqueta A --versao <a que o cabeçalho diz>`,
-depois `conferir`, e o parágrafo `Fonte:` substitui a bandeira.
+depois `conferir`, e o parágrafo `Fonte:` substitui a bandeira. Com a cópia na pasta do recibo
+de "não obtido", o novo recibo herda dele o diário da escada e a data da tentativa.

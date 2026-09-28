@@ -83,7 +83,7 @@ degrau pulado, sem perguntar e sem tentar credencial nenhuma. Segredo não entra
 |---|---|---|
 | "Tem estudo sobre X?", "qual a meta-análise de Y?" | `buscar` (OpenAlex) e os conectores scite e Consensus | lista com ano, DOI, situação de acesso, citações — uma lista, não uma revisão; revisão é `deep-research` ou o agente `academic-researcher` |
 | "Abre este artigo", "me consegue esse paper", "acha o PDF de <DOI>" | `resolver` → `abrir` → degraus manuais da escada | PDF ou XML + `.txt` + `.procedencia.json` + parágrafo `Fonte:` com rota e etiqueta |
-| "Achei o PDF no site do autor", "o autor mandou a cópia" | `registrar` | a mesma procedência, com a etiqueta que você declara (A ou C) |
+| "Achei o PDF no site do autor", "o autor mandou a cópia", "li na página do PMC" | `registrar` (a página HTML com `--texto`) | a mesma procedência, com a etiqueta que você declara (A ou C) |
 | "Escreve pro autor" | `pedido` → `create_draft` no Gmail | o rascunho, nunca o envio; a pendência para o recibo |
 | "Confere se os números batem", "isso está mesmo no artigo?" | `abrir` → `conferir` → `references/conferencia.md` | relatório por expressão, com linha e contexto; a frase do material com a data |
 
@@ -101,6 +101,9 @@ python3 $S/artigo.py abrir 10.1007/s10648-025-10003-9 --destino <scratch>/artigo
     --reavaliar-em 2026-10-16                                # o recibo de quem NÃO abriu, gravado e impresso
 python3 $S/artigo.py registrar 10.1007/s10648-025-10003-9 --arquivo <scratch>/artigos/copia.pdf \
     --url "https://bradyrtroberts.ca/…" --origem "site do coautor Brady Roberts" --etiqueta C --versao publicada
+python3 $S/artigo.py registrar 10.1073/pnas.1406138111 --arquivo <scratch>/artigos/pagina-pmc.html \
+    --texto <scratch>/artigos/pagina-pmc.txt --url "https://pmc.ncbi.nlm.nih.gov/articles/PMC4121776/" \
+    --origem "PubMed Central" --etiqueta A --versao publicada   # a página HTML entra com o texto já extraído dela
 python3 $S/artigo.py pedido 10.1007/s10648-025-10003-9 --tema "velocidade de reprodução de videoaulas" \
     --para <e-mail lido na primeira página> --json      # to/subject/body para o create_draft do Gmail; o --tema no idioma do pedido
 python3 $S/artigo.py conferir <scratch>/artigos/10-7717-peerj-4375.txt "g = -0,36" "k = 48" "p < .001"
@@ -159,7 +162,10 @@ consulte-o pelo navegador da app.
 Por artigo, o `.procedencia.json` e o parágrafo `Fonte:` trazem: título, DOI, versão obtida,
 licença, rota e etiqueta, onde está salvo, hash, páginas, data da tentativa e da conferência; e,
 quando não abriu, o diário, as pendências e a data de reavaliar. Uma linha de ressalva entra
-sozinha quando a versão não é a publicada, e outra quando a rota é C.
+sozinha quando a versão não é a publicada, e outra quando a rota é C. Quando a cópia chega
+depois de uma tentativa que falhou, o `registrar` substitui o recibo dessa tentativa e herda
+dele o diário e a data em que foi feita, porque é a mesma busca que terminou. O `.txt` que já
+está ao lado da cópia não se sobrescreve sem `--sobrescrever-texto`.
 
 ## Ferramentas desta máquina
 

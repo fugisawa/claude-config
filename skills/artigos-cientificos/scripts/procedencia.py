@@ -170,3 +170,18 @@ def gravar(destino: Path, slug: str, reg: dict) -> Path:
     caminho = destino / f"{slug}.procedencia.json"
     caminho.write_text(json.dumps(reg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return caminho
+
+
+def ler(destino: Path, slug: str) -> dict | None:
+    """O recibo que `gravar` deixou no destino, ou None se não há nenhum. O que existe e não se lê é
+    erro, e não ausência: seguir em frente o sobrescreveria sem que ninguém soubesse o que ele dizia."""
+    caminho = destino / f"{slug}.procedencia.json"
+    if not caminho.exists():
+        return None
+    try:
+        reg = json.loads(caminho.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as erro:
+        raise RuntimeError(f"o recibo {caminho} não se lê ({erro}); conserte-o ou mova-o antes") from erro
+    if not isinstance(reg, dict):
+        raise RuntimeError(f"o recibo {caminho} não é um recibo de procedência; conserte-o ou mova-o antes")
+    return reg

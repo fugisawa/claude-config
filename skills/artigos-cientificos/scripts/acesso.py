@@ -222,31 +222,70 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
 
 VERSAO_DECLARADA = {"publicada": "publishedVersion", "aceita": "acceptedVersion",
                     "submetida": "submittedVersion", "": ""}
+FORMATO_DO_SUFIXO = {".pdf": "pdf", ".xml": "xml", ".html": "html", ".htm": "html"}
+
+
+def _texto_a_extrair(arquivo: Path, formato: str, texto: Path | None, sobrescrever: bool) -> Path | None:
+    """Confere, antes de tocar em qualquer arquivo, de onde vem o texto da cópia. A página HTML só entra
+    com o texto já extraído dela, que se usa como está; o PDF e o XML têm o texto extraído para o .txt
+    ao lado, e o .txt que já existe só se sobrescreve quando se pede. Devolve o .txt que a extração vai
+    substituir, ou None."""
+    if formato == "html":
+        if texto is None:
+            raise RuntimeError(f"{arquivo.name}: página HTML só se registra com --texto, o texto já extraído "
+                               "dela, porque o script não extrai texto de HTML")
+        if not texto.is_file():
+            raise RuntimeError(f"o texto {texto} não existe")
+        return None
+    if texto is not None:
+        raise RuntimeError("--texto vale só para página HTML; o texto de PDF e de XML se extrai da cópia")
+    alvo = arquivo.with_suffix(".txt")
+    if not alvo.exists():
+        return None
+    if not sobrescrever:
+        raise RuntimeError(f"{alvo} já existe, e o registro não sobrescreve texto sem que se peça: passe "
+                           f"--sobrescrever-texto se ele pode ser trocado pelo texto extraído de {arquivo.name}, "
+                           "ou dê outro nome à cópia se ele veio de outra, como a página HTML ao lado do XML")
+    return alvo
 
 
 def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta: str,
-                     versao: str = "", meta=None, extrair=leitura.extrair_texto,
+                     versao: str = "", meta=None, texto: Path | None = None, anterior: dict | None = None,
+                     sobrescrever_texto: bool = False, extrair=leitura.extrair_texto,
                      info=leitura.pdfinfo, agora: str | None = None) -> dict:
     """A cópia obtida por degrau manual (site do autor, pedido atendido, biblioteca) ganha a mesma
     procedência do `abrir`: texto extraído, hash, páginas, data — e a etiqueta que quem a obteve
-    declara, porque o script não tem como saber de onde ela veio. Rota D não se registra."""
+    declara, porque o script não tem como saber de onde ela veio. Rota D não se registra.
+
+    `texto` é o texto já extraído da página HTML, que entra sem reextração. `anterior` é o recibo que
+    já estava no destino: se ele registra uma tentativa que falhou, o diário dela e a data em que foi
+    feita passam para este, porque é a mesma busca que agora terminou."""
     if etiqueta not in procedencia.ETIQUETAS_REGISTRAVEIS:
         raise RuntimeError(f"etiqueta {etiqueta!r} não se registra: só A, B ou C (D está fora da escada)")
     if versao not in VERSAO_DECLARADA:
         raise RuntimeError(f"versão {versao!r}: use publicada, aceita ou submetida")
-    formato = arquivo.suffix.lower().lstrip(".")
-    if formato not in ("pdf", "xml"):
-        raise RuntimeError(f"{arquivo.name}: só se registra PDF ou XML JATS")
+    formato = FORMATO_DO_SUFIXO.get(arquivo.suffix.lower())
+    if formato is None:
+        raise RuntimeError(f"{arquivo.name}: só se registra PDF, XML JATS ou página HTML com o texto já extraído")
     if formato == "pdf" and not eh_pdf(arquivo.read_bytes()[:1024]):
         raise RuntimeError(f"{arquivo.name} não é um PDF (falta o cabeçalho %PDF-)")
-    texto = extrair(arquivo, formato)
+    texto = Path(texto) if texto is not None else None
+    substituido = _texto_a_extrair(arquivo, formato, texto, sobrescrever_texto)
+    if formato != "html":
+        texto = extrair(arquivo, formato)
+    avisos = [f"{substituido} existia e foi substituído pelo texto extraído de {arquivo.name}"] if substituido else []
     dados = info(arquivo) if formato == "pdf" else {}
     quando = agora or _agora()
+    diario, tentado_em = [f"manual: {origem}, em {url}"], quando
+    if anterior and anterior.get("status") != "aberto":
+        diario = list(anterior.get("diario") or []) + diario
+        tentado_em = anterior.get("tentado_em") or quando
     return {
         "doi": doi, "status": "aberto", "meta": meta if isinstance(meta, dict) else _meta_serializavel(meta),
-        "candidatos": [], "diario": [f"manual: {origem}, em {url}"], "tentado_em": quando,
+        "candidatos": [], "diario": diario, "tentado_em": tentado_em,
         "arquivo": str(arquivo), "texto": str(texto), "formato": formato, "degrau": "manual",
         "origem": origem, "url": url, "url_final": url, "versao": VERSAO_DECLARADA[versao],
         "licenca": "", "etiqueta": etiqueta, "sha256": leitura.sha256_de(arquivo),
         "paginas": dados.get("paginas"), "produtor": dados.get("produtor", ""), "baixado_em": quando,
+        "avisos": avisos,
     }

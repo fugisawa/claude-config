@@ -133,7 +133,7 @@ class RegistrarManual(unittest.TestCase):
         self.assertIn("https://autor.ca/x.pdf, por site do coautor (rota C, cinzenta)", p)
         self.assertIn("conferidos no texto em 2026-09-16", p)
 
-    def test_rota_d_e_recusada_e_so_pdf_ou_xml_de_verdade_entra(self):
+    def test_rota_d_pdf_falso_e_pagina_html_sem_texto_sao_recusados(self):
         with tempfile.TemporaryDirectory() as pasta:
             pdf = Path(pasta) / "copia.pdf"
             pdf.write_bytes(PDF)

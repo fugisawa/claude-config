@@ -91,7 +91,9 @@ versão publicada é a versão publicada que manda.
   o texto não foi servido. `search_literature` com `dois` e `term` devolve cinco trechos que
   contêm o termo, e é o modo mais barato de conferir um número.
 - **PubMed/PMC**: só biomedicina e ciências da vida; `convert_article_ids` do PMID ao PMCID e
-  `get_full_text_article`.
+  `get_full_text_article`. A página do artigo no PMC, salva como `.html` com o texto extraído
+  ao lado, registra-se com `artigo.py registrar <doi> --arquivo <página>.html --texto <texto>.txt
+  --url <endereço da página> --origem "PubMed Central" --etiqueta A --versao publicada`.
 - **Consensus** e o conector de corpus (`semanticSearch`): passagens e metadados, não o texto;
   servem para achar o DOI e para saber que há contestação.
 
