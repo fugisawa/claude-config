@@ -52,8 +52,8 @@ class Fichar(unittest.TestCase):
         (self.raiz / "fontes" / "copias").mkdir(parents=True); (self.raiz / "docs" / "leituras").mkdir(parents=True)
         (self.raiz / "fontes" / "registro.md").write_text(REGISTRO, encoding="utf-8")
         txt = self.raiz / "fontes" / "copias" / "teste.txt"; txt.write_text(TXT, encoding="utf-8")
-        json.dump({"doi": "10.1000/teste", "arquivo": str(self.raiz / "fontes" / "copias" / "teste.pdf")},
-                  open(self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json", "w"))
+        (self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json").write_text(
+            json.dumps({"doi": "10.1000/teste", "arquivo": str(self.raiz / "fontes" / "copias" / "teste.pdf")}), encoding="utf-8")
         self.nota = self.raiz / "docs" / "leituras" / "FT-teste-2020.md"; self.nota.write_text(NOTA, encoding="utf-8")
 
     def tearDown(self):
@@ -115,8 +115,8 @@ class FicharDefeitosDoS4(unittest.TestCase):
         (self.raiz / "fontes" / "copias").mkdir(parents=True)
         (self.raiz / "fontes" / "registro.md").write_text(REGISTRO, encoding="utf-8")
         (self.raiz / "fontes" / "copias" / "teste.txt").write_text(TXT_HIFEN, encoding="utf-8")
-        json.dump({"doi": "10.1000/teste", "arquivo": str(self.raiz / "fontes" / "copias" / "teste.pdf")},
-                  open(self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json", "w"))
+        (self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json").write_text(
+            json.dumps({"doi": "10.1000/teste", "arquivo": str(self.raiz / "fontes" / "copias" / "teste.pdf")}), encoding="utf-8")
         self.f = fichar.localizar("FT-teste-2020", self.raiz)
 
     def tearDown(self):
@@ -271,3 +271,79 @@ class FicharCapaAntesDoArtigo(unittest.TestCase):
         truncada = self._registro_com_versao("PDF da versão publicada, sem a primeira página; a página 1 do PDF é a página 470")
         f = self._fonte(TXT, truncada)   # deslocamento -1: a cópia não traz número de página, e só o registro o dá
         self.assertEqual(fichar.pagina_impressa(0, f), "p. 470"); self.assertEqual(fichar.indice_de_pagina(470, f, 3), 0)
+
+
+# ------------------------------------------------ o texto que o recibo declara (defeito de 28/09/2026)
+# O recibo da artigos-cientificos grava "arquivo" e "texto" como o comando os recebeu: só o nome,
+# relativo à pasta do recibo; relativo à raiz do projeto; ou absoluto, às vezes com a pasta pessoal
+# da outra máquina. O fichar.py ignorava o campo "texto", resolvia o nome solto contra a raiz e usava
+# o caminho da outra máquina como estava: dizia "sem cópia local" com o texto ao lado do recibo, ou
+# caía no texto com o nome do DOI, que no caso de Steyvers e col. (2025) é a pré-publicação do arXiv,
+# e não a versão publicada que o recibo declara.
+
+OUTRA_MAQUINA = "/outra-maquina/analista_intel/fontes/copias/"   # como /home/danielfugisawa/… no recibo de Heuer (1981)
+
+
+class FicharTextoDoRecibo(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.raiz = Path(self.tmp.name).resolve()
+        self.copias = self.raiz / "fontes" / "copias"; self.copias.mkdir(parents=True)
+        (self.raiz / "fontes" / "registro.md").write_text(REGISTRO, encoding="utf-8")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _recibo(self, arquivo, texto):
+        (self.copias / "10-1000-teste.procedencia.json").write_text(
+            json.dumps({"doi": "10.1000/teste", "arquivo": arquivo, "texto": texto}), encoding="utf-8")
+
+    def test_nome_solto_e_relativo_a_pasta_do_recibo(self):
+        (self.copias / "teste-manual.txt").write_text(TXT, encoding="utf-8")
+        self._recibo("teste-manual.pdf", "teste-manual.txt")   # como o recibo de Kalyuga e col. (2003)
+        self.assertEqual(fichar.localizar("FT-teste-2020", self.raiz).txt, self.copias / "teste-manual.txt")
+
+    def test_caminho_relativo_a_raiz_do_projeto(self):
+        (self.copias / "teste-manual.txt").write_text(TXT, encoding="utf-8")
+        self._recibo("fontes/copias/teste-manual.pdf", "fontes/copias/teste-manual.txt")   # como o recibo de Dhami, Belton e Mandel (2019)
+        self.assertEqual(fichar.localizar("FT-teste-2020", self.raiz).txt, self.copias / "teste-manual.txt")
+
+    def test_caminho_absoluto_da_outra_maquina(self):
+        (self.copias / "teste-manual.txt").write_text(TXT, encoding="utf-8")
+        self._recibo(OUTRA_MAQUINA + "teste-manual.pdf", OUTRA_MAQUINA + "teste-manual.txt")
+        self.assertEqual(fichar.localizar("FT-teste-2020", self.raiz).txt, self.copias / "teste-manual.txt")
+
+    def test_texto_do_recibo_vence_o_texto_com_o_nome_do_doi(self):
+        (self.copias / "teste-publicada.txt").write_text(TXT, encoding="utf-8")
+        (self.copias / "10-1000-teste.txt").write_text("arXiv:2401.13835v2\n", encoding="utf-8")   # a pré-publicação
+        self._recibo("teste-publicada.pdf", "teste-publicada.txt")   # como o recibo de Steyvers e col. (2025)
+        self.assertEqual(fichar.localizar("FT-teste-2020", self.raiz).txt, self.copias / "teste-publicada.txt")
+
+    def test_texto_declarado_que_falta_nao_cede_o_lugar_a_outro(self):
+        (self.copias / "10-1000-teste.txt").write_text("arXiv:2401.13835v2\n", encoding="utf-8")
+        self._recibo("teste-publicada.pdf", "teste-publicada.txt")   # o texto declarado ainda não chegou a esta máquina
+        f = fichar.localizar("FT-teste-2020", self.raiz)
+        self.assertIsNone(f.txt); self.assertIn("teste-publicada.txt", f.aviso)
+
+    def test_texto_declarado_que_falta_manda_trazer_e_nao_reabrir(self):
+        self._recibo("teste-publicada.pdf", "teste-publicada.txt")
+        saida, erro = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
+            codigo = fichar.main(["--raiz", str(self.raiz), "localizar", "FT-teste-2020"])
+        self.assertEqual(codigo, 2); self.assertIn("traga a cópia da outra máquina", erro.getvalue())
+        self.assertNotIn("abra pela skill", erro.getvalue())   # o abrir de Steyvers e col. (2025) trouxe a pré-publicação
+
+    def test_recibo_sem_o_campo_texto_usa_o_pdf_com_txt(self):
+        (self.copias / "teste-manual.txt").write_text(TXT, encoding="utf-8")
+        (self.copias / "10-1000-teste.procedencia.json").write_text(   # recibo que só nomeia o PDF
+            json.dumps({"doi": "10.1000/teste", "arquivo": OUTRA_MAQUINA + "teste-manual.pdf"}), encoding="utf-8")
+        self.assertEqual(fichar.localizar("FT-teste-2020", self.raiz).txt, self.copias / "teste-manual.txt")
+
+    def test_texto_corrido_acha_o_pdf_do_recibo(self):
+        (self.copias / "teste-manual.pdf").write_bytes(b"%PDF-1.4\n")
+        (self.copias / "teste-manual.txt").write_text(TXT, encoding="utf-8")
+        (self.copias / "teste-manual.corrido.txt").write_text(TXT, encoding="utf-8")   # já extraído: o teste não roda o pdftotext
+        for pasta in ("", "fontes/copias/", OUTRA_MAQUINA):
+            with self.subTest(pasta=pasta or "nome solto"):
+                self._recibo(pasta + "teste-manual.pdf", pasta + "teste-manual.txt")
+                f = fichar.localizar("FT-teste-2020", self.raiz)
+                self.assertEqual(fichar.texto_corrido(f), self.copias / "teste-manual.corrido.txt")

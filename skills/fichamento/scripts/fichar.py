@@ -64,7 +64,7 @@ class Fonte:
     txt: Path | None
     procedencia: Path | None
     deslocamento: int = 0             # páginas da cópia antes da primeira impressa: capa da editora, folha de rosto
-    aviso: str = ""                   # o registro e os cabeçalhos da cópia discordam sobre o deslocamento
+    aviso: str = ""                   # o texto declarado no recibo falta aqui, ou o deslocamento está em dúvida
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -90,11 +90,15 @@ def _paginas_de(referencia: str) -> tuple[int, int] | None:
     return (a, b) if b >= a else None
 
 
+def _ler_recibo(procedencia: str | Path) -> dict:
+    return json.loads(Path(procedencia).read_text(encoding="utf-8"))
+
+
 def _procedencias(copias: Path) -> dict[str, Path]:
     por_doi = {}
     for p in glob.glob(str(copias / "*.procedencia.json")):
         try:
-            d = json.load(open(p, encoding="utf-8"))
+            d = _ler_recibo(p)
         except Exception:
             continue
         if d.get("doi"):
@@ -102,22 +106,38 @@ def _procedencias(copias: Path) -> dict[str, Path]:
     return por_doi
 
 
-def _absoluto(caminho: str | Path, raiz: Path) -> Path:
-    """O recibo pode gravar o caminho da cópia relativo à raiz do projeto; aqui ele vira absoluto."""
+def _no_disco(caminho: str, procedencia: Path, raiz: Path) -> Path | None:
+    """Onde está, nesta máquina, o arquivo que o recibo nomeia. O recibo grava o caminho como o comando
+    o recebeu: só o nome, relativo à pasta do recibo; relativo à raiz do projeto ("fontes/copias/x.pdf");
+    ou absoluto, às vezes com a pasta pessoal da outra máquina. Quando nenhuma dessas leituras existe
+    aqui, vale o mesmo nome na pasta do recibo, onde a artigos-cientificos grava a cópia por padrão."""
+    if not caminho:
+        return None
     c = Path(caminho)
-    return c if c.is_absolute() else (raiz / c)
+    cands = [c] if c.is_absolute() else [procedencia.parent / c, raiz / c]
+    return next((x for x in cands + [procedencia.parent / c.name] if x.exists()), None)
 
 
-def _txt_de(procedencia: Path, raiz: Path) -> Path | None:
-    d = json.load(open(procedencia, encoding="utf-8"))
+def _txt_de(procedencia: Path, raiz: Path) -> tuple[Path | None, str]:
+    """O texto que o recibo declara, e o aviso quando ele não está nesta máquina. Nesse caso não se
+    lê outro no lugar dele, porque o texto com o nome do DOI pode ser outra versão, como a
+    pré-publicação de Steyvers e col. (2025) ao lado da versão publicada. O recibo sem o campo
+    'texto' fica com os candidatos de antes: o arquivo com .txt e o texto com o nome do recibo."""
+    d = _ler_recibo(procedencia)
+    declarado = d.get("texto") or ""
+    if declarado:
+        achado = _no_disco(declarado, procedencia, raiz)
+        if achado:
+            return achado, ""
+        return None, (f"o recibo {procedencia.name} declara o texto {Path(declarado).name}, que não está nesta máquina: "
+                      "traga a cópia da outra máquina. Nenhum outro texto o substitui, nem o de uma nova abertura da "
+                      "fonte, porque pode ser outra versão dela")
     arq = d.get("arquivo") or ""
     if not arq:
-        return None
-    cands = [_absoluto(arq, raiz).with_suffix(".txt"), procedencia.with_name(procedencia.name.replace(".procedencia.json", ".txt"))]
-    for c in cands:
-        if c.exists():
-            return c
-    return None
+        return None, ""
+    do_pdf = _no_disco(str(Path(arq).with_suffix(".txt")), procedencia, raiz)
+    do_recibo = procedencia.with_name(procedencia.name.replace(".procedencia.json", ".txt"))
+    return do_pdf or (do_recibo if do_recibo.exists() else None), ""
 
 
 def localizar(ft: str, raiz: Path) -> Fonte:
@@ -127,11 +147,11 @@ def localizar(ft: str, raiz: Path) -> Fonte:
         raise SystemExit(f"{ft} não está no registro")
     ref = _campo(bloco, "Referência"); doi = _doi_de(ref)
     proc = _procedencias(raiz / "fontes" / "copias").get(doi)
-    txt = _txt_de(proc, raiz) if proc else None
+    txt, falta = _txt_de(proc, raiz) if proc else (None, "")
     pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
-    deslocamento, aviso = _deslocamento(versao, pags, txt)
+    deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
     return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao,
-                 txt=txt, procedencia=proc, deslocamento=deslocamento, aviso=aviso)
+                 txt=txt, procedencia=proc, deslocamento=deslocamento, aviso=falta or aviso)
 
 
 # ---------------------------------------------------------------- páginas e mapa
@@ -141,10 +161,10 @@ def texto_corrido(fonte: Fonte) -> Path:
     Fica ao lado da cópia, com o sufixo .corrido.txt, e se cria uma vez a partir do PDF da procedência."""
     if not fonte.procedencia:
         raise SystemExit("sem procedência: não há PDF de onde reextrair")
-    d = json.load(open(fonte.procedencia, encoding="utf-8"))
-    pdf = _absoluto(d.get("arquivo") or "", fonte.procedencia.resolve().parents[2])
-    if not pdf.exists() or pdf.suffix.lower() != ".pdf":
-        raise SystemExit(f"a cópia não é PDF ou não existe: {pdf}")
+    arq = _ler_recibo(fonte.procedencia).get("arquivo") or ""
+    pdf = _no_disco(arq, fonte.procedencia, fonte.procedencia.resolve().parents[2])
+    if not pdf or pdf.suffix.lower() != ".pdf":
+        raise SystemExit(f"a cópia não é PDF ou não está nesta máquina: {arq}")
     alvo = pdf.with_suffix(".corrido.txt")
     if not alvo.exists():
         r = subprocess.run(["pdftotext", str(pdf), str(alvo)], capture_output=True, text=True)
@@ -494,10 +514,14 @@ def main(argv: list[str] | None = None) -> int:
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
                           "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
         if not f.txt:
-            print("sem cópia local: abra pela skill artigos-cientificos (artigo.py abrir/registrar) antes de fichar", file=sys.stderr); return 2
+            if not f.aviso:   # sem texto, o aviso é o do texto declarado que falta aqui, e reabrir a fonte pode trazer outra versão
+                print("sem cópia local: abra pela skill artigos-cientificos (artigo.py abrir/registrar) antes de fichar", file=sys.stderr)
+            return 2
         return 0
     if not f.txt:
-        print("sem cópia local: abra pela skill artigos-cientificos antes de fichar", file=sys.stderr); return 2
+        if not f.aviso:
+            print("sem cópia local: abra pela skill artigos-cientificos antes de fichar", file=sys.stderr)
+        return 2
     origem = texto_corrido(f) if getattr(a, "corrido", False) else f.txt
     txt = origem.read_text(encoding="utf-8", errors="replace")
     if a.cmd == "mapa":

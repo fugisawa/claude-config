@@ -73,8 +73,13 @@ orçamento de leitura.
 
 1. **Localize.** `fichar.py localizar <FT>` diz o DOI, a cópia, o texto extraído, o intervalo
    de páginas impressas e o deslocamento, que é o número de páginas que a cópia traz antes do
-   artigo. Sem cópia local, pare: a rota é `artigo.py abrir` ou `registrar` da
-   `artigos-cientificos`, e ler o resumo no lugar do texto não é opção.
+   artigo. Quando o `.procedencia.json` da cópia declara um texto no campo `texto`, é esse o
+   texto lido, mesmo que o caminho gravado ali seja o da outra máquina; se ele não está nesta
+   máquina, o script avisa e não lê outro no lugar, porque o texto com o nome do DOI pode ser
+   outra versão da fonte. Sem cópia local, pare. Se o aviso diz que o texto declarado falta
+   nesta máquina, traga-o da outra, porque uma nova abertura também pode trazer outra versão;
+   sem esse aviso, a rota é `artigo.py abrir` ou `registrar` da `artigos-cientificos`. Ler o
+   resumo no lugar do texto não é opção.
 2. **Mapeie.** `fichar.py mapa <FT>` lista as páginas e os cabeçalhos prováveis. É o índice que
    evita ler o arquivo inteiro. A primeira linha diz em que página da cópia está a primeira
    página impressa: a capa da editora, a folha de rosto do repositório e a errata, quando vêm
