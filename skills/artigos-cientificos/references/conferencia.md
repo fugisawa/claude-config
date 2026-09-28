@@ -55,19 +55,23 @@ O `abrir` imprime o parágrafo `Fonte:` já no padrão. A forma:
 Quando a cópia veio de degrau manual (site do autor, pedido atendido), `artigo.py registrar`
 grava a mesma procedência com a etiqueta que você declara (A para repositório ou cópia
 enviada pelo autor, C para o PDF da editora no site do autor) e imprime o parágrafo; o que
-ainda se escreve à mão é a prova de que é a versão publicada. A página HTML, como a do PubMed
-Central, entra com `--texto`, o texto que já se extraiu dela, e o registro não o refaz nem o
-sobrescreve. O `.txt` que já está ao lado de um PDF ou XML também só se sobrescreve com
-`--sobrescrever-texto`: em 28/09/2026, o XML do PMC ao lado da página de Mandel e Barnes (2014)
-tinha só a folha de rosto, e registrá-lo teria trocado o texto completo pelo dela. Quando a p. 1
-do PDF é a capa do ResearchGate, o registro a tira da cópia de leitura e guarda o PDF obtido em
-`originais/`; o parágrafo mantém o hash e as páginas do PDF obtido e acrescenta a frase que diz
-que a cópia de leitura é ele sem a capa, com quantas páginas ela ficou. Exemplo do caso de
+ainda se escreve à mão é a prova de que é a versão publicada. Exemplo do caso de
 16/09/2026, gravado em `disciplinas/_infra/videoaulas.md`:
 
 > A página da Springer mostra só o resumo; a conferência foi feita no PDF da versão publicada
 > que o coautor Brady Roberts deposita no site dele (bradyrtroberts.ca), com o cabeçalho, o
 > DOI, a data de aceite e a paginação do periódico.
+
+O registro não refaz nem sobrescreve o texto que já se extraiu. A página HTML, como a do PubMed
+Central, entra com `--texto`, o texto extraído dela, que fica como está; e o `.txt` que já está
+ao lado de um PDF ou XML só se sobrescreve com `--sobrescrever-texto`. Em 28/09/2026, o XML do
+PMC tinha o mesmo nome da página de Mandel e Barnes (2014) e só a folha de rosto, com os
+metadados e o resumo, e registrá-lo teria trocado o texto completo da página pelo do XML.
+
+Quando a p. 1 do PDF é a capa do ResearchGate, o registro a tira da cópia de leitura e guarda o
+PDF obtido em `originais/`. O parágrafo `Fonte:` mantém o hash e as páginas do PDF obtido, que
+são o que se confere contra a URL, e acrescenta a frase que diz que a cópia de leitura é o PDF
+obtido sem a capa e quantas páginas ela tem.
 
 No corpo, a frase que carrega o número diz que foi conferida: "valores conferidos no artigo em
 16/09/2026". Sem isso o leitor não distingue o número lido do número lembrado.

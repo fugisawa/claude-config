@@ -112,8 +112,9 @@ python3 -m unittest discover -s ~/.claude/skills/artigos-cientificos/tests -q   
 
 `--json` em qualquer comando devolve o dicionário inteiro. Códigos de saída: `0` abriu ou
 achou tudo; `2` não abriu, ou faltou expressão no `conferir`; `1` erro de uso ou de ambiente
-(`pdftotext` ausente: `apt install poppler-utils`; `pypdf` ausente quando há capa do
-ResearchGate a tirar: `python3 -m pip install pypdf`, ou `--manter-capa`). As cópias vão para `--destino`, que deve
+(`pdftotext` ausente: `apt install poppler-utils`; `pypdf` ausente quando o `registrar` acha
+capa do ResearchGate a tirar: `python3 -m pip install pypdf`, ou `--manter-capa`; no `abrir`, a
+capa fica e o diário diz por quê). As cópias vão para `--destino`, que deve
 ser o diretório de trabalho da sessão, nunca o repositório (ver *O que vai para o repositório*
 em `references/conferencia.md`).
 
@@ -164,19 +165,21 @@ Por artigo, o `.procedencia.json` e o parágrafo `Fonte:` trazem: título, DOI, 
 licença, rota e etiqueta, onde está salvo, hash, páginas, data da tentativa e da conferência; e,
 quando não abriu, o diário, as pendências e a data de reavaliar. Uma linha de ressalva entra
 sozinha quando a versão não é a publicada, e outra quando a rota é C. Quando a cópia chega
-depois de uma tentativa que falhou, o `registrar` substitui o recibo dessa tentativa e herda
-dele o diário e a data em que foi feita, porque é a mesma busca que terminou. O `.txt` que já
-está ao lado da cópia não se sobrescreve sem `--sobrescrever-texto`.
+depois de uma tentativa que falhou, e o recibo dela está no destino (por padrão, a pasta da
+cópia), o `registrar` substitui esse recibo e herda dele o diário e a data em que a tentativa
+foi feita, porque é a mesma busca que terminou. No `registrar`, o `.txt` que já está ao lado da
+cópia não se sobrescreve sem `--sobrescrever-texto`.
 
 Quando a p. 1 do PDF é a capa do ResearchGate, o `abrir` e o `registrar` a tiram da cópia de
 leitura, que fica no lugar do PDF obtido, e guardam o PDF obtido em `originais/`, ao lado, com o
 mesmo nome e a data que tinha. O hash e as páginas do recibo e do parágrafo `Fonte:` continuam
 sendo os do PDF obtido, que é o que se confere contra a URL, e o parágrafo ganha uma frase que
-diz que a cópia de leitura é ele sem a capa; no recibo, `copia_de_leitura` traz as páginas e o
-hash da cópia cortada. Ela sai com a data de agora, para vencer a cópia com capa em qualquer
-cópia de arquivos que só troca o mais velho pelo mais novo, como o `cp -u`. `--manter-capa`
-deixa a cópia como veio. Registrar de novo uma cópia já cortada se recusa, porque o hash dela
-não é o do PDF obtido: devolva antes o PDF de `originais/` ao lugar dela.
+diz que a cópia de leitura é o PDF obtido sem a capa; no recibo, `copia_de_leitura` traz as
+páginas e o hash da cópia cortada. A cópia de leitura sai com data de modificação de agora, para
+substituir a que tem capa em qualquer transferência de arquivos que só troca o mais velho pelo
+mais novo, como o `cp -u`. `--manter-capa` deixa a cópia como veio. Registrar de novo uma cópia
+já cortada se recusa, porque o hash dela não é o do PDF obtido: devolva antes o PDF de
+`originais/` ao lugar dela.
 
 ## Ferramentas desta máquina
 
