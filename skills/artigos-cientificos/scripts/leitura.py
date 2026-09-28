@@ -8,6 +8,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+TEMPO_MAX_DO_PDFTOTEXT = 60   # segundos; um PDF de 381 páginas e 11 MB saiu do `-raw` em 0,4 s
 TAGS_DE_TEXTO = {"p", "title", "td", "th", "label", "caption", "abstract"}
 BLOCOS = TAGS_DE_TEXTO | {"sec", "fig", "table-wrap", "table", "tr", "list", "list-item",
                           "disp-formula", "disp-quote", "boxed-text", "ref", "fn"}
@@ -46,6 +47,20 @@ def pdftotext(caminho: Path, destino: Path) -> Path:
         raise RuntimeError("pdftotext ausente: instale poppler-utils (apt install poppler-utils)")
     subprocess.run(["pdftotext", "-layout", str(caminho), str(destino)], check=True)
     return destino
+
+
+def texto_em_ordem_de_leitura(pdf: Path) -> str | None:
+    """O texto na ordem em que o PDF o desenha (`pdftotext -raw`), que, ao contrário do `-layout`, não
+    intercala as colunas; só na memória, nada vai para o disco. None sem o `pdftotext`, se ele falhar
+    ou se passar de TEMPO_MAX_DO_PDFTOTEXT."""
+    if not shutil.which("pdftotext"):
+        return None
+    try:
+        saida = subprocess.run(["pdftotext", "-raw", "-enc", "UTF-8", str(pdf), "-"], capture_output=True,
+                               timeout=TEMPO_MAX_DO_PDFTOTEXT)
+    except subprocess.TimeoutExpired:
+        return None
+    return saida.stdout.decode("utf-8", "replace") if saida.returncode == 0 else None
 
 
 def jats_para_texto(xml_bytes: bytes) -> str:

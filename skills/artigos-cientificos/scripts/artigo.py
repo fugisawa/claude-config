@@ -19,6 +19,10 @@ mesma procedência do `abrir`, com a etiqueta que você declara (A, B ou C; D n�
 `pedido` redige o e-mail ao autor e imprime o que o conector Gmail `create_draft` precisa;
 nada aqui envia e-mail.
 
+`conferir` procura cada expressão no texto extraído e acha também a que a quebra de linha partiu,
+com a hifenização desfeita e a página em colunas lida coluna por coluna; com o PDF ao lado do
+`.txt`, de mesmo nome, procura ainda na ordem de leitura dele (`pdftotext -raw`).
+
 Códigos de saída: 0 ok · 2 não abriu / não encontrou · 1 erro de uso ou de ambiente.
 """
 from __future__ import annotations
@@ -247,9 +251,18 @@ def cmd_conferir(args) -> int:
         print(f"Arquivo não existe: {arquivo}", file=sys.stderr)
         return 1
     if arquivo.suffix.lower() == ".pdf":
-        arquivo = leitura.extrair_texto(arquivo, "pdf")
+        pdf, arquivo = arquivo, leitura.extrair_texto(arquivo, "pdf")
+    else:
+        pdf = arquivo.with_suffix(".pdf")
     conteudo = arquivo.read_text(encoding="utf-8", errors="replace")
-    achados = modulo_texto.procurar(conteudo, args.expressoes, contexto=args.contexto)
+    ordem = None
+    if pdf.exists():
+        ordem = leitura.texto_em_ordem_de_leitura(pdf)
+        if ordem is None:
+            print(f"aviso: não li a ordem de leitura de {pdf.name} (pdftotext -raw ausente, com erro ou lento "
+                  "demais); a busca seguiu só no texto", file=sys.stderr)
+    achados = modulo_texto.procurar(conteudo, args.expressoes, contexto=args.contexto, atravessa_linhas=True,
+                                    ordem_de_leitura=ordem)
     print(modulo_texto.relatorio(achados, args.expressoes))
     faltando = [e for e in args.expressoes if not any(a.expressao == e for a in achados)]
     return 2 if faltando else 0
@@ -296,7 +309,8 @@ def montar_parser() -> argparse.ArgumentParser:
     e.add_argument("--idioma", default="auto", choices=("auto", "pt", "en"))
     e.add_argument("--assinatura", default=None, help="padrão: ARTIGOS_ASSINATURA, ou o nome do Daniel")
 
-    c = sub.add_parser("conferir", help="procura expressões no texto extraído, com contexto")
+    c = sub.add_parser("conferir", help="procura expressões no texto extraído, também através de linhas "
+                                        "e colunas, com contexto")
     c.add_argument("arquivo")
     c.add_argument("expressoes", nargs="+")
     c.add_argument("--contexto", type=int, default=1)

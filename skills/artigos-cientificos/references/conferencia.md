@@ -14,10 +14,21 @@ memória do modelo não conferem nada.
    decida pelo cabeçalho e escreva o que decidiu.
 2. **Procure no texto, nunca só na tabela, nunca só no resumo.** Use
    `artigo.py conferir <slug>.txt "g = -0,36" "k = 48" "p < .001"`: a busca tolera sinal de
-   menos tipográfico, vírgula decimal e espaçamento. Leia a linha e o contexto que ele imprime;
-   se precisar de mais, `grep -n -C3 "playback" <slug>.txt`, ou `Read` com `offset` e `limit`
-   numa janela. **Não leia o arquivo inteiro para o contexto**: um artigo de 27 páginas tem
-   uns 25 mil tokens, e cada leitura dessas entra na próxima compactação.
+   menos tipográfico, vírgula decimal, espaçamento, ligaduras e hífen discricionário, e acha a
+   citação que a quebra de linha partiu, com a hifenização desfeita e a página em colunas lida
+   coluna por coluna. Com o PDF ao lado do `.txt`, com o mesmo nome, ela procura também na
+   ordem em que o PDF desenha o texto, e é essa ordem que revela a frase que a diagramação
+   esconde, como a que muda de linha bem onde passa uma legenda mais larga que a coluna: no
+   `.txt`, as linhas da legenda ficam entre as duas metades da frase. A ocorrência que atravessa
+   linhas sai com o número de cada linha que ocupa, e o contexto vem da mesma coluna. Não monte
+   versão corrida do texto à mão: o que o `conferir` não achar, confira no PDF, na página. Leia a
+   linha e o contexto que ele imprime; se precisar de mais, rode
+   `grep -n -C3 "<palavra da linha>" <slug>.txt` ou abra uma janela com o `Read`, usando `offset`
+   e `limit`. Tire do `grep -n` o número de linha para o `Read`, e não do `conferir`: ele conta
+   como quebra de linha o form feed que fecha cada página, e por isso o número que dá é maior que
+   o do `grep -n` e o do `Read`, uma unidade a mais para cada página anterior. **Não leia o
+   arquivo inteiro para o contexto**: um artigo de 27 páginas tem uns 25 mil tokens, e cada
+   leitura dessas entra na próxima compactação.
 3. **Anote os companheiros do número.** Para um tamanho de efeito: o modelo de onde ele saiu
    (categórico, linear, spline), `k` (quantos tamanhos de efeito o alimentam), o intervalo de
    confiança de 95% e o `p`. Um `g` sem `k` e sem intervalo é meio número.
