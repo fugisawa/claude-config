@@ -37,7 +37,7 @@ confirma nada; aponta onde olhar.
 
 **Tipo de fonte:** <tipo> · **Mapa:** <seções principais com página>
 
-**Conexões candidatas.** (a âncora é a página impressa, `(p. N)`; a página da cópia, `(p. N da cópia)`, quando a versão lida não tem a paginação do periódico, como a prova tipográfica ou o manuscrito aceito; ou a seção, `(seção …)`, quando a cópia não tem página nenhuma, como a que vem de XML ou de HTML)
+**Conexões candidatas.** (a âncora é a página do periódico, `(p. N)`; a página da cópia, `(p. N da cópia)`, quando a versão lida não tem a paginação do periódico, como a prova tipográfica, o manuscrito aceito ou a publicação antecipada que o registro cita pela numeração dela; a posição no arquivo, `(p. N do PDF)`, na página fora dessa numeração, como a capa; ou a seção, `(seção …)`, quando a cópia não tem página nenhuma, como a que vem de XML ou de HTML)
 - <afirmação do alvo> ← "<trecho curto>" (p. N) (apoia) — <o que estende ou refina>
 - <afirmação do alvo> ← "<trecho curto>" (p. N) (contraria) — <em quê>
 - <afirmação do alvo> ← <paráfrase> (p. N) (menciona) — <por que vale olhar>

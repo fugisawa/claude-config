@@ -34,10 +34,11 @@ está em `references/pesquisa/plano-2026-09-26.md`.
   localizada na fonte**, nunca um parágrafo do artigo. Pedido de "escreve o parágrafo" dentro
   de um fichamento recebe "não": o que sai daqui é o que o autor precisa para escrevê-lo.
 - **Tudo com página.** Todo número e todo trecho no bloco carregam `(p. N)` da versão lida,
-  `(p. N da cópia)` quando a versão não tem a paginação do periódico, ou `(seção …)` quando a
-  cópia não tem página nenhuma, como a que vem de XML ou de HTML. Um bloco sem nenhuma
-  âncora, de página ou de seção, e sem nenhum "não consta" é um bloco feito do resumo, e o
-  validador o recusa.
+  `(p. N da cópia)` quando a versão não tem a paginação do periódico, `(p. N do PDF)` quando o
+  registro cita a numeração impressa na própria cópia e a página fica fora dela, como a capa, ou
+  `(seção …)` quando a cópia não tem página nenhuma, como a que vem de XML ou de HTML. Um bloco
+  sem nenhuma âncora, de página ou de seção, e sem nenhum "não consta" é um bloco feito do
+  resumo, e o validador o recusa.
 - **"Não consta na fonte" é resposta válida**, e muitas vezes a mais útil. A skill nunca completa
   com o que "deveria estar lá".
 - **O texto fica no disco; a janela entra no contexto.** O `fichar.py` dá o mapa de seções e
@@ -74,19 +75,23 @@ orçamento de leitura.
 ## O procedimento comum
 
 1. **Localize.** `fichar.py localizar <FT>` diz o DOI, a cópia, o texto extraído, o intervalo
-   de páginas impressas e o deslocamento, que é o número de páginas que a cópia traz antes do
-   artigo; quando o texto não diz em que página está cada linha, a saída traz também o campo
-   `sem_paginas`, com o motivo. Quando o `.procedencia.json` da cópia declara um texto no campo
-   `texto`, é esse o texto lido, mesmo que o caminho gravado ali seja o da outra máquina; se ele não está nesta
-   máquina, o script avisa e não lê outro no lugar, porque o texto com o nome do DOI pode ser
-   outra versão da fonte. Sem cópia local, pare. Se o aviso diz que o texto declarado falta
-   nesta máquina, traga-o da outra, porque uma nova abertura também pode trazer outra versão;
-   sem esse aviso, a rota é `artigo.py abrir` ou `registrar` da `artigos-cientificos`. Ler o
-   resumo no lugar do texto não é opção.
+   de páginas impressas no periódico, que vem da referência do registro, e o deslocamento, que é
+   o número de páginas que a cópia traz antes do artigo; quando o texto não diz em que página
+   está cada linha, a saída traz também o campo `sem_paginas`, com o motivo. Quando o registro
+   cita a numeração impressa na própria cópia, e não a do periódico, a saída traz ainda o campo
+   `paginas_da_copia`, com a primeira e a última página dessa numeração. Quando o
+   `.procedencia.json` da cópia declara um texto no campo `texto`, é esse o texto lido, mesmo que
+   o caminho gravado ali seja o da outra máquina; se ele não está nesta máquina, o script avisa e
+   não lê outro no lugar, porque o texto com o nome do DOI pode ser outra versão da fonte. Sem
+   cópia local, pare. Se o aviso diz que o texto declarado falta nesta máquina, traga-o da outra,
+   porque uma nova abertura também pode trazer outra versão; sem esse aviso, a rota é
+   `artigo.py abrir` ou `registrar` da `artigos-cientificos`. Ler o resumo no lugar do texto não
+   é opção.
 2. **Mapeie.** `fichar.py mapa <FT>` lista as páginas e os cabeçalhos prováveis. É o índice que
-   evita ler o arquivo inteiro. A primeira linha diz em que página da cópia está a primeira
-   página impressa: a capa da editora, a folha de rosto do repositório e a errata, quando vêm
-   antes do artigo, não ganham número impresso e levam `(p. N da cópia)`.
+   evita ler o arquivo inteiro. A primeira linha diz em que página do PDF está a primeira página
+   impressa. Se o registro cita a paginação do periódico, a capa da editora, a folha de rosto do
+   repositório e a errata, quando vêm antes do artigo, não ganham número impresso e levam
+   `(p. N da cópia)`.
 
    O deslocamento sai do campo *Versão da cópia* do registro, quando ele declara "a página 2 do
    PDF é a página 268" ou "a página impressa é a do PDF mais 229" (ou "menos 1"); se o registro
@@ -97,6 +102,28 @@ orçamento de leitura.
    dele; e quando a cópia tem mais páginas que o intervalo e nada diz onde o artigo começa, caso
    em que a página citada pode estar deslocada até que a *Versão da cópia* declare a
    correspondência.
+
+   Há cópia que o registro cita pela numeração impressa nela, e não pela do periódico: a
+   publicação antecipada, paginada de 1 em diante antes de o fascículo sair, e a reimpressão, em
+   outra revista ou no arquivo de publicações do autor. O script a reconhece quando a *Versão da
+   cópia* diz "as páginas citadas são as da cópia" ou "as localizações citam a página da cópia"
+   (ou "da reimpressão"), e o campo deve usar uma dessas frases, porque o script não reconhece
+   outra redação e, sem ela, rotula a cópia pela paginação do periódico.
+   Nessa cópia, o rótulo é `(p. N da cópia)`, com o número impresso na página, que é o que o
+   registro cita, e a página fora dessa numeração, como a capa, leva `(p. N do PDF)`, que é a
+   posição no arquivo; o autor decidiu assim em 28/09/2026. A página do PDF em que a numeração
+   começa sai da *Versão da cópia*, quando ela declara "a página 2 do PDF é a página 1"; senão,
+   dos números que o cabeçalho e o pé imprimem, desde que ao menos três páginas concordem, como
+   quando o registro cita a paginação do periódico. Sem nenhum desses dois indícios, o script
+   supõe que a numeração começa na primeira página do PDF: o rótulo continua `(p. N da cópia)`,
+   mas o N é a posição da página no arquivo, e um aviso pede que a *Versão da cópia* declare onde
+   a numeração começa. A numeração vai até a última página com texto, porque há página cujo
+   número impresso não passa para o texto extraído.
+
+   Nas provas, nos manuscritos e nas pré-publicações, cuja *Versão da cópia* começa por "prova",
+   "manuscrito" ou "pré", o rótulo `(p. N da cópia)` continua sendo a posição no PDF, mesmo quando
+   o campo diz que as localizações citam a página da cópia. Essa posição só coincide com o número
+   impresso quando o PDF começa na primeira página do texto.
 
    Há texto que não diz em que página está cada linha, e nele o rótulo é `sem paginação`. Isso
    vale para a cópia que o recibo declara em XML, como a do PubMed Central e a do Europe PMC, ou
@@ -114,10 +141,12 @@ orçamento de leitura.
    `responder` lê a seção provável e as janelas dos termos; `verificar` lê o método, os
    resultados e a discussão inteiros, por página, o que num artigo curto é quase tudo: a regra
    proíbe despejar o arquivo de uma vez, não ler o que o modo pede; `sintetizar` não abre a fonte.
-   `fichar.py janela <FT> --pagina N` (a página impressa, quando o registro traz o intervalo; senão
-   o índice na cópia, e o `mapa` diz qual é a primeira; na cópia sem paginação, o script recusa
-   `--pagina`), `--termo "x"` (repetível; busca tolerante a sinal, vírgula decimal, espaço e
-   hífen de fim de linha) ou `--secao "Results"`.
+   `fichar.py janela <FT> --pagina N` (N é a página impressa: a da cópia, quando o registro cita
+   a numeração dela, e senão a do periódico, quando o registro traz o intervalo; fora dessas
+   numerações, N é a posição da página no PDF, e o `mapa` diz em que posição está a primeira
+   página impressa; na cópia sem paginação, o script recusa `--pagina`), `--termo "x"`
+   (repetível; busca tolerante a sinal, vírgula decimal, espaço e hífen de fim de linha) ou
+   `--secao "Results"`.
 4. **Escreva o bloco** no formato do `reference` do modo, num arquivo fora do repositório.
    Todo trecho literal é curto; o resto é paráfrase com página. O bloco fecha com
    `**Perguntas ao autor:**` e duas ou três perguntas que digam o que ele precisa abrir ou
@@ -133,10 +162,12 @@ orçamento de leitura.
 ## O contrato de todo bloco
 
 - Abre com o que se pediu (a pergunta, a alegação, o alvo da exploração), na forma exata.
-- Todo número e todo trecho literal levam `(p. N)`, ou `(p. N da cópia)` quando a versão lida não
-  tem a paginação do periódico, ou `(seção …)` quando nem a cópia tem página, como o manuscrito
-  aceito em XML. O rótulo `sem paginação` da janela não é âncora, e o validador não o aceita no
-  lugar da seção. Aspas duplas são citação de fonte; título, rótulo e nome de seção vão em itálico.
+- Todo número e todo trecho literal levam a página como a janela a rotula: `(p. N)`, ou
+  `(p. N da cópia)` quando a versão lida não tem a paginação do periódico, ou `(p. N do PDF)`
+  quando o registro cita a numeração impressa na própria cópia e a página fica fora dela, como a
+  capa, ou `(seção …)` quando nem a cópia tem página, como o manuscrito aceito em XML. O rótulo
+  `sem paginação` da janela não é âncora, e o validador não o aceita no lugar da seção. Aspas
+  duplas são citação de fonte; título, rótulo e nome de seção vão em itálico.
 - Os rótulos do modo vêm em negrito, com os valores fixos que o validador conhece.
 - Quando a evidência é mista, diz que é mista; quando não há, diz "não consta na fonte".
 - Distingue o que a fonte **diz** do que o modelo **infere**; a inferência vem marcada como tal.

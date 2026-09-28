@@ -5,10 +5,11 @@ O que ele faz, e só isso: acha o texto extraído de uma fonte a partir do ident
 registro (ou de um DOI, ou de um caminho); dá o mapa de páginas e de seções; devolve janelas do
 texto por página, por termo ou por seção, para que o texto integral fique no disco e só a janela
 entre no contexto; calcula a página impressa a partir do form feed, do intervalo do registro e das
-páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório), e diz
-"sem paginação" quando o texto não tem página, como o que vem de XML, de HTML ou de OCR sem form feed;
-grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar em mais nada;
-e valida um bloco contra o contrato da skill antes de gravá-lo.
+páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório), ou pela
+numeração impressa na própria cópia, quando o registro cita por ela, como na publicação antecipada e na
+reimpressão; diz "sem paginação" quando o texto não tem página, como o que vem de XML, de HTML ou de
+OCR sem form feed; grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar
+em mais nada; e valida um bloco contra o contrato da skill antes de gravá-lo.
 
 Não usa rede. A busca tolerante por termo vem do `texto.py` da skill `artigos-cientificos`,
 importado por caminho relativo dentro de ~/.claude/skills, nunca copiado.
@@ -67,6 +68,7 @@ class Fonte:
     deslocamento: int = 0             # páginas da cópia antes da primeira impressa: capa da editora, folha de rosto
     aviso: str = ""                   # o texto declarado no recibo falta aqui, ou o deslocamento está em dúvida
     sem_paginas: str = ""             # por que o texto não diz a página de cada linha: cópia em XML ou HTML, texto sem form feed
+    paginas_da_copia: tuple[int, int] | None = None   # a numeração impressa na própria cópia, quando o registro cita por ela
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -151,9 +153,13 @@ def localizar(ft: str, raiz: Path) -> Fonte:
     proc = _procedencias(raiz / "fontes" / "copias").get(doi)
     txt, falta = _txt_de(proc, raiz) if proc else (None, "")
     pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
-    deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
+    sem = _sem_paginas(proc, pags, txt); da_copia = None
+    if _cita_a_copia(versao) and txt and not sem:
+        da_copia, deslocamento, aviso = _numeracao_da_copia(versao, txt)
+    else:
+        deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
     return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao, txt=txt, procedencia=proc,
-                 deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=_sem_paginas(proc, pags, txt))
+                 deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=sem, paginas_da_copia=da_copia)
 
 
 # ---------------------------------------------------------------- páginas e mapa
@@ -180,12 +186,34 @@ def paginas(txt: str) -> list[str]:
     return txt.split(FF)
 
 
+def total_de_paginas(txt: str) -> int:
+    """Quantas páginas o PDF tem. O pdftotext fecha toda página com form feed, até a última, e o form
+    feed da última não abre outra: a parte vazia que sobra depois dele não é página."""
+    return len(paginas(txt)) - int(txt.endswith(FF))
+
+
 _NUMERO_SOLTO = re.compile(r"(?<!\S)\d{1,5}(?!\S)")
+_DECLARACAO_PDF = re.compile(r"página (\d+) do PDF é a página (\d+)")   # como a Versão da cópia declara onde a numeração começa
+
+
+_CITA_A_COPIA = re.compile(r"(?:páginas citadas(?: abaixo)? são as|localizações(?: abaixo)? citam a (?:página|paginação)"
+                           r"(?: \d+[-–]\d+)?) da (?:cópia|reimpressão)\b", re.I)
+_PROVA_OU_MANUSCRITO = ("prova", "manuscrito", "pré")   # como começa a Versão da cópia da prova, do manuscrito e da pré-publicação
+
+
+def _cita_a_copia(versao: str) -> bool:
+    """A Versão da cópia diz que as páginas citadas são as impressas na própria cópia, e não as do periódico,
+    como na publicação antecipada e na reimpressão: 'as páginas citadas abaixo são as da cópia', 'as
+    localizações citam a página da reimpressão'. A prova, o manuscrito e a pré-publicação ficam de fora
+    mesmo quando o campo diz o mesmo, como o de Tricot e Sweller (2014): o rótulo deles continua sendo a
+    posição no PDF, como se apresentou ao autor na decisão de 28/09/2026."""
+    return bool(_CITA_A_COPIA.search(versao)) and not versao.lower().startswith(_PROVA_OU_MANUSCRITO)
 
 
 def _sem_paginacao(versao: str) -> bool:
-    """A versão lida não tem a paginação do periódico: prova, manuscrito, pré-publicação."""
-    return versao.lower().startswith(("prova", "manuscrito", "pré"))
+    """A versão lida não tem a paginação do periódico: prova, manuscrito, pré-publicação, e a cópia
+    que o registro cita pela numeração impressa nela."""
+    return versao.lower().startswith(_PROVA_OU_MANUSCRITO) or _cita_a_copia(versao)
 
 
 def _sem_paginas(procedencia: Path | None, intervalo: tuple[int, int] | None, txt: Path | None) -> str:
@@ -215,15 +243,16 @@ def _deslocamento(versao: str, intervalo: tuple[int, int] | None, txt: Path | No
     achado = _deslocamento_achado(intervalo, pags)
     if declarado is not None:
         if achado is not None and achado != declarado:
-            return declarado, (f"a Versão da cópia do registro põe a p. {p0} na página {declarado + 1} da cópia, e os "
-                               f"cabeçalhos da cópia a põem na página {achado + 1}; vale o registro, porque as AF citam pela regra dele")
+            return declarado, (f"a Versão da cópia do registro põe a p. {p0} na página {declarado + 1} do PDF, e os "
+                               f"cabeçalhos da cópia a põem na página {achado + 1}; vale o registro, porque as afirmações dele "
+                               "citam as páginas por essa correspondência")
         return declarado, ""
     if achado is not None:
         return achado, ""
     com_texto = sum(1 for p in pags if p.strip())
     if com_texto > p1 - p0 + 1:
         return 0, (f"a cópia tem {com_texto} páginas com texto e o intervalo {p0}–{p1} do registro tem {p1 - p0 + 1}, e nem os "
-                   f"cabeçalhos nem a Versão da cópia dizem onde o artigo começa; supõe-se que na primeira página da cópia. "
+                   f"cabeçalhos nem a Versão da cópia dizem onde o artigo começa; supõe-se que na primeira página do PDF. "
                    f"Se houver capa antes dele, declare na Versão da cópia \"a página N do PDF é a página {p0}\"")
     return 0, ""
 
@@ -231,7 +260,7 @@ def _deslocamento(versao: str, intervalo: tuple[int, int] | None, txt: Path | No
 def _deslocamento_declarado(versao: str, p0: int) -> int | None:
     """O que o campo 'Versão da cópia' declara, nas formas em que o registro o escreve:
     'a página 2 do PDF é a página 268' e 'a página impressa é a do PDF mais 229' (ou 'menos 1')."""
-    m = re.search(r"página (\d+) do PDF é a página (\d+)", versao)
+    m = _DECLARACAO_PDF.search(versao)
     if m:
         return int(m.group(1)) - 1 - (int(m.group(2)) - p0)
     m = re.search(r"página impressa é a do PDF (mais|menos) (\d+)", versao)
@@ -241,29 +270,90 @@ def _deslocamento_declarado(versao: str, p0: int) -> int | None:
     return p0 - soma - 1
 
 
-def _deslocamento_achado(intervalo: tuple[int, int], pags: list[str]) -> int | None:
-    """O deslocamento que os cabeçalhos da cópia mostram. Cada número do intervalo que aparece solto
-    nas três primeiras ou nas três últimas linhas da página i, onde ficam o cabeçalho e o pé, vota
-    em i - (n - p0). Vence o mais votado se tiver três votos ao menos e nenhum empate: um número
-    solto no texto não basta, nem dois alinhados por acaso, e sem indício a resposta é None."""
-    p0, p1 = intervalo
-    votos = Counter()
-    for i, pag in enumerate(pags):
-        linhas = [l for l in pag.split("\n") if l.strip()]
-        numeros = {int(n) for l in linhas[:3] + linhas[-3:] for n in _NUMERO_SOLTO.findall(l)}
-        votos.update({i - (n - p0) for n in numeros if p0 <= n <= p1})
+def _numeros_da_borda(pag: str) -> set[int]:
+    """Os números soltos nas três primeiras e nas três últimas linhas da página, onde ficam o cabeçalho e o pé."""
+    linhas = [l for l in pag.split("\n") if l.strip()]
+    return {int(n) for l in linhas[:3] + linhas[-3:] for n in _NUMERO_SOLTO.findall(l)}
+
+
+def _mais_votado(votos: Counter) -> int | None:
+    """O mais votado, se tiver três votos ao menos e nenhum empate: um número solto no texto não basta,
+    nem dois alinhados por acaso, e sem indício a resposta é None."""
     ordem = votos.most_common(2)
     if not ordem or ordem[0][1] < 3 or (len(ordem) > 1 and ordem[1][1] == ordem[0][1]):
         return None
     return ordem[0][0]
 
 
+def _deslocamento_achado(intervalo: tuple[int, int], pags: list[str]) -> int | None:
+    """O deslocamento que os cabeçalhos da cópia mostram. Cada número do intervalo que aparece solto
+    no cabeçalho ou no pé da página i vota em i - (n - p0), e vence o mais votado."""
+    p0, p1 = intervalo
+    votos = Counter()
+    for i, pag in enumerate(pags):
+        votos.update({i - (n - p0) for n in _numeros_da_borda(pag) if p0 <= n <= p1})
+    return _mais_votado(votos)
+
+
+def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None, int, str]:
+    """A numeração impressa na própria cópia, quando o registro cita por ela: o intervalo, as páginas do
+    PDF antes da primeira impressa e o aviso. A primeira página impressa sai do que a Versão da cópia
+    declara, 'a página 2 do PDF é a página 1'; senão, dos números que o cabeçalho e o pé imprimem; sem
+    nenhum dos dois, o N do rótulo 'p. N da cópia' é a posição no PDF, e o aviso diz como declarar. A
+    numeração vai até a última página com texto, porque há página cujo número não chega à camada de
+    texto, como a p. 13 de Harrison e col. (2020)."""
+    pags = paginas(txt.read_text(encoding="utf-8", errors="replace"))
+    fim = max((i for i, p in enumerate(pags) if p.strip()), default=0)
+    achada = _numeracao_achada(pags)
+    m = _DECLARACAO_PDF.search(versao)
+    if m:
+        primeira, deslocamento = int(m.group(2)), int(m.group(1)) - 1
+        aviso = ""
+        if achada and achada[0] - achada[1] != primeira - deslocamento:   # número impresso menos índice, pelas duas fontes
+            aviso = (f"a Versão da cópia do registro põe a p. {primeira} da cópia na página {deslocamento + 1} do PDF, e os números "
+                     f"impressos no cabeçalho e no pé a põem na página {primeira - achada[0] + achada[1] + 1} do PDF; vale o registro, "
+                     "porque as afirmações dele citam as páginas por essa correspondência")
+    elif achada:
+        (primeira, deslocamento), aviso = achada, ""
+    else:
+        return None, 0, ("a Versão da cópia do registro diz que as páginas citadas são as impressas na cópia, e nem ela nem os "
+                         "números do cabeçalho e do pé dizem em que página do PDF a numeração impressa começa; supõe-se que na "
+                         "primeira, e por isso o N do rótulo \"p. N da cópia\" é a posição da página no PDF. Se houver capa antes "
+                         "do artigo, declare na Versão da cópia em que página do PDF está a primeira página impressa, como "
+                         "\"a página 2 do PDF é a página 1\"")
+    return (primeira, primeira + fim - deslocamento), deslocamento, aviso
+
+
+def _numeracao_achada(pags: list[str]) -> tuple[int, int] | None:
+    """A numeração que a cópia imprime no cabeçalho e no pé, sem intervalo do registro que a limite: cada
+    número solto no cabeçalho ou no pé da página i vota em n - i, o número impresso menos o índice, e vence
+    o mais votado. Devolve a primeira página impressa e o índice dela na cópia. A primeira página do artigo
+    costuma sair sem número, e por isso a numeração que só aparece a partir da p. 2 começa na p. 1, se a
+    cópia tem a página anterior."""
+    votos, primeiras = Counter(), {}
+    for i, pag in enumerate(pags):
+        for n in _numeros_da_borda(pag) - {0}:
+            votos[n - i] += 1; primeiras[n - i] = min(n, primeiras.get(n - i, n))
+    c = _mais_votado(votos)
+    if c is None:
+        return None
+    primeira = 1 if primeiras[c] == 2 and c <= 1 else primeiras[c]   # a p. 1 cai no índice 1 - c, que tem de existir
+    return primeira, primeira - c
+
+
 def pagina_impressa(indice: int, fonte: Fonte | None) -> str:
     """Página como o manuscrito a cita: a impressa, se o registro traz o intervalo e a página cai
     dentro do artigo; senão 'da cópia', que é também o rótulo da capa e do que vem depois do artigo.
+    Quando o registro cita a numeração impressa na própria cópia, como a da publicação antecipada ou a
+    da reimpressão, o rótulo é 'p. N da cópia' com esse número, e a página fora dela, como a capa, leva
+    'p. N do PDF', que é a posição no arquivo.
     Quando o texto não diz a página de cada linha, o rótulo é 'sem paginação', e o bloco cita a seção."""
     if fonte and fonte.sem_paginas:
         return "sem paginação"
+    if fonte and fonte.paginas_da_copia:
+        a, b = fonte.paginas_da_copia
+        p = a + indice - fonte.deslocamento
+        return f"p. {p} da cópia" if a <= p <= b else f"p. {indice + 1} do PDF"
     if fonte and fonte.paginas and not _sem_paginacao(fonte.versao_copia):
         p = fonte.paginas[0] + indice - fonte.deslocamento
         if fonte.paginas[0] <= p <= fonte.paginas[1]:
@@ -298,21 +388,25 @@ def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
 
 def indice_de_pagina(pagina: int, fonte: Fonte | None, total: int) -> int:
     """Traduz o que o usuário pediu para o índice na cópia: página impressa se o registro dá o
-    intervalo e o número cai nele; senão, índice a partir de 1. A cópia sem paginação não tem página
-    que se peça: a única que ela tem é o texto inteiro."""
+    intervalo e o número cai nele, ou se o número cai na numeração impressa na cópia, quando o registro
+    cita por ela; senão, índice a partir de 1. A cópia sem paginação não tem página que se peça: a única
+    que ela tem é o texto inteiro."""
     if fonte and fonte.sem_paginas:
         raise SystemExit(f"sem paginação: {fonte.sem_paginas}; peça a janela por --termo ou --secao")
+    if fonte and fonte.paginas_da_copia and fonte.paginas_da_copia[0] <= pagina <= fonte.paginas_da_copia[1]:
+        return pagina - fonte.paginas_da_copia[0] + fonte.deslocamento
     if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not _sem_paginacao(fonte.versao_copia):
         return pagina - fonte.paginas[0] + fonte.deslocamento
     return pagina - 1
 
 
 def janela_pagina(txt: str, indice: int) -> str:
-    pags = paginas(txt)
-    if indice < 0 or indice >= len(pags):
-        raise SystemExit(f"a cópia tem {len(pags)} páginas (índices 1 a {len(pags)}); pedido fora do intervalo. "
-                         "--pagina aceita a página impressa quando o registro traz o intervalo, ou o índice na cópia.")
-    return pags[indice]
+    n = total_de_paginas(txt)
+    if indice < 0 or indice >= n:
+        raise SystemExit(f"o PDF tem {n} páginas (posições 1 a {n}); pedido fora do intervalo. --pagina aceita a página "
+                         "impressa, que é a da cópia quando o registro cita a numeração dela e a do periódico quando o "
+                         "registro traz o intervalo, ou a posição no PDF.")
+    return paginas(txt)[indice]
 
 
 def janela_termo(txt: str, termos: list[str], contexto: int = 3, fonte: Fonte | None = None, limite: int = 8) -> str:
@@ -498,7 +592,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--corrido", action="store_true", help="usa a extração sem -layout (artigo em duas colunas)")
     s = sub.add_parser("janela", help="uma página, ou as linhas em volta de termos, ou uma seção"); s.add_argument("ft")
     s.add_argument("--corrido", action="store_true", help="usa a extração sem -layout (artigo em duas colunas)")
-    s.add_argument("--pagina", type=int, help="página impressa (quando o registro traz o intervalo) ou índice na cópia, a partir de 1")
+    s.add_argument("--pagina", type=int, help="página impressa (a da cópia quando o registro cita a numeração dela, senão a do periódico) ou posição no PDF, a partir de 1")
     s.add_argument("--termo", action="append", help="expressão a procurar (repetível)")
     s.add_argument("--secao", help="parte do título da seção")
     s.add_argument("--contexto", type=int, default=3)
@@ -534,7 +628,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"aviso: {f.ft}: {f.aviso}", file=sys.stderr)
     if a.cmd == "localizar":
         print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento,
-                          **({"sem_paginas": f.sem_paginas} if f.sem_paginas else {}), "versao_copia": f.versao_copia,
+                          **({"sem_paginas": f.sem_paginas} if f.sem_paginas else {}),
+                          **({"paginas_da_copia": f.paginas_da_copia} if f.paginas_da_copia else {}), "versao_copia": f.versao_copia,
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
                           "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
         if not f.txt:
@@ -550,9 +645,12 @@ def main(argv: list[str] | None = None) -> int:
     txt = origem.read_text(encoding="utf-8", errors="replace")
     if a.cmd == "mapa":
         print(f"texto: {origem.relative_to(raiz)}")
-        n, d = len(paginas(txt)), f.deslocamento
+        n, d = total_de_paginas(txt), f.deslocamento
         if f.sem_paginas:
             print(f"sem paginação: {f.sem_paginas}; o bloco cita a seção, \"(seção …)\", e não uma página")
+        elif f.paginas_da_copia:
+            print(f"{n} páginas no PDF; o registro cita a numeração impressa na cópia, e não a do periódico: a "
+                  f"{pagina_impressa(d, f)} é a {d + 1}ª delas" + (", e o que vem antes leva o rótulo 'do PDF'" if d > 0 else ""))
         elif d > 0 and not pagina_impressa(d, f).endswith("da cópia"):
             print(f"{n} páginas na cópia; a {pagina_impressa(d, f)} é a {d + 1}ª delas, e o que vem antes não é do artigo "
                   "(capa, folha de rosto) e leva o rótulo 'da cópia'")
@@ -564,7 +662,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "janela":
         if a.pagina:
             idx = indice_de_pagina(a.pagina, f, len(paginas(txt)))
-            print(f"[{pagina_impressa(idx, f)}; índice {idx + 1} na cópia]\n" + janela_pagina(txt, idx))
+            print(f"[{pagina_impressa(idx, f)}; posição {idx + 1} no PDF]\n" + janela_pagina(txt, idx))
         elif a.termo:
             print(janela_termo(txt, a.termo, a.contexto, f))
         elif a.secao:

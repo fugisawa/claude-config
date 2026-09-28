@@ -433,3 +433,138 @@ class FicharCopiaSemPaginacao(unittest.TestCase):
         self._copia(TXT_JATS, "pdf")   # o rótulo 'da cópia' daria "p. 1 da cópia" a toda linha de um manuscrito de várias páginas
         manuscrito = REGISTRO.replace("- **Tipo e revisão:** artigo", "- **Versão da cópia:** manuscrito aceito, sem a paginação do periódico\n- **Tipo e revisão:** artigo", 1)
         self.assertEqual(fichar.pagina_impressa(0, self._registro(manuscrito)), "sem paginação")
+
+
+# ------------------------------------------------ numeração impressa na própria cópia (defeito de 28/09/2026)
+# Quando o registro cita a numeração impressa na própria cópia, e não a do periódico, o rótulo é "p. N da cópia",
+# com o número impresso na página, que é o que o registro cita, e a página fora dessa numeração, como a capa, leva
+# "p. N do PDF", com a posição da página no arquivo; o autor decidiu assim em 28/09/2026, e provas e manuscritos
+# continuam rotulados pela posição no PDF, como se apresentou a ele. A regra nasceu de um defeito. A cópia de
+# Colson e Cooke (2018) é a publicação antecipada da Oxford University Press, paginada de 1 a 21, e a de
+# Tofel-Grehl e Feldon (2013) é a publicação antecipada paginada de 1 a 12. A Versão da cópia das duas diz que as
+# páginas citadas são as da cópia, e não as do fascículo (113–132 e 293–304), mas o fichar.py só reconhecia a
+# versão sem a paginação do periódico quando o campo começava por "prova", "manuscrito" ou "pré", e rotulava pelo
+# fascículo: a p. 5 da cópia saía "p. 117".
+
+TXT_ANTECIPADO = "\f".join([
+    "1\n\nUm artigo\n\nAna Teste\n\nABSTRACT\n\nWe found that training did not improve accuracy.\n",
+    "2\t\tAna Teste\n\nMETHOD\n\nForty-four investigators took part, d = -0.129.\n",
+    "Um artigo\t\t3\n\nRESULTS\n\nThe effect was significant, p < .01.\n",
+    "4\t\tAna Teste\n\nDISCUSSION\n\nTraining is not enough.\n",
+]) + "\f"
+ANTECIPADO = ("PDF da publicação antecipada online, paginado de 1 a 4; a paginação do fascículo é 469–480, "
+              "e as páginas citadas abaixo são as da cópia.")
+
+TXT_REIMPRESSAO = "\f".join([
+    "HISTORICAL REVIEW PROGRAM\n\nRELEASE IN FULL\n\nTITLE: Um artigo\n",
+    "Um artigo\n\nABSTRACT\n\nWe found that training did not improve accuracy.\n\n35\n",
+    "Um artigo\n\nMETHOD\n\nForty-four investigators took part, d = -0.129.\n\n36\n",
+    "Um artigo\n\nRESULTS\n\nThe effect was significant, p < .01.\n\n37\n",
+    "Um artigo\n\nDISCUSSION\n\nTraining is not enough.\n\n38\n",
+]) + "\f"
+REIMPRESSAO = ("reimpressão integral do artigo em outra revista, pp. 35–38; o texto é o publicado, mas a paginação é a "
+               "da reimpressão, e as localizações abaixo citam a página da reimpressão.")
+
+
+class FicharNumeracaoDaCopia(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.raiz = Path(self.tmp.name).resolve()
+        (self.raiz / "fontes" / "copias").mkdir(parents=True)
+        (self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json").write_text(
+            json.dumps({"doi": "10.1000/teste", "arquivo": "teste.pdf", "texto": "teste.txt"}), encoding="utf-8")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _fonte(self, txt, versao):
+        registro = REGISTRO.replace("- **Tipo e revisão:** artigo", f"- **Versão da cópia:** {versao}\n- **Tipo e revisão:** artigo", 1)
+        (self.raiz / "fontes" / "registro.md").write_text(registro, encoding="utf-8")
+        (self.raiz / "fontes" / "copias" / "teste.txt").write_text(txt, encoding="utf-8")
+        return fichar.localizar("FT-teste-2020", self.raiz)
+
+    def _rodar(self, *args):
+        saida, erro = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
+            fichar.main(["--raiz", str(self.raiz), *args])
+        return saida.getvalue(), erro.getvalue()
+
+    def test_publicacao_antecipada_cita_a_pagina_da_copia(self):
+        f = self._fonte(TXT_ANTECIPADO, ANTECIPADO)   # como Colson e Cooke (2018): o PDF começa no artigo
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia")   # e não "p. 470", do fascículo
+        self.assertIn("[p. 2 da cópia,", fichar.janela_termo(TXT_ANTECIPADO, ["Forty-four"], fonte=f))
+
+    def test_reimpressao_com_capa_cita_o_numero_impresso(self):
+        f = self._fonte(TXT_REIMPRESSAO, REIMPRESSAO)   # como Betts (1978): a folha da CIA e a reimpressão de 1979, pp. 35–54
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 35 da cópia")   # e não "p. 470", nem a posição, "p. 2 da cópia"
+        self.assertEqual(fichar.pagina_impressa(0, f), "p. 1 do PDF")      # a folha não tem número impresso
+        self.assertEqual(fichar.indice_de_pagina(37, f, 6), 3)              # --pagina 37 abre a página de RESULTS
+
+    def test_primeira_pagina_sem_numero_impresso(self):
+        sem_numero = TXT_ANTECIPADO.replace("1\n\nUm artigo", "Um artigo", 1)   # como Tofel-Grehl e Feldon (2013): a p. 1 não imprime o número
+        self.assertEqual(fichar.pagina_impressa(0, self._fonte(sem_numero, ANTECIPADO)), "p. 1 da cópia")   # e não "p. 1 do PDF"
+
+    def test_ultima_pagina_sem_numero_impresso(self):
+        sem_numero = TXT_ANTECIPADO.replace("4\t\tAna Teste", "Ana Teste", 1)   # como Harrison e col. (2020), cuja p. 13 não traz o número na camada de texto
+        self.assertEqual(fichar.pagina_impressa(3, self._fonte(sem_numero, ANTECIPADO)), "p. 4 da cópia")   # e não "p. 4 do PDF"
+
+    def test_declaracao_diz_onde_a_numeracao_comeca(self):
+        com_capa = "Repositório institucional\n\nUm artigo\n\f" + TXT   # a capa e três páginas sem número impresso
+        antiga = ("PDF da publicação antecipada, com a capa do repositório; a página 2 do PDF é a página 1, e as localizações "
+                  "citam a paginação 1–3 da cópia, e não a 469–480 do fascículo")   # como Mellers e col. (2014) até 28/09/2026
+        f = self._fonte(com_capa, antiga)
+        self.assertEqual([fichar.pagina_impressa(i, f) for i in range(4)], ["p. 1 do PDF", "p. 1 da cópia", "p. 2 da cópia", "p. 3 da cópia"])
+        self.assertEqual(f.aviso, "")
+
+    def test_declaracao_prevalece_sobre_os_cabecalhos_e_avisa(self):
+        f = self._fonte(TXT_ANTECIPADO, ANTECIPADO + " A página 2 do PDF é a página 1.")   # os cabeçalhos põem a p. 1 na 1ª página do PDF
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 1 da cópia")   # as AF citam pela regra do registro, e o bloco concorda com elas
+        self.assertIn("na página 1 do PDF", f.aviso); self.assertIn("vale o registro", f.aviso)
+
+    def test_sem_indicio_rotula_pela_posicao_e_avisa(self):
+        f = self._fonte(TXT, ANTECIPADO)   # nem número impresso no cabeçalho e no pé, nem declaração
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia")   # supõe-se que o PDF começa no artigo
+        self.assertIn("a numeração impressa começa", f.aviso); self.assertIn('"a página 2 do PDF é a página 1"', f.aviso)
+
+    def test_versao_que_cita_o_fasciculo_continua_no_fasciculo(self):
+        com_capa = "Repositório institucional\n\nUm artigo\n\f" + TXT
+        convertida = ("PDF diagramado pela editora, com a paginação provisória 1–3 da publicação antecipada; na cópia, a capa é a p. 1 "
+                      "do PDF, e a p. 1 provisória é a p. 2 do PDF. O fascículo tem as mesmas páginas, e as localizações citam a página "
+                      "do fascículo, que é a provisória mais 468. Assim, a página 2 do PDF é a página 469. Até 2026-09-28 as localizações "
+                      "citavam a paginação provisória, e o autor mandou convertê-las nessa data.")   # como Mellers e col. (2014) desde 28/09/2026
+        f = self._fonte(com_capa, convertida)
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 469"); self.assertIsNone(f.paginas_da_copia)
+
+    def test_manuscrito_que_cita_a_pagina_da_copia_fica_na_posicao(self):
+        com_capa = "Repositório institucional\n\nUm artigo\n\f" + TXT_ANTECIPADO   # a capa e a numeração de 1 a 4 no cabeçalho
+        manuscrito = "manuscrito do autor, com a capa do repositório, e as localizações citam a página da cópia"   # como Tricot e Sweller (2014), que não tem capa
+        f = self._fonte(com_capa, manuscrito)   # provas e manuscritos ficam como estavam, como se apresentou ao autor
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia"); self.assertIsNone(f.paginas_da_copia)
+
+    def test_copia_sem_paginacao_nao_ganha_numeracao_da_copia(self):
+        (self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json").write_text(json.dumps(
+            {"doi": "10.1000/teste", "arquivo": "teste.xml", "texto": "teste.txt", "formato": "xml"}), encoding="utf-8")
+        f = self._fonte(TXT_JATS, ANTECIPADO)   # o XML não tem página, diga a Versão da cópia o que disser
+        self.assertEqual(fichar.pagina_impressa(0, f), "sem paginação"); self.assertEqual(f.aviso, "")
+
+    def test_mapa_e_localizar_dizem_onde_a_numeracao_da_copia_comeca(self):
+        self._fonte(TXT_REIMPRESSAO, REIMPRESSAO)
+        d = json.loads(self._rodar("localizar", "FT-teste-2020")[0])
+        self.assertEqual(d.get("paginas_da_copia"), [35, 38]); self.assertEqual(d["deslocamento"], 1)
+        linhas = self._rodar("mapa", "FT-teste-2020")[0].splitlines()
+        self.assertIn("a p. 35 da cópia é a 2ª delas", linhas[1]); self.assertIn("'do PDF'", linhas[1])
+        self.assertIn("  p. 36 da cópia  L3     METHOD", linhas)
+
+    def test_mapa_conta_as_paginas_do_pdf(self):
+        self._fonte(TXT_REIMPRESSAO, REIMPRESSAO)   # o pdftotext fecha toda página com form feed, até a última
+        linha = self._rodar("mapa", "FT-teste-2020")[0].splitlines()[1]
+        self.assertTrue(linha.startswith("5 páginas no PDF;"), linha)   # e não 6, que conta o vazio depois do último form feed
+
+    def test_janela_por_pagina_diz_a_posicao_no_pdf(self):
+        self._fonte(TXT_REIMPRESSAO, REIMPRESSAO)
+        saida = self._rodar("janela", "FT-teste-2020", "--pagina", "37")[0]
+        self.assertTrue(saida.startswith("[p. 37 da cópia; posição 4 no PDF]\n"), saida)   # e não "índice 4 na cópia", outro número da cópia
+
+    def test_janela_por_pagina_recusa_a_pagina_depois_da_ultima(self):
+        with self.assertRaises(SystemExit) as recusa:   # cinco páginas; o form feed da última não abre uma sexta
+            fichar.janela_pagina(TXT_REIMPRESSAO, 5)
+        self.assertIn("o PDF tem 5 páginas", str(recusa.exception))
