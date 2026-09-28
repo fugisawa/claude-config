@@ -10,6 +10,7 @@ import io
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -229,6 +230,49 @@ class SemPypdf(Pasta):
         self.assertEqual((r["status"], r["copia_de_leitura"]), ("aberto", None))
         self.assertEqual(Path(r["arquivo"]).read_bytes(), COM_CAPA)
         self.assertIn("pypdf", r["diario"][-1])
+
+
+def extracao_que_falha(arquivo, formato):
+    raise subprocess.CalledProcessError(1, ["pdftotext", "-layout", str(arquivo)])
+
+
+@unittest.skipUnless(TEM_POPPLER and TEM_PYPDF, "sem pdftotext, pdfinfo ou pypdf")
+class FalhaNoMeioDoCorte(Pasta):
+    # o erro que o pypdf dá no PDF cifrado com AES quando falta o pacote cryptography, e que não é PyPdfError
+    SEM_CRYPTOGRAPHY = "cryptography>=3.1 is required for AES algorithm"
+
+    def assertNadaMudou(self):
+        self.assertEqual(self.arquivo.read_bytes(), COM_CAPA)
+        self.assertEqual(sorted(p.name for p in self.pasta.iterdir()), [NOME])
+
+    def test_erro_do_pypdf_de_qualquer_familia_para_o_registro_sem_tocar_em_nada(self):
+        self.obtido()
+        erro = pypdf.errors.DependencyError(self.SEM_CRYPTOGRAPHY)
+        with mock.patch.object(pypdf, "PdfReader", side_effect=erro), \
+                self.assertRaisesRegex(RuntimeError, "cryptography(.|\n)*--manter-capa"):
+            self.registrar()
+        self.assertNadaMudou()
+
+    def test_erro_do_pypdf_de_qualquer_familia_deixa_a_capa_no_abrir_e_o_diario_diz_por_que(self):
+        erro = pypdf.errors.DependencyError(self.SEM_CRYPTOGRAPHY)
+        with mock.patch.object(pypdf, "PdfReader", side_effect=erro):
+            r = acesso.abrir("10.1/x", self.pasta, buscar=falso_buscar(), obter=falso_obter(), agora=QUANDO)
+        self.assertEqual((r["status"], r["copia_de_leitura"]), ("aberto", None))
+        self.assertEqual(Path(r["arquivo"]).read_bytes(), COM_CAPA)
+        self.assertIn(self.SEM_CRYPTOGRAPHY, r["diario"][-1])
+
+    def test_extracao_que_falha_depois_do_corte_deixa_tudo_como_estava(self):
+        self.obtido()
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.registrar(extrair=extracao_que_falha)
+        self.assertNadaMudou()
+
+    def test_no_abrir_a_extracao_que_falha_depois_do_corte_deixa_o_pdf_obtido_no_lugar(self):
+        with self.assertRaises(subprocess.CalledProcessError):
+            acesso.abrir("10.1/x", self.pasta, buscar=falso_buscar(), obter=falso_obter(), agora=QUANDO,
+                         extrair=extracao_que_falha)
+        self.assertEqual(sorted(p.name for p in self.pasta.iterdir()), ["10-1-x.pdf"])
+        self.assertEqual((self.pasta / "10-1-x.pdf").read_bytes(), COM_CAPA)
 
 
 def falso_buscar():

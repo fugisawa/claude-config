@@ -96,17 +96,20 @@ def sem_a_primeira_pagina(pdf: Path, destino: Path) -> str:
                            "--manter-capa") from erro
     try:
         leitor = pypdf.PdfReader(str(pdf))
-        if len(leitor.pages) < 2:
-            raise RuntimeError(f"{pdf.name} só tem a capa do ResearchGate, sem o artigo")
-        escritor = pypdf.PdfWriter()
-        for pagina in leitor.pages[1:]:
-            escritor.add_page(pagina)
-        if leitor.metadata:
-            escritor.add_metadata(leitor.metadata)
-        with open(destino, "wb") as f:
-            escritor.write(f)
-    except pypdf.errors.PyPdfError as erro:
-        raise RuntimeError(f"o pypdf não tirou a capa de {pdf.name} ({erro}); mantenha-a com --manter-capa") from erro
+        total = len(leitor.pages)
+        if total > 1:
+            escritor = pypdf.PdfWriter()
+            for pagina in leitor.pages[1:]:
+                escritor.add_page(pagina)
+            if leitor.metadata:
+                escritor.add_metadata(leitor.metadata)
+            with open(destino, "wb") as f:
+                escritor.write(f)
+    except Exception as erro:   # nem tudo o que o pypdf levanta é PyPdfError: o PDF com AES sem o cryptography dá DependencyError
+        raise RuntimeError(f"o pypdf não tirou a capa de {pdf.name} ({type(erro).__name__}: {erro}); "
+                           "mantenha-a com --manter-capa") from erro
+    if total < 2:
+        raise RuntimeError(f"{pdf.name} só tem a capa do ResearchGate, sem o artigo")
     return f"pypdf {pypdf.__version__}"
 
 

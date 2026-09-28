@@ -193,25 +193,34 @@ def _tem_capa(arquivo: Path) -> bool:
     return leitura.eh_capa_do_researchgate(leitura.texto_da_pagina(arquivo, 1))
 
 
-def retirar_capa(arquivo: Path, *, info=leitura.pdfinfo) -> dict:
+def retirar_capa(arquivo: Path, *, info=leitura.pdfinfo, extrair=leitura.extrair_texto) -> tuple[dict, Path]:
     """Guarda o PDF obtido em `originais/`, com o mesmo nome e a data que tinha, e grava no lugar dele a
     cópia de leitura, sem a p. 1 e com a data de agora: o transporte entre as máquinas só troca arquivo
     por outro mais novo, e é assim que a cópia cortada substitui a que ainda tem capa na outra máquina.
-    O PDF obtido se copia antes de a cópia de leitura tomar o lugar dele, e nada se perde se um dos
-    passos falhar. Devolve o que o recibo diz da cópia de leitura."""
+    O corte e a extração do texto se fazem numa cópia provisória, e o disco só muda quando os dois
+    deram certo; se um falha, tudo fica como estava. Devolve o que o recibo diz da cópia de leitura e
+    o texto dela."""
     guardado = _guardado(arquivo)
     if guardado.exists() and leitura.sha256_de(guardado) != leitura.sha256_de(arquivo):
         raise RuntimeError(f"{guardado} já existe e é outro PDF; mova-o antes, ou mantenha a capa com --manter-capa")
     provisoria = arquivo.with_name(f".{arquivo.stem}.sem-capa.pdf")
+    guardando = guardado.with_name(f".{guardado.name}.guardando")
     try:
         ferramenta = leitura.sem_a_primeira_pagina(arquivo, provisoria)
+        texto_provisorio = extrair(provisoria, "pdf")
+        copia = {"retirada": "capa do ResearchGate", "pagina_retirada": 1,
+                 "paginas": info(provisoria).get("paginas"), "sha256": leitura.sha256_de(provisoria),
+                 "pdf_obtido": str(guardado), "ferramenta": ferramenta}
         guardado.parent.mkdir(exist_ok=True)
-        shutil.copy2(arquivo, guardado)
+        shutil.copy2(arquivo, guardando)
+        os.replace(guardando, guardado)
         os.replace(provisoria, arquivo)
+        texto = arquivo.with_suffix(".txt")
+        os.replace(texto_provisorio, texto)
     finally:
-        provisoria.unlink(missing_ok=True)
-    return {"retirada": "capa do ResearchGate", "pagina_retirada": 1, "paginas": info(arquivo).get("paginas"),
-            "sha256": leitura.sha256_de(arquivo), "pdf_obtido": str(guardado), "ferramenta": ferramenta}
+        for resto in (provisoria, provisoria.with_suffix(".txt"), guardando):
+            resto.unlink(missing_ok=True)
+    return copia, texto
 
 
 def _linha_da_capa(copia: dict, paginas_do_obtido) -> str:
@@ -221,15 +230,16 @@ def _linha_da_capa(copia: dict, paginas_do_obtido) -> str:
             f"{copia['pdf_obtido']}; o texto é o da cópia de leitura")
 
 
-def _capa_no_abrir(arquivo: Path, formato: str, manter_capa: bool) -> tuple[dict | None, list[str]]:
+def _capa_no_abrir(arquivo: Path, formato: str, manter_capa: bool,
+                   extrair) -> tuple[dict | None, Path | None, list[str]]:
     """No `abrir`, o download já está no disco quando a capa aparece: a que não sai fica, e o diário diz
-    por quê, em vez de a abertura inteira falhar."""
+    por quê, em vez de a abertura inteira falhar. Devolve a cópia de leitura, o texto dela e a nota."""
     if formato != "pdf" or manter_capa or not _tem_capa(arquivo):
-        return None, []
+        return None, None, []
     try:
-        return retirar_capa(arquivo), []
+        return (*retirar_capa(arquivo, extrair=extrair), [])
     except RuntimeError as erro:
-        return None, [f"capa do ResearchGate mantida na p. 1: {erro}"]
+        return None, None, [f"capa do ResearchGate mantida na p. 1: {erro}"]
 
 
 def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: bool = False,
@@ -259,9 +269,9 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
         corpo, final, formato = baixado
         arquivo = destino / f"{slug}.{formato}"
         arquivo.write_bytes(corpo)
-        copia, nota = _capa_no_abrir(arquivo, formato, manter_capa)
+        copia, texto, nota = _capa_no_abrir(arquivo, formato, manter_capa, extrair)
         obtido = Path(copia["pdf_obtido"]) if copia else arquivo
-        texto = extrair(arquivo, formato)
+        texto = texto or extrair(arquivo, formato)
         info = leitura.pdfinfo(obtido) if formato == "pdf" else {}
         return {
             **base, "status": "aberto", "arquivo": str(arquivo), "texto": str(texto),
@@ -355,10 +365,12 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
     texto = Path(texto) if texto is not None else None
     substituido = _texto_a_extrair(arquivo, formato, texto, sobrescrever_texto)
     meta = meta() if callable(meta) else meta
-    copia = retirar_capa(arquivo, info=info) if com_capa else None
-    obtido = Path(copia["pdf_obtido"]) if copia else arquivo
-    if formato != "html":
+    copia = None
+    if com_capa:
+        copia, texto = retirar_capa(arquivo, info=info, extrair=extrair)
+    elif formato != "html":
         texto = extrair(arquivo, formato)
+    obtido = Path(copia["pdf_obtido"]) if copia else arquivo
     avisos = [f"{substituido} existia e foi substituído pelo texto extraído de {arquivo.name}"] if substituido else []
     dados = info(obtido) if formato == "pdf" else {}
     quando = agora or _agora()
