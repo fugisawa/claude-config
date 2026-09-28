@@ -18,14 +18,14 @@ pode escrever uma frase, e não para explorar nem para julgar o método.
    - `misto`: parte a favor, parte contra, ou sustenta uma versão mais estreita;
    - `insuficiente`: a fonte toca no assunto, mas o trecho não decide;
    - `não consta`: a fonte não trata disso. É resposta válida e frequente.
-4. **Copie o trecho literal**, curto, com a página, e diga em uma frase o que o cerca
+4. **Copie o trecho literal**, curto, com a página (ou a seção, na cópia sem paginação), e diga em uma frase o que o cerca
    (condição, amostra, medida), porque o trecho fora do contexto é a forma mais comum de erro
    de citação.
 5. **Faça a pergunta de verificação:** releia o trecho e responda, contra ele, "o trecho diz
    isto mesmo?". Se a resposta for "só em parte", o rótulo desce para `misto` ou
    `insuficiente`.
-6. **Valide e grave.** O bloco só vale com pelo menos um trecho ancorado em página ou com
-   "não consta".
+6. **Valide e grave.** O bloco só vale com pelo menos um trecho ancorado em página ou em seção,
+   ou com "não consta".
 
 ## Modelo do bloco
 

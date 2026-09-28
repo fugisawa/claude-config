@@ -27,7 +27,7 @@ com o que tem, e para ver o que falta. Ele não escreve a seção.
 Grava-se na nota de síntese `docs/leituras/sintese-<recorte>.md`, criada por este modo com as duas
 marcas (`fichar.py gravar sintese-<recorte> sintetizar <bloco>` procura exatamente esse nome).
 Títulos de linha da tabela do argumento e nomes de seção vão em itálico, não entre aspas: o
-validador lê aspas duplas como citação de fonte, que exige página.
+validador lê aspas duplas como citação de fonte, que exige página ou seção.
 
 ```markdown
 **Recorte.** <notas | estágio | seção> · **Alvo.** <parte do argumento>

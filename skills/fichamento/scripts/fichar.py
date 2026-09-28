@@ -5,7 +5,8 @@ O que ele faz, e só isso: acha o texto extraído de uma fonte a partir do ident
 registro (ou de um DOI, ou de um caminho); dá o mapa de páginas e de seções; devolve janelas do
 texto por página, por termo ou por seção, para que o texto integral fique no disco e só a janela
 entre no contexto; calcula a página impressa a partir do form feed, do intervalo do registro e das
-páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório);
+páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório), e diz
+"sem paginação" quando o texto não tem página, como o que vem de XML, de HTML ou de OCR sem form feed;
 grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar em mais nada;
 e valida um bloco contra o contrato da skill antes de gravá-lo.
 
@@ -65,6 +66,7 @@ class Fonte:
     procedencia: Path | None
     deslocamento: int = 0             # páginas da cópia antes da primeira impressa: capa da editora, folha de rosto
     aviso: str = ""                   # o texto declarado no recibo falta aqui, ou o deslocamento está em dúvida
+    sem_paginas: str = ""             # por que o texto não diz a página de cada linha: cópia em XML ou HTML, texto sem form feed
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -150,8 +152,8 @@ def localizar(ft: str, raiz: Path) -> Fonte:
     txt, falta = _txt_de(proc, raiz) if proc else (None, "")
     pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
     deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
-    return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao,
-                 txt=txt, procedencia=proc, deslocamento=deslocamento, aviso=falta or aviso)
+    return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao, txt=txt, procedencia=proc,
+                 deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=_sem_paginas(proc, pags, txt))
 
 
 # ---------------------------------------------------------------- páginas e mapa
@@ -184,6 +186,21 @@ _NUMERO_SOLTO = re.compile(r"(?<!\S)\d{1,5}(?!\S)")
 def _sem_paginacao(versao: str) -> bool:
     """A versão lida não tem a paginação do periódico: prova, manuscrito, pré-publicação."""
     return versao.lower().startswith(("prova", "manuscrito", "pré"))
+
+
+def _sem_paginas(procedencia: Path | None, intervalo: tuple[int, int] | None, txt: Path | None) -> str:
+    """Por que o texto não diz em que página está cada linha; vazio quando diz. O XML JATS do PubMed
+    Central e do Europe PMC e a página HTML não têm página: o texto inteiro é uma só. O pdftotext
+    fecha toda página com form feed, até a última, e o texto sem nenhum também é uma página só, que
+    é a do artigo apenas quando o intervalo do registro tem uma."""
+    formato = (_ler_recibo(procedencia).get("formato") or "").lower() if procedencia else ""
+    if formato in ("xml", "html"):
+        return f"o recibo declara a cópia em {formato.upper()}, que não tem página"
+    if not txt or (intervalo and intervalo[0] == intervalo[1]) or FF in txt.read_text(encoding="utf-8", errors="replace"):
+        return ""
+    if intervalo:
+        return f"o texto não tem form feed, e o intervalo {intervalo[0]}–{intervalo[1]} do registro tem mais de uma página"
+    return "o texto não tem form feed, e o script não acha o intervalo de páginas na referência do registro"
 
 
 def _deslocamento(versao: str, intervalo: tuple[int, int] | None, txt: Path | None) -> tuple[int, str]:
@@ -243,7 +260,10 @@ def _deslocamento_achado(intervalo: tuple[int, int], pags: list[str]) -> int | N
 
 def pagina_impressa(indice: int, fonte: Fonte | None) -> str:
     """Página como o manuscrito a cita: a impressa, se o registro traz o intervalo e a página cai
-    dentro do artigo; senão 'da cópia', que é também o rótulo da capa e do que vem depois do artigo."""
+    dentro do artigo; senão 'da cópia', que é também o rótulo da capa e do que vem depois do artigo.
+    Quando o texto não diz a página de cada linha, o rótulo é 'sem paginação', e o bloco cita a seção."""
+    if fonte and fonte.sem_paginas:
+        return "sem paginação"
     if fonte and fonte.paginas and not _sem_paginacao(fonte.versao_copia):
         p = fonte.paginas[0] + indice - fonte.deslocamento
         if fonte.paginas[0] <= p <= fonte.paginas[1]:
@@ -278,7 +298,10 @@ def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
 
 def indice_de_pagina(pagina: int, fonte: Fonte | None, total: int) -> int:
     """Traduz o que o usuário pediu para o índice na cópia: página impressa se o registro dá o
-    intervalo e o número cai nele; senão, índice a partir de 1."""
+    intervalo e o número cai nele; senão, índice a partir de 1. A cópia sem paginação não tem página
+    que se peça: a única que ela tem é o texto inteiro."""
+    if fonte and fonte.sem_paginas:
+        raise SystemExit(f"sem paginação: {fonte.sem_paginas}; peça a janela por --termo ou --secao")
     if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not _sem_paginacao(fonte.versao_copia):
         return pagina - fonte.paginas[0] + fonte.deslocamento
     return pagina - 1
@@ -510,7 +533,8 @@ def main(argv: list[str] | None = None) -> int:
     if f.aviso:
         print(f"aviso: {f.ft}: {f.aviso}", file=sys.stderr)
     if a.cmd == "localizar":
-        print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento, "versao_copia": f.versao_copia,
+        print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento,
+                          **({"sem_paginas": f.sem_paginas} if f.sem_paginas else {}), "versao_copia": f.versao_copia,
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
                           "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
         if not f.txt:
@@ -527,7 +551,9 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "mapa":
         print(f"texto: {origem.relative_to(raiz)}")
         n, d = len(paginas(txt)), f.deslocamento
-        if d > 0 and not pagina_impressa(d, f).endswith("da cópia"):
+        if f.sem_paginas:
+            print(f"sem paginação: {f.sem_paginas}; o bloco cita a seção, \"(seção …)\", e não uma página")
+        elif d > 0 and not pagina_impressa(d, f).endswith("da cópia"):
             print(f"{n} páginas na cópia; a {pagina_impressa(d, f)} é a {d + 1}ª delas, e o que vem antes não é do artigo "
                   "(capa, folha de rosto) e leva o rótulo 'da cópia'")
         else:

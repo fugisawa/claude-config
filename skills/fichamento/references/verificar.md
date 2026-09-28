@@ -56,7 +56,7 @@ assim como proposta.
 
 ## Modelo do bloco
 
-Aspas duplas no bloco são lidas pelo validador como citação literal, que exige página; nas
+Aspas duplas no bloco são lidas pelo validador como citação literal, que exige página ou seção; nas
 linhas de alegação, de versão mais forte e de razão, escreva sem aspas ou em itálico.
 
 ```markdown

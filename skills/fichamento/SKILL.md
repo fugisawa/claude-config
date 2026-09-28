@@ -33,9 +33,11 @@ está em `references/pesquisa/plano-2026-09-26.md`.
   manuscrito ou crie e conclua o argumento. Por isso a saída desta skill é sempre **análise
   localizada na fonte**, nunca um parágrafo do artigo. Pedido de "escreve o parágrafo" dentro
   de um fichamento recebe "não": o que sai daqui é o que o autor precisa para escrevê-lo.
-- **Tudo com página.** Todo número e todo trecho no bloco carregam `(p. N)` da versão lida, ou
-  `(p. N da cópia)` quando a versão não tem a paginação do periódico. Um bloco sem nenhuma
-  âncora de página e sem nenhum "não consta" é um bloco feito do resumo, e o validador o recusa.
+- **Tudo com página.** Todo número e todo trecho no bloco carregam `(p. N)` da versão lida,
+  `(p. N da cópia)` quando a versão não tem a paginação do periódico, ou `(seção …)` quando a
+  cópia não tem página nenhuma, como a que vem de XML ou de HTML. Um bloco sem nenhuma
+  âncora, de página ou de seção, e sem nenhum "não consta" é um bloco feito do resumo, e o
+  validador o recusa.
 - **"Não consta na fonte" é resposta válida**, e muitas vezes a mais útil. A skill nunca completa
   com o que "deveria estar lá".
 - **O texto fica no disco; a janela entra no contexto.** O `fichar.py` dá o mapa de seções e
@@ -73,8 +75,9 @@ orçamento de leitura.
 
 1. **Localize.** `fichar.py localizar <FT>` diz o DOI, a cópia, o texto extraído, o intervalo
    de páginas impressas e o deslocamento, que é o número de páginas que a cópia traz antes do
-   artigo. Quando o `.procedencia.json` da cópia declara um texto no campo `texto`, é esse o
-   texto lido, mesmo que o caminho gravado ali seja o da outra máquina; se ele não está nesta
+   artigo; quando o texto não diz em que página está cada linha, a saída traz também o campo
+   `sem_paginas`, com o motivo. Quando o `.procedencia.json` da cópia declara um texto no campo
+   `texto`, é esse o texto lido, mesmo que o caminho gravado ali seja o da outra máquina; se ele não está nesta
    máquina, o script avisa e não lê outro no lugar, porque o texto com o nome do DOI pode ser
    outra versão da fonte. Sem cópia local, pare. Se o aviso diz que o texto declarado falta
    nesta máquina, traga-o da outra, porque uma nova abertura também pode trazer outra versão;
@@ -95,6 +98,15 @@ orçamento de leitura.
    em que a página citada pode estar deslocada até que a *Versão da cópia* declare a
    correspondência.
 
+   Há texto que não diz em que página está cada linha, e nele o rótulo é `sem paginação`. Isso
+   vale para a cópia que o recibo declara em XML, como a do PubMed Central e a do Europe PMC, ou
+   em HTML; vale também para o texto sem nenhum form feed, como a transcrição por OCR, salvo
+   quando o intervalo do registro tem uma página só. O `pdftotext` fecha toda página com form
+   feed; sem ele o texto inteiro é uma página, e numerá-la pelo intervalo do registro daria a
+   primeira página impressa a todas as linhas. Nesses casos a primeira linha do mapa começa por "sem paginação" e
+   diz o motivo, a janela recusa `--pagina`, que devolveria o texto inteiro, e o bloco cita a
+   seção, `(seção …)`.
+
    Se o texto veio em duas colunas embaralhadas pelo `pdftotext -layout` (o mapa mostra linhas
    com duas frases coladas), use `--corrido` no `mapa` e na `janela`: o script reextrai o PDF sem
    `-layout` uma vez, ao lado da cópia, fora do git.
@@ -103,8 +115,9 @@ orçamento de leitura.
    resultados e a discussão inteiros, por página, o que num artigo curto é quase tudo: a regra
    proíbe despejar o arquivo de uma vez, não ler o que o modo pede; `sintetizar` não abre a fonte.
    `fichar.py janela <FT> --pagina N` (a página impressa, quando o registro traz o intervalo; senão
-   o índice na cópia, e o `mapa` diz qual é a primeira), `--termo "x"` (repetível; busca tolerante
-   a sinal, vírgula decimal, espaço e hífen de fim de linha) ou `--secao "Results"`.
+   o índice na cópia, e o `mapa` diz qual é a primeira; na cópia sem paginação, o script recusa
+   `--pagina`), `--termo "x"` (repetível; busca tolerante a sinal, vírgula decimal, espaço e
+   hífen de fim de linha) ou `--secao "Results"`.
 4. **Escreva o bloco** no formato do `reference` do modo, num arquivo fora do repositório.
    Todo trecho literal é curto; o resto é paráfrase com página. O bloco fecha com
    `**Perguntas ao autor:**` e duas ou três perguntas que digam o que ele precisa abrir ou
@@ -122,7 +135,8 @@ orçamento de leitura.
 - Abre com o que se pediu (a pergunta, a alegação, o alvo da exploração), na forma exata.
 - Todo número e todo trecho literal levam `(p. N)`, ou `(p. N da cópia)` quando a versão lida não
   tem a paginação do periódico, ou `(seção …)` quando nem a cópia tem página, como o manuscrito
-  aceito em XML. Aspas duplas são citação de fonte; título, rótulo e nome de seção vão em itálico.
+  aceito em XML. O rótulo `sem paginação` da janela não é âncora, e o validador não o aceita no
+  lugar da seção. Aspas duplas são citação de fonte; título, rótulo e nome de seção vão em itálico.
 - Os rótulos do modo vêm em negrito, com os valores fixos que o validador conhece.
 - Quando a evidência é mista, diz que é mista; quando não há, diz "não consta na fonte".
 - Distingue o que a fonte **diz** do que o modelo **infere**; a inferência vem marcada como tal.

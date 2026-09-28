@@ -347,3 +347,89 @@ class FicharTextoDoRecibo(unittest.TestCase):
                 self._recibo(pasta + "teste-manual.pdf", pasta + "teste-manual.txt")
                 f = fichar.localizar("FT-teste-2020", self.raiz)
                 self.assertEqual(fichar.texto_corrido(f), self.copias / "teste-manual.corrido.txt")
+
+
+# ------------------------------------------------ cópia sem paginação (defeito de 28/09/2026)
+# O texto que vem do XML JATS do PubMed Central e do Europe PMC, ou de uma página HTML, não tem form
+# feed: a cópia inteira é uma página só, e o fichar.py a numerava pelo intervalo do registro. Toda
+# linha de Reyna e col. (2014) saía "p. 76", toda linha de Lynn e Barrett (2014) saía "p. 1663", e o
+# registro dessas fontes cita a seção.
+
+TXT_JATS = ("Introduction\n\nWe asked whether training improves accuracy.\n\nMethod\n\n"
+            "Forty-four investigators took part, d = -0.129.\n\nResults\n\nThe effect was significant, p < .01.\n")
+
+
+class FicharCopiaSemPaginacao(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.raiz = Path(self.tmp.name).resolve()
+        self.copias = self.raiz / "fontes" / "copias"; self.copias.mkdir(parents=True)
+        (self.raiz / "fontes" / "registro.md").write_text(REGISTRO, encoding="utf-8")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _copia(self, txt, formato):
+        (self.copias / "teste.txt").write_text(txt, encoding="utf-8")
+        (self.copias / "10-1000-teste.procedencia.json").write_text(json.dumps(
+            {"doi": "10.1000/teste", "arquivo": "teste." + formato, "texto": "teste.txt", "formato": formato}), encoding="utf-8")
+
+    def _rodar(self, *args):
+        saida, erro = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(saida), contextlib.redirect_stderr(erro):
+            fichar.main(["--raiz", str(self.raiz), *args])
+        return saida.getvalue(), erro.getvalue()
+
+    def test_xml_e_html_nao_ganham_pagina_impressa(self):
+        for formato in ("xml", "html"):   # como os recibos de Reyna e col. (2014) e de Mandel e Barnes (2014)
+            with self.subTest(formato=formato):
+                self._copia(TXT_JATS, formato)
+                saida = self._rodar("janela", "FT-teste-2020", "--termo", "Forty-four")[0]
+                self.assertIn("[sem paginação, linha 7] Forty-four", saida); self.assertNotIn("p. 469", saida)
+                saida = self._rodar("janela", "FT-teste-2020", "--secao", "Results")[0]
+                self.assertTrue(saida.startswith("[sem paginação] Results"), saida)
+
+    def _registro(self, registro):
+        (self.raiz / "fontes" / "registro.md").write_text(registro, encoding="utf-8")
+        return fichar.localizar("FT-teste-2020", self.raiz)
+
+    def test_texto_sem_form_feed_nao_ganha_pagina_impressa(self):
+        self._copia(TXT_JATS, "pdf")   # o recibo diz PDF, mas o texto não veio do pdftotext, que fecha toda página com form feed
+        self.assertEqual(fichar.pagina_impressa(0, self._registro(REGISTRO)), "sem paginação")   # e não "p. 469", num intervalo de doze
+
+    def test_artigo_de_uma_pagina_sem_form_feed_guarda_a_pagina(self):
+        self._copia(TXT_JATS, "pdf")   # a única página da cópia é a única do artigo
+        self.assertEqual(fichar.pagina_impressa(0, self._registro(REGISTRO.replace("469-480", "469-469"))), "p. 469")
+
+    def test_texto_sem_form_feed_nem_intervalo_nao_ganha_pagina_da_copia(self):
+        self._copia(TXT_JATS, "pdf")   # como a transcrição por OCR de Moore e Hoffman (2019), cujo intervalo o registro não dá ao script
+        f = self._registro(REGISTRO.replace(" 469-480.", ""))
+        self.assertIsNone(f.paginas); self.assertEqual(fichar.pagina_impressa(0, f), "sem paginação")   # e não "p. 1 da cópia", num PDF de 24 páginas
+
+    def test_mapa_diz_que_a_copia_nao_tem_paginacao(self):
+        self._copia(TXT_JATS, "xml")
+        linhas = self._rodar("mapa", "FT-teste-2020")[0].splitlines()
+        self.assertTrue(linhas[1].startswith("sem paginação: o recibo declara a cópia em XML"), linhas[1])
+        self.assertIn('"(seção …)"', linhas[1]); self.assertIn("   sem paginação  L5     Method", linhas)
+
+    def test_localizar_diz_que_a_copia_nao_tem_paginacao(self):
+        self._copia(TXT_JATS, "html")
+        d = json.loads(self._rodar("localizar", "FT-teste-2020")[0])
+        self.assertEqual(d.get("sem_paginas"), "o recibo declara a cópia em HTML, que não tem página")
+        self._copia(TXT, "pdf")   # a cópia paginada não ganha a chave, e o localizar dela sai como antes
+        self.assertNotIn("sem_paginas", json.loads(self._rodar("localizar", "FT-teste-2020")[0]))
+
+    def test_janela_por_pagina_recusa_a_copia_sem_paginacao(self):
+        self._copia(TXT_JATS, "xml")   # --pagina 469 devolvia o texto inteiro, com o rótulo "p. 469"
+        with self.assertRaises(SystemExit) as recusa:
+            fichar.indice_de_pagina(469, fichar.localizar("FT-teste-2020", self.raiz), 1)
+        self.assertIn("--termo", str(recusa.exception)); self.assertIn("--secao", str(recusa.exception))
+
+    def test_rotulo_sem_paginacao_nao_e_ancora(self):
+        copiado = BLOCO_OK.replace("(p. 469)", "(sem paginação)")   # o rótulo da janela não substitui a seção no bloco
+        self.assertTrue(any("sem página" in e for e in fichar.validar(copiado, "responder")))
+        self.assertEqual(fichar.validar(BLOCO_OK.replace("(p. 469)", "(seção Results)"), "responder"), [])
+
+    def test_manuscrito_sem_form_feed_tambem_e_sem_paginacao(self):
+        self._copia(TXT_JATS, "pdf")   # o rótulo 'da cópia' daria "p. 1 da cópia" a toda linha de um manuscrito de várias páginas
+        manuscrito = REGISTRO.replace("- **Tipo e revisão:** artigo", "- **Versão da cópia:** manuscrito aceito, sem a paginação do periódico\n- **Tipo e revisão:** artigo", 1)
+        self.assertEqual(fichar.pagina_impressa(0, self._registro(manuscrito)), "sem paginação")

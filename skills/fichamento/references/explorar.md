@@ -12,7 +12,8 @@ confirma nada; aponta onde olhar.
    da fonte. Escreva o alvo no topo do bloco.
 2. **Primeira passada de Keshav**: título, resumo, introdução, cabeçalhos, figuras e tabelas
    por alto, conclusão. `fichar.py mapa` dá os cabeçalhos; `janela --pagina 1` e a última página
-   dão resumo e conclusão. Em cópia de duas colunas, use `--corrido` no `mapa` e na `janela`, e
+   dão resumo e conclusão, e na cópia sem paginação, que o `mapa` anuncia na primeira linha,
+   `janela --secao` faz as vezes da página. Em cópia de duas colunas, use `--corrido` no `mapa` e na `janela`, e
    confirme a página de cada trecho pelo `janela --termo` antes de gravar. Esse é o mínimo. Em artigo curto (até umas quinze páginas de texto),
    leia-o inteiro por páginas, porque a conexão inesperada costuma estar no corpo e não no resumo;
    em livro ou relatório longo, fique na primeira passada e nas seções que o mapa indicar. O que
@@ -36,7 +37,7 @@ confirma nada; aponta onde olhar.
 
 **Tipo de fonte:** <tipo> · **Mapa:** <seções principais com página>
 
-**Conexões candidatas.** (a página é a impressa, `(p. N)`, ou `(p. N da cópia)` quando a versão lida não tem a paginação do periódico, como a prova tipográfica ou o manuscrito aceito)
+**Conexões candidatas.** (a âncora é a página impressa, `(p. N)`; a página da cópia, `(p. N da cópia)`, quando a versão lida não tem a paginação do periódico, como a prova tipográfica ou o manuscrito aceito; ou a seção, `(seção …)`, quando a cópia não tem página nenhuma, como a que vem de XML ou de HTML)
 - <afirmação do alvo> ← "<trecho curto>" (p. N) (apoia) — <o que estende ou refina>
 - <afirmação do alvo> ← "<trecho curto>" (p. N) (contraria) — <em quê>
 - <afirmação do alvo> ← <paráfrase> (p. N) (menciona) — <por que vale olhar>
