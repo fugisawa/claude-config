@@ -164,16 +164,18 @@ consulte-o pelo navegador da app.
 Por artigo, o `.procedencia.json` e o parágrafo `Fonte:` trazem: título, DOI, versão obtida,
 licença, rota e etiqueta, onde está salvo, hash, páginas, data da tentativa e da conferência; e,
 quando não abriu, o diário, as pendências e a data de reavaliar. Uma linha de ressalva entra
-sozinha quando a versão não é a publicada, e outra quando a rota é C. Quando a cópia chega
-depois de uma tentativa que falhou, e o recibo dela está no destino (por padrão, a pasta da
-cópia), o `registrar` substitui esse recibo e herda dele o diário e a data em que a tentativa
-foi feita, porque é a mesma busca que terminou. Isso vale só para o recibo do mesmo DOI. O nome
-do recibo sai do DOI, com a pontuação trocada por hífen, e por isso dois DOIs que só diferem na
-pontuação, como `10.1080/02684527.2012.699290` e `10.1080/02684527/2012/699290`, dão o mesmo
-nome de arquivo. Diante do recibo de outro DOI, o `registrar` para antes de tocar em arquivo e de
-consultar a Crossref e o OpenAlex, porque, se seguisse, herdaria o diário de uma tentativa alheia
-ou poria o recibo novo no lugar do de outra cópia; a saída é outro `--destino`. No `registrar`, o
-`.txt` que já está ao lado da cópia não se sobrescreve sem `--sobrescrever-texto`.
+sozinha quando a versão não é a publicada, e outra quando a rota é C.
+
+Quando a cópia chega depois de uma tentativa que falhou, e o recibo dela está no destino (por
+padrão, a pasta da cópia), o `registrar` substitui esse recibo e herda dele o diário e a data em
+que a tentativa foi feita, porque é a mesma busca que terminou. Isso vale só para o recibo do
+mesmo DOI. O nome do recibo sai do DOI, com a pontuação trocada por hífen, e por isso dois DOIs
+que só diferem na pontuação, como `10.1080/02684527.2012.699290` e `10.1080/02684527/2012/699290`,
+dão o mesmo nome de arquivo. Diante do recibo de outro DOI, o `registrar` para antes de tocar em
+arquivo e de consultar a Crossref e o OpenAlex, porque, se seguisse, herdaria o diário de uma
+tentativa alheia ou poria o recibo novo no lugar do de outra cópia; a saída é outro `--destino`.
+No `registrar`, o `.txt` que já está ao lado da cópia não se sobrescreve sem
+`--sobrescrever-texto`.
 
 O `abrir` também lê o recibo que está no destino antes de rodar a escada. Quando esse recibo
 registra uma cópia aberta, venha ela da escada ou do `registrar`, o `abrir` para sem consultar a

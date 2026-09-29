@@ -20,7 +20,10 @@ Saída humana por padrão; `--json` devolve o dicionário inteiro.
 mesma procedência do `abrir`, com a etiqueta que você declara (A, B ou C; D não se registra).
 A página HTML entra com `--texto`, o texto já extraído dela, que não se reextrai; o `.txt` que
 já existe ao lado da cópia só se sobrescreve com `--sobrescrever-texto`; e o recibo de uma
-tentativa que falhou, se estiver no destino, passa ao novo o diário e a data da tentativa.
+tentativa que falhou, se estiver no destino e for do mesmo DOI, passa ao novo o diário e a data
+da tentativa. O recibo de outro DOI com o mesmo nome de arquivo, que aparece quando dois DOIs só
+diferem na pontuação, interrompe o registro antes de tocar em arquivo e de consultar a rede; a
+saída é outro `--destino`.
 
 O `abrir` lê, antes de rodar a escada, o recibo que está no destino. Se o recibo registra uma cópia
 aberta, venha ela da escada ou do `registrar`, o `abrir` se interrompe antes de consultar a rede;

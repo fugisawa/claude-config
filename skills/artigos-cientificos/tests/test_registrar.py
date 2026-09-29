@@ -230,8 +230,8 @@ class CliRegistrar(Pasta):
 class ReciboDeOutroDoi(Pasta):
     """Dois DOIs que só diferem na pontuação, como 10.1073/pnas.1406138111 e 10.1073/pnas/1406138111, dão o mesmo
     nome de recibo. Sem a recusa, o `registrar` de um herdaria o diário da tentativa do outro, ou gravaria o seu
-    recibo no lugar do da cópia do outro; o `abrir` já o recusava desde 28/09/2026. O DOI que só difere na caixa
-    é o mesmo DOI."""
+    recibo no lugar do da cópia do outro; o `abrir` já recusava o recibo de outro DOI desde 28/09/2026. O DOI que
+    só difere na caixa é o mesmo DOI."""
     def setUp(self):
         super().setUp()
         self.html = self.pasta / "mandel-barnes-2014-pmc.html"
