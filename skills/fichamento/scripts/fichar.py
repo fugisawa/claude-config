@@ -6,9 +6,9 @@ registro (ou de um DOI, ou de um caminho); dá o mapa de páginas e de seções;
 texto por página, por termo ou por seção, para que o texto integral fique no disco e só a janela
 entre no contexto; calcula a página impressa a partir do form feed, do intervalo do registro e das
 páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório), ou pela
-numeração impressa na própria cópia, quando o registro cita por ela, como na publicação antecipada e na
-reimpressão; diz "sem paginação" quando o texto não tem página, como o que vem de XML, de HTML ou de
-OCR sem form feed; grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar
+numeração impressa na própria cópia, quando o registro cita por ela, como na publicação antecipada, na
+reimpressão, na prova, no manuscrito e na pré-publicação; diz "sem paginação" quando o texto não tem
+página, como o que vem de XML, de HTML ou de OCR sem form feed; grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar
 em mais nada; e valida um bloco contra o contrato da skill antes de gravá-lo.
 
 Não usa rede. A busca tolerante por termo vem do `texto.py` da skill `artigos-cientificos`,
@@ -69,6 +69,7 @@ class Fonte:
     aviso: str = ""                   # o texto declarado no recibo falta aqui, ou o deslocamento está em dúvida
     sem_paginas: str = ""             # por que o texto não diz a página de cada linha: cópia em XML ou HTML, texto sem form feed
     paginas_da_copia: tuple[int, int] | None = None   # a numeração impressa na própria cópia, quando o registro cita por ela
+    correspondencias: tuple[tuple[int, int], ...] = ()   # (índice no PDF, número impresso) de cada trecho dessa numeração, em ordem
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -154,12 +155,14 @@ def localizar(ft: str, raiz: Path) -> Fonte:
     txt, falta = _txt_de(proc, raiz) if proc else (None, "")
     pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
     sem = _sem_paginas(proc, pags, txt); da_copia = None
-    if _cita_a_copia(versao) and txt and not sem:
-        da_copia, deslocamento, aviso = _numeracao_da_copia(versao, txt)
+    correspondencias = ()
+    if _pela_copia(versao, pags) and txt and not sem:
+        da_copia, deslocamento, correspondencias, aviso = _numeracao_da_copia(versao, txt)
     else:
         deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
     return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao, txt=txt, procedencia=proc,
-                 deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=sem, paginas_da_copia=da_copia)
+                 deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=sem, paginas_da_copia=da_copia,
+                 correspondencias=correspondencias)
 
 
 # ---------------------------------------------------------------- páginas e mapa
@@ -204,15 +207,24 @@ _PROVA_OU_MANUSCRITO = ("prova", "manuscrito", "pré")   # como começa a Versã
 def _cita_a_copia(versao: str) -> bool:
     """A Versão da cópia diz que as páginas citadas são as impressas na própria cópia, e não as do periódico,
     como na publicação antecipada e na reimpressão: 'as páginas citadas abaixo são as da cópia', 'as
-    localizações citam a página da reimpressão'. A prova, o manuscrito e a pré-publicação ficam de fora
-    mesmo quando o campo diz o mesmo, como o de Tricot e Sweller (2014): o rótulo deles continua sendo a
-    posição no PDF, como se apresentou ao autor na decisão de 28/09/2026."""
-    return bool(_CITA_A_COPIA.search(versao)) and not versao.lower().startswith(_PROVA_OU_MANUSCRITO)
+    localizações citam a página da reimpressão'."""
+    return bool(_CITA_A_COPIA.search(versao))
+
+
+def _pela_copia(versao: str, intervalo: tuple[int, int] | None) -> bool:
+    """O registro cita a numeração impressa na própria cópia, e não a do periódico, em três casos. A Versão da
+    cópia diz isso com as palavras que _cita_a_copia reconhece. A cópia é prova, manuscrito ou pré-publicação,
+    cuja Versão da cópia começa por essas palavras: o autor decidiu em 29/09/2026 que elas também citam o
+    número impresso, e não a posição no PDF. Ou a referência não traz o intervalo de páginas do periódico e a
+    Versão da cópia declara 'a página 2 do PDF é a página 1', que é então a única numeração que as afirmações
+    podem citar, como no artigo que a revista identifica por número (Schoenegger e col., 2024)."""
+    return (_cita_a_copia(versao) or versao.lower().startswith(_PROVA_OU_MANUSCRITO)
+            or (intervalo is None and bool(_DECLARACAO_PDF.search(versao))))
 
 
 def _sem_paginacao(versao: str) -> bool:
     """A versão lida não tem a paginação do periódico: prova, manuscrito, pré-publicação, e a cópia
-    que o registro cita pela numeração impressa nela."""
+    que o registro cita pela numeração impressa nela, como a publicação antecipada e a reimpressão."""
     return versao.lower().startswith(_PROVA_OU_MANUSCRITO) or _cita_a_copia(versao)
 
 
@@ -295,33 +307,38 @@ def _deslocamento_achado(intervalo: tuple[int, int], pags: list[str]) -> int | N
     return _mais_votado(votos)
 
 
-def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None, int, str]:
+def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None, int, tuple[tuple[int, int], ...], str]:
     """A numeração impressa na própria cópia, quando o registro cita por ela: o intervalo, as páginas do
-    PDF antes da primeira impressa e o aviso. A primeira página impressa sai do que a Versão da cópia
-    declara, 'a página 2 do PDF é a página 1'; senão, dos números que o cabeçalho e o pé imprimem; sem
-    nenhum dos dois, o N do rótulo 'p. N da cópia' é a posição no PDF, e o aviso diz como declarar. A
-    numeração vai até a última página com texto, porque há página cujo número não chega à camada de
-    texto, como a p. 13 de Harrison e col. (2020)."""
+    PDF antes da primeira impressa, as correspondências e o aviso. A primeira página impressa sai do que a
+    Versão da cópia declara, 'a página 2 do PDF é a página 1'; senão, dos números que o cabeçalho e o pé
+    imprimem; sem nenhum dos dois, o N do rótulo 'p. N da cópia' é a posição no PDF, e o aviso diz como
+    declarar. A Versão da cópia pode declarar mais de uma correspondência, quando a numeração se repete ou
+    salta, como o 12 repetido na página da tabela 2 de Costa, Miranda e Melo (2022), e cada uma vale da sua
+    página do PDF em diante. A numeração vai até a última página com texto, porque há página cujo número
+    não chega à camada de texto, como a p. 13 de Harrison e col. (2020)."""
     pags = paginas(txt.read_text(encoding="utf-8", errors="replace"))
     fim = max((i for i, p in enumerate(pags) if p.strip()), default=0)
     achada = _numeracao_achada(pags)
-    m = _DECLARACAO_PDF.search(versao)
-    if m:
-        primeira, deslocamento = int(m.group(2)), int(m.group(1)) - 1
-        aviso = ""
-        if achada and achada[0] - achada[1] != primeira - deslocamento:   # número impresso menos índice, pelas duas fontes
+    declaradas = sorted((int(pdf) - 1, int(numero)) for pdf, numero in _DECLARACAO_PDF.findall(versao))
+    aviso = ""
+    if declaradas:
+        correspondencias = tuple(declaradas)
+        deslocamento, primeira = correspondencias[0]
+        if achada and achada[0] - achada[1] not in {n - i for i, n in correspondencias}:   # número impresso menos índice, pelas duas fontes
             aviso = (f"a Versão da cópia do registro põe a p. {primeira} da cópia na página {deslocamento + 1} do PDF, e os números "
                      f"impressos no cabeçalho e no pé a põem na página {primeira - achada[0] + achada[1] + 1} do PDF; vale o registro, "
                      "porque as afirmações dele citam as páginas por essa correspondência")
     elif achada:
-        (primeira, deslocamento), aviso = achada, ""
+        primeira, deslocamento = achada
+        correspondencias = ((deslocamento, primeira),)
     else:
-        return None, 0, ("a Versão da cópia do registro diz que as páginas citadas são as impressas na cópia, e nem ela nem os "
-                         "números do cabeçalho e do pé dizem em que página do PDF a numeração impressa começa; supõe-se que na "
-                         "primeira, e por isso o N do rótulo \"p. N da cópia\" é a posição da página no PDF. Se houver capa antes "
-                         "do artigo, declare na Versão da cópia em que página do PDF está a primeira página impressa, como "
-                         "\"a página 2 do PDF é a página 1\"")
-    return (primeira, primeira + fim - deslocamento), deslocamento, aviso
+        return None, 0, (), ("o registro cita pelo número impresso na cópia, e nem a Versão da cópia nem os números do cabeçalho e "
+                             "do pé dizem em que página do PDF a numeração impressa começa; supõe-se que na primeira, e por isso o N do "
+                             "rótulo \"p. N da cópia\" é a posição da página no PDF. Se houver página sem número antes do texto, como "
+                             "a capa, declare na Versão da cópia em que página do PDF está a primeira página impressa, como "
+                             "\"a página 2 do PDF é a página 1\"")
+    ultimo_indice, ultimo_numero = correspondencias[-1]
+    return (primeira, ultimo_numero + fim - ultimo_indice), deslocamento, correspondencias, aviso
 
 
 def _numeracao_achada(pags: list[str]) -> tuple[int, int] | None:
@@ -344,21 +361,48 @@ def _numeracao_achada(pags: list[str]) -> tuple[int, int] | None:
 def pagina_impressa(indice: int, fonte: Fonte | None) -> str:
     """Página como o manuscrito a cita: a impressa, se o registro traz o intervalo e a página cai
     dentro do artigo; senão 'da cópia', que é também o rótulo da capa e do que vem depois do artigo.
-    Quando o registro cita a numeração impressa na própria cópia, como a da publicação antecipada ou a
-    da reimpressão, o rótulo é 'p. N da cópia' com esse número, e a página fora dela, como a capa, leva
-    'p. N do PDF', que é a posição no arquivo.
+    Quando o registro cita a numeração impressa na própria cópia, como a da publicação antecipada, a da
+    reimpressão e a do manuscrito, o rótulo é 'p. N da cópia' com esse número, e a página fora dela, como a
+    capa, leva 'p. N do PDF', que é a posição no arquivo.
     Quando o texto não diz a página de cada linha, o rótulo é 'sem paginação', e o bloco cita a seção."""
     if fonte and fonte.sem_paginas:
         return "sem paginação"
     if fonte and fonte.paginas_da_copia:
-        a, b = fonte.paginas_da_copia
-        p = a + indice - fonte.deslocamento
-        return f"p. {p} da cópia" if a <= p <= b else f"p. {indice + 1} do PDF"
+        p = _numero_da_copia(indice, fonte)
+        return f"p. {p} da cópia" if p is not None else f"p. {indice + 1} do PDF"
     if fonte and fonte.paginas and not _sem_paginacao(fonte.versao_copia):
         p = fonte.paginas[0] + indice - fonte.deslocamento
         if fonte.paginas[0] <= p <= fonte.paginas[1]:
             return f"p. {p}"
     return f"p. {indice + 1} da cópia"
+
+
+def _correspondencias(fonte: Fonte) -> tuple[tuple[int, int], ...]:
+    """As correspondências entre índice no PDF e número impresso; a Fonte montada à mão, só com o intervalo e o
+    deslocamento, tem uma só."""
+    return fonte.correspondencias or ((fonte.deslocamento, fonte.paginas_da_copia[0]),)
+
+
+def _numero_da_copia(indice: int, fonte: Fonte) -> int | None:
+    """O número impresso na página do índice dado, pela última correspondência que começa nela ou antes dela;
+    None antes da primeira, como na capa, e depois do fim da numeração."""
+    antes = [(i, n) for i, n in _correspondencias(fonte) if i <= indice]
+    if not antes:
+        return None
+    i, n = antes[-1]
+    p = n + indice - i
+    return p if p <= fonte.paginas_da_copia[1] else None
+
+
+def _indice_da_copia(pagina: int, fonte: Fonte) -> int | None:
+    """O índice no PDF da página impressa pedida; quando o número se repete, a primeira página que o traz.
+    None quando nenhuma correspondência chega a ele, como no número que a numeração salta."""
+    corr = _correspondencias(fonte)
+    for k, (i, n) in enumerate(corr):
+        indice = i + pagina - n
+        if pagina >= n and (k + 1 == len(corr) or indice < corr[k + 1][0]):
+            return indice
+    return None
 
 
 _TITULO = re.compile(r"^\s*(?:[0-9]+(?:\.[0-9]+)*\.?\s+)?([A-ZÀ-Ú][A-Za-zÀ-ú' ,:\-]{2,70})\s*$")
@@ -394,7 +438,9 @@ def indice_de_pagina(pagina: int, fonte: Fonte | None, total: int) -> int:
     if fonte and fonte.sem_paginas:
         raise SystemExit(f"sem paginação: {fonte.sem_paginas}; peça a janela por --termo ou --secao")
     if fonte and fonte.paginas_da_copia and fonte.paginas_da_copia[0] <= pagina <= fonte.paginas_da_copia[1]:
-        return pagina - fonte.paginas_da_copia[0] + fonte.deslocamento
+        indice = _indice_da_copia(pagina, fonte)
+        if indice is not None:
+            return indice
     if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not _sem_paginacao(fonte.versao_copia):
         return pagina - fonte.paginas[0] + fonte.deslocamento
     return pagina - 1
@@ -629,7 +675,9 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "localizar":
         print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento,
                           **({"sem_paginas": f.sem_paginas} if f.sem_paginas else {}),
-                          **({"paginas_da_copia": f.paginas_da_copia} if f.paginas_da_copia else {}), "versao_copia": f.versao_copia,
+                          **({"paginas_da_copia": f.paginas_da_copia} if f.paginas_da_copia else {}),
+                          **({"correspondencias": [[i + 1, n] for i, n in f.correspondencias]} if len(f.correspondencias) > 1 else {}),
+                          "versao_copia": f.versao_copia,
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
                           "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
         if not f.txt:
@@ -649,8 +697,9 @@ def main(argv: list[str] | None = None) -> int:
         if f.sem_paginas:
             print(f"sem paginação: {f.sem_paginas}; o bloco cita a seção, \"(seção …)\", e não uma página")
         elif f.paginas_da_copia:
+            mudancas = "".join(f"; a correspondência muda na posição {i + 1} do PDF, que é a p. {m} da cópia" for i, m in f.correspondencias[1:])
             print(f"{n} páginas no PDF; o registro cita a numeração impressa na cópia, e não a do periódico: a "
-                  f"{pagina_impressa(d, f)} é a {d + 1}ª delas" + (", e o que vem antes leva o rótulo 'do PDF'" if d > 0 else ""))
+                  f"{pagina_impressa(d, f)} é a {d + 1}ª delas" + (", e o que vem antes leva o rótulo 'do PDF'" if d > 0 else "") + mudancas)
         elif d > 0 and not pagina_impressa(d, f).endswith("da cópia"):
             print(f"{n} páginas na cópia; a {pagina_impressa(d, f)} é a {d + 1}ª delas, e o que vem antes não é do artigo "
                   "(capa, folha de rosto) e leva o rótulo 'da cópia'")

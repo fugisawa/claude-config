@@ -120,10 +120,19 @@ orçamento de leitura.
    a numeração começa. A numeração vai até a última página com texto, porque há página cujo
    número impresso não passa para o texto extraído.
 
-   Nas provas, nos manuscritos e nas pré-publicações, cuja *Versão da cópia* começa por "prova",
-   "manuscrito" ou "pré", o rótulo `(p. N da cópia)` continua sendo a posição no PDF, mesmo quando
-   o campo diz que as localizações citam a página da cópia. Essa posição só coincide com o número
-   impresso quando o PDF começa na primeira página do texto.
+   As provas, os manuscritos e as pré-publicações, cuja *Versão da cópia* começa por "prova",
+   "manuscrito" ou "pré", seguem a mesma regra desde 29/09/2026, quando o autor decidiu que o
+   registro cita nelas o número impresso, e não a posição no PDF: a capa do repositório e a folha
+   da editora antes do texto levam `(p. N do PDF)`, e o resto leva `(p. N da cópia)`, com o número
+   impresso. A *Versão da cópia* pode declarar mais de uma correspondência, quando a numeração se
+   repete ou salta, e cada uma vale da sua página do PDF em diante: a de Costa, Miranda e Melo
+   (2022) declara "a página 2 do PDF é a página 1" e "a página 14 do PDF é a página 12", porque a
+   página da tabela 2 repete o 12. Nesse caso duas páginas levam o mesmo rótulo, `--pagina 12`
+   abre a primeira delas, e o mapa diz em que posição do PDF a correspondência muda.
+
+   A declaração vale também quando a referência não traz o intervalo de páginas do periódico, como
+   no artigo que a revista identifica por um número (Schoenegger e col., 2024) e no relatório lido
+   no lugar de um livro: o rótulo é `(p. N da cópia)`, com o número que a declaração dá.
 
    Há texto que não diz em que página está cada linha, e nele o rótulo é `sem paginação`. Isso
    vale para a cópia que o recibo declara em XML, como a do PubMed Central e a do Europe PMC, ou

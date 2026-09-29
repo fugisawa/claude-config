@@ -244,10 +244,11 @@ class FicharCapaAntesDoArtigo(unittest.TestCase):
         self._fonte(TXT_CAPA, self._registro_com_versao("PDF da versão publicada; a página 1 do PDF é a página 469"))
         self.assertIn("vale o registro", self._rodar("mapa", "FT-teste-2020")[1])
 
-    def test_sem_intervalo_a_declaracao_nao_da_pagina_impressa(self):
+    def test_sem_intervalo_a_declaracao_vale_e_a_divergencia_aparece(self):
         sem_intervalo = self._registro_com_versao("PDF da versão publicada; a página 2 do PDF é a página 1").replace(" 469-480.", "")
-        f = self._fonte(TXT_CAPA, sem_intervalo)   # a referência sem intervalo, como a de FT-schoenegger-2024
-        self.assertIsNone(f.paginas); self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia")
+        f = self._fonte(TXT_CAPA, sem_intervalo)   # a referência sem intervalo, como a de FT-schoenegger-2024, e a cópia imprime 470 a 472
+        self.assertIsNone(f.paginas); self.assertEqual(fichar.pagina_impressa(1, f), "p. 1 da cópia")   # e não a posição, "p. 2 da cópia"
+        self.assertIn("vale o registro", f.aviso)   # até 29/09/2026 a declaração sem intervalo era ignorada
 
     def test_dois_numeros_alinhados_por_acaso_nao_bastam(self):
         negativo = "\f".join(["Capa\n\nPeriódico, pp. 469 a 480\n", "471\n\nTABLE 1 Participant ID\n", "472\n\nTABLE 1 (cont.)\n"])
@@ -255,10 +256,11 @@ class FicharCapaAntesDoArtigo(unittest.TestCase):
         positivo = "\f".join(["Title Page\n", "METHOD\n", "470 participants\n", "471 participants\n"])
         self.assertEqual(fichar.pagina_impressa(2, self._fonte(positivo)), "p. 471")   # nem dois votos em 1
 
-    def test_versao_sem_paginacao_nao_avisa(self):
+    def test_prova_segue_a_declaracao_com_o_rotulo_da_copia(self):
         prova = self._registro_com_versao("prova tipográfica da editora, sem a paginação do periódico; a página 1 do PDF é a página 469")
-        f = self._fonte(TXT_CAPA, prova)   # os cabeçalhos discordam da declaração, mas o rótulo é sempre 'da cópia'
-        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia"); self.assertEqual(f.aviso, "")
+        f = self._fonte(TXT_CAPA, prova)   # até 29/09/2026 a prova ficava na posição, "p. 2 da cópia", sem aviso
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 470 da cópia")   # o número que o registro declara, e não o do periódico, "p. 470"
+        self.assertIn("vale o registro", f.aviso)   # os cabeçalhos põem a p. 470 na página 3 do PDF
 
     def test_pagina_a_mais_sem_indicio_avisa(self):
         sem_cabecalho = "Repositório institucional\n\nUm artigo\n\f" + TXT   # quatro páginas com texto
@@ -465,6 +467,11 @@ TXT_REIMPRESSAO = "\f".join([
 REIMPRESSAO = ("reimpressão integral do artigo em outra revista, pp. 35–38; o texto é o publicado, mas a paginação é a "
                "da reimpressão, e as localizações abaixo citam a página da reimpressão.")
 
+TXT_REPETIDO = "\f".join(["Repositório institucional\n\nUm artigo\n"] +
+                         [f"{n}\t\tAna Teste\n\nTexto da seção.\n" for n in (1, 2, 3, 3, 4, 5, 6)]) + "\f"
+REPETIDO = ("manuscrito aceito, com a capa do repositório; a página 2 do PDF é a página 1, e a página 5 do PDF é a página 3, "
+            "que se repete; as localizações citam a página impressa no manuscrito")   # como Costa, Miranda e Melo (2022), cuja página da tabela 2 repete o 12
+
 
 class FicharNumeracaoDaCopia(unittest.TestCase):
     def setUp(self):
@@ -476,8 +483,10 @@ class FicharNumeracaoDaCopia(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def _fonte(self, txt, versao):
+    def _fonte(self, txt, versao, sem_intervalo=False):
         registro = REGISTRO.replace("- **Tipo e revisão:** artigo", f"- **Versão da cópia:** {versao}\n- **Tipo e revisão:** artigo", 1)
+        if sem_intervalo:   # como a Science Advances, que identifica o artigo por um número, e o relatório lido no lugar de um livro
+            registro = registro.replace("*Periódico* 1(1), 469-480. DOI", "*Periódico* 1(1), e123. DOI", 1)
         (self.raiz / "fontes" / "registro.md").write_text(registro, encoding="utf-8")
         (self.raiz / "fontes" / "copias" / "teste.txt").write_text(txt, encoding="utf-8")
         return fichar.localizar("FT-teste-2020", self.raiz)
@@ -534,11 +543,46 @@ class FicharNumeracaoDaCopia(unittest.TestCase):
         f = self._fonte(com_capa, convertida)
         self.assertEqual(fichar.pagina_impressa(1, f), "p. 469"); self.assertIsNone(f.paginas_da_copia)
 
-    def test_manuscrito_que_cita_a_pagina_da_copia_fica_na_posicao(self):
+    def test_versao_anterior_a_publicacao_com_capa_cita_o_numero_impresso(self):
         com_capa = "Repositório institucional\n\nUm artigo\n\f" + TXT_ANTECIPADO   # a capa e a numeração de 1 a 4 no cabeçalho
-        manuscrito = "manuscrito do autor, com a capa do repositório, e as localizações citam a página da cópia"   # como Tricot e Sweller (2014), que não tem capa
-        f = self._fonte(com_capa, manuscrito)   # provas e manuscritos ficam como estavam, como se apresentou ao autor
-        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia"); self.assertIsNone(f.paginas_da_copia)
+        for versao in ("manuscrito aceito, com a folha da editora antes do texto, e as localizações citam a página impressa no manuscrito",   # como Brem e col. (2018)
+                       "prova tipográfica da editora, com a capa do repositório, sem a paginação do periódico",
+                       "pré-publicação, com a capa do repositório"):
+            with self.subTest(versao=versao.split(",")[0]):   # até 29/09/2026 as três ficavam na posição: "p. 2 da cópia" na p. 1
+                f = self._fonte(com_capa, versao)
+                self.assertEqual([fichar.pagina_impressa(i, f) for i in range(3)], ["p. 1 do PDF", "p. 1 da cópia", "p. 2 da cópia"])
+
+    # A decisão do autor de 29/09/2026 estendeu a regra do número impresso às provas, aos manuscritos e às
+    # pré-publicações, e a conferência do mesmo dia achou a declaração ignorada quando a referência não traz o
+    # intervalo de páginas: a Versão da cópia de Schoenegger e col. (2024) diz "a página 2 do PDF é a página 1",
+    # e o script rotulava a p. 1 do artigo como "p. 2 da cópia", a posição no PDF.
+
+    def test_referencia_sem_intervalo_le_a_declaracao(self):
+        com_capa = "Repositório institucional\n\nUm artigo\n\f" + TXT   # a capa e três páginas sem número impresso
+        publicada = "PDF da versão publicada, com a capa do repositório; a página 2 do PDF é a página 1, e as localizações citam a página do artigo"
+        f = self._fonte(com_capa, publicada, sem_intervalo=True)
+        self.assertEqual([fichar.pagina_impressa(i, f) for i in range(4)], ["p. 1 do PDF", "p. 1 da cópia", "p. 2 da cópia", "p. 3 da cópia"])
+        self.assertEqual(fichar.indice_de_pagina(3, f, 5), 3)   # --pagina 3 abre a última página, e não a 3ª do PDF
+
+    def test_numeracao_que_se_repete_pede_duas_declaracoes(self):
+        f = self._fonte(TXT_REPETIDO, REPETIDO)
+        self.assertEqual([fichar.pagina_impressa(i, f) for i in range(8)],
+                         ["p. 1 do PDF", "p. 1 da cópia", "p. 2 da cópia", "p. 3 da cópia", "p. 3 da cópia", "p. 4 da cópia", "p. 5 da cópia", "p. 6 da cópia"])
+        self.assertEqual(f.aviso, "")   # os cabeçalhos concordam com a segunda declaração, que vale da página 5 do PDF em diante
+        self.assertEqual(fichar.indice_de_pagina(5, f, 9), 6)   # --pagina 5 abre a 7ª página do PDF
+
+    def test_manuscrito_sem_numero_impresso_fica_na_posicao_e_avisa_sem_atribuir_frase_ao_registro(self):
+        f = self._fonte(TXT, "manuscrito do autor, gerado de TeX, sem a paginação do periódico")   # como Laskov e col. (2005): nenhuma página traz número
+        self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia")   # a posição, como antes de 29/09/2026
+        self.assertNotIn("diz que as páginas citadas são as impressas", f.aviso)   # a Versão da cópia deste não diz isso
+        self.assertIn('"a página 2 do PDF é a página 1"', f.aviso)
+
+    def test_mapa_e_localizar_mostram_a_segunda_correspondencia(self):
+        self._fonte(TXT_REPETIDO, REPETIDO)
+        d = json.loads(self._rodar("localizar", "FT-teste-2020")[0])
+        self.assertEqual(d.get("correspondencias"), [[2, 1], [5, 3]])   # posição no PDF e número impresso de cada trecho
+        linha = self._rodar("mapa", "FT-teste-2020")[0].splitlines()[1]   # quem abre a cópia fica sabendo que o 3 se repete
+        self.assertIn("posição 5 do PDF", linha); self.assertIn("p. 3 da cópia", linha)
 
     def test_copia_sem_paginacao_nao_ganha_numeracao_da_copia(self):
         (self.raiz / "fontes" / "copias" / "10-1000-teste.procedencia.json").write_text(json.dumps(
