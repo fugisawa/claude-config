@@ -7,6 +7,11 @@ metadata:
   confidence: alta (duas ocorrências na mesma sessão, ambas produzindo saída errada calada)
 ---
 
+> **Estendida por [[conserto-de-leitor-vale-para-os-irmaos]] em 29/09/2026**, com o caso dos
+> leitores que já existem e moram em repositórios diferentes, onde o comentário ao lado da
+> regra não bastou: o defeito achado num leitor estava nos irmãos, e cada irmão virou um
+> conserto novo. A extensão não contradiz nada daqui — acrescenta.
+
 **O padrão.** Uma regra que vale em dois lugares e está escrita em dois lugares **não fica
 igual**. E a divergência não estoura: ela produz saída errada que parece certa, porque cada
 cópia está internamente coerente. Foi o que aconteceu duas vezes numa sessão só, com poucas
