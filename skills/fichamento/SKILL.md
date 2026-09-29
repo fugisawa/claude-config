@@ -79,14 +79,32 @@ orçamento de leitura.
    o número de páginas que a cópia traz antes do artigo; quando o texto não diz em que página
    está cada linha, a saída traz também o campo `sem_paginas`, com o motivo. Quando o registro
    cita a numeração impressa na própria cópia, e não a do periódico, a saída traz ainda o campo
-   `paginas_da_copia`, com a primeira e a última página dessa numeração. Quando o
-   `.procedencia.json` da cópia declara um texto no campo `texto`, é esse o texto lido, mesmo que
-   o caminho gravado ali seja o da outra máquina; se ele não está nesta máquina, o script avisa e
-   não lê outro no lugar, porque o texto com o nome do DOI pode ser outra versão da fonte. Sem
-   cópia local, pare. Se o aviso diz que o texto declarado falta nesta máquina, traga-o da outra,
-   porque uma nova abertura também pode trazer outra versão; sem esse aviso, a rota é
-   `artigo.py abrir` ou `registrar` da `artigos-cientificos`. Ler o resumo no lugar do texto não
-   é opção.
+   `paginas_da_copia`, com a primeira e a última página dessa numeração.
+
+   Quando o recibo da cópia, o `.procedencia.json` que a `artigos-cientificos` grava ao lado dela,
+   declara um texto no campo `texto`, é esse o texto lido, mesmo que o caminho gravado ali seja o
+   da outra máquina; se ele não está nesta máquina, o script avisa e não lê outro no lugar, porque
+   o texto com o nome do DOI pode ser outra versão da fonte.
+
+   Quando nenhum recibo dá o texto nem avisa que ele falta, o script procura a cópia pelo hash. É o
+   caso da fonte sem DOI, que não tem recibo porque o `artigo.py registrar` exige um DOI, como o
+   relatório, a lei, a página institucional, a tese e o livro; e é o caso da fonte cujo recibo só
+   registra a tentativa de abri-la. O parágrafo "Fonte:" do registro guarda os primeiros dígitos do
+   SHA-256 do arquivo baixado, e o script fica com o arquivo de `fontes/copias/` cujo hash começa
+   por eles; o campo `copia` da saída diz qual é. O texto é o `.txt` de mesmo nome ao lado da
+   cópia, ou a própria cópia, quando o que se baixou já é texto, como a página copiada pelo
+   navegador. O PDF que ainda não tem `.txt`, como o que o autor pôs na pasta à mão, ganha o texto
+   extraído com `pdftotext -layout` na primeira vez, e o comando diz que gravou o arquivo; se a
+   extração falha, o script avisa e não deixa `.txt` pela metade.
+
+   Sem cópia local, pare. Se o aviso diz que falta nesta máquina o texto que o recibo declara, ou o
+   arquivo com o hash que o registro guarda, traga-o da outra, porque uma nova abertura também
+   pode trazer outra versão. Se o aviso cita arquivos que não se leram, a cópia pode ser um deles,
+   como o que o Syncthing ainda está gravando: espere a sincronização e rode de novo. Se o aviso diz
+   que o texto não se extraiu, a cópia está nesta máquina e só falta o `.txt` de mesmo nome ao lado
+   dela: resolva a extração ou grave esse `.txt` por outro meio. Sem nenhum desses avisos, a rota é
+   `artigo.py abrir` ou `registrar` da `artigos-cientificos`. Ler o resumo no lugar do texto não é
+   opção.
 2. **Mapeie.** `fichar.py mapa <FT>` lista as páginas e os cabeçalhos prováveis. É o índice que
    evita ler o arquivo inteiro. A primeira linha diz em que página do PDF está a primeira página
    impressa. Se o registro cita a paginação do periódico, a capa da editora, a folha de rosto do
@@ -133,8 +151,13 @@ orçamento de leitura.
    script avisa quando eles discordam; `--pagina` recusa o número que a numeração salta.
 
    A declaração vale também quando a referência não traz o intervalo de páginas do periódico, como
-   no artigo que a revista identifica por um número (Schoenegger e col., 2024) e no relatório lido
-   no lugar de um livro: o rótulo é `(p. N da cópia)`, com o número que a declaração dá.
+   no artigo que a revista identifica por um número (Schoenegger e col., 2024), no relatório lido
+   no lugar de um livro e na fonte sem DOI: o rótulo é `(p. N da cópia)`, com o número que a
+   declaração dá. A numeração começa na página do PDF que a declaração nomeia, e por isso a
+   declaração deve nomear a primeira página do trecho em que a correspondência vale, e não uma do
+   meio: a de Treverton (2009) dizia "a página 5 do PDF é a página 7", e as duas páginas antes
+   dessa, a terceira e a quarta do PDF, que o registro cita como pp. 5 e 6, saíam `(p. 3 do PDF)` e
+   `(p. 4 do PDF)`; hoje ela diz "a página 3 do PDF é a página 5".
 
    Há texto que não diz em que página está cada linha, e nele o rótulo é `sem paginação`. Isso
    vale para a cópia que o recibo declara em XML, como a do PubMed Central e a do Europe PMC, ou

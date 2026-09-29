@@ -2,14 +2,16 @@
 """fichar.py — a infraestrutura comum dos quatro modos da skill `fichamento`.
 
 O que ele faz, e só isso: acha o texto extraído de uma fonte a partir do identificador FT do
-registro (ou de um DOI, ou de um caminho); dá o mapa de páginas e de seções; devolve janelas do
-texto por página, por termo ou por seção, para que o texto integral fique no disco e só a janela
-entre no contexto; calcula a página impressa a partir do form feed, do intervalo do registro e das
-páginas que a cópia traz antes do artigo (capa da editora, folha de rosto do repositório), ou pela
-numeração impressa na própria cópia, quando o registro cita por ela, como na publicação antecipada, na
-reimpressão, na prova, no manuscrito e na pré-publicação; diz "sem paginação" quando o texto não tem
-página, como o que vem de XML, de HTML ou de OCR sem form feed; grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar
-em mais nada; e valida um bloco contra o contrato da skill antes de gravá-lo.
+registro, pelo recibo com o DOI da referência ou, quando nenhum recibo dá o texto nem avisa que ele
+falta, pelo SHA-256 que o parágrafo "Fonte:" guarda, e extrai o texto do PDF que ainda não o tem; dá o
+mapa de páginas e de seções; devolve janelas do texto por página, por termo ou por seção, para que o
+texto integral fique no disco e só a janela entre no contexto; calcula a página impressa a partir do
+form feed, do intervalo do registro e das páginas que a cópia traz antes do artigo (capa da editora,
+folha de rosto do repositório), ou pela numeração impressa na própria cópia, quando o registro cita
+por ela, como na publicação antecipada, na reimpressão, na prova, no manuscrito e na pré-publicação;
+diz "sem paginação" quando o texto não tem página, como o que vem de XML, de HTML ou de OCR sem form
+feed; grava um bloco datado no fim da seção "## Do modelo" da nota de leitura, sem tocar em mais
+nada; e valida um bloco contra o contrato da skill antes de gravá-lo.
 
 Não usa rede. A busca tolerante por termo vem do `texto.py` da skill `artigos-cientificos`,
 importado por caminho relativo dentro de ~/.claude/skills, nunca copiado.
@@ -35,6 +37,9 @@ try:
     import texto as _texto  # type: ignore
 except Exception:  # pragma: no cover - sem a artigos-cientificos, a busca é literal
     _texto = None
+if str(_AQUI.parent) not in sys.path:   # o módulo irmão, também quando o fichar.py se carrega pelo caminho do arquivo
+    sys.path.insert(0, str(_AQUI.parent))
+from copia_pelo_hash import pelo_hash  # noqa: E402
 
 MARCA_MODELO = "## Do modelo"
 MARCA_AUTOR = "## Do autor"
@@ -66,10 +71,12 @@ class Fonte:
     txt: Path | None
     procedencia: Path | None
     deslocamento: int = 0             # páginas da cópia antes da primeira impressa: capa da editora, folha de rosto
-    aviso: str = ""                   # o texto declarado no recibo falta aqui, ou o deslocamento está em dúvida
+    aviso: str = ""                   # falta aqui o texto ou a cópia, o texto não se extraiu, ou o deslocamento está em dúvida
     sem_paginas: str = ""             # por que o texto não diz a página de cada linha: cópia em XML ou HTML, texto sem form feed
     paginas_da_copia: tuple[int, int] | None = None   # a numeração impressa na própria cópia, quando o registro cita por ela
     correspondencias: tuple[tuple[int, int], ...] = ()   # (índice no PDF, número impresso) de cada trecho dessa numeração, em ordem
+    copia: Path | None = None         # o arquivo que o SHA-256 do parágrafo "Fonte:" identifica, quando nenhum recibo dá o texto
+    extraido: bool = False            # o texto dessa cópia não existia e foi gravado agora, com pdftotext -layout
 
 
 def _secao_ft(registro: str, ft: str) -> str | None:
@@ -83,8 +90,10 @@ def _campo(bloco: str, nome: str) -> str:
 
 
 def _doi_de(referencia: str) -> str:
-    m = re.search(r"DOI (10\.\S+?)(?=[ ;)]|$)", referencia)
-    return m.group(1).lower() if m else ""
+    """O primeiro DOI da referência, com o parêntese que faz parte dele, como o '(86)' de 10.1016/0010-0285(86)90002-2,
+    e sem a pontuação que o separa do resto da frase."""
+    m = re.search(r"DOI (10\.\S+)", referencia)
+    return _limpar_doi(m.group(1)).lower() if m else ""
 
 
 def _paginas_de(referencia: str) -> tuple[int, int] | None:
@@ -153,6 +162,9 @@ def localizar(ft: str, raiz: Path) -> Fonte:
     ref = _campo(bloco, "Referência"); doi = _doi_de(ref)
     proc = _procedencias(raiz / "fontes" / "copias").get(doi)
     txt, falta = _txt_de(proc, raiz) if proc else (None, "")
+    copia, extraido = None, False
+    if not txt and not falta:   # nenhum recibo dá o texto nem avisa que ele falta, como na fonte sem DOI
+        copia, txt, falta, extraido = pelo_hash(bloco, raiz / "fontes" / "copias")
     pags = _paginas_de(ref); versao = _campo(bloco, "Versão da cópia")
     sem = _sem_paginas(proc, pags, txt); da_copia = None
     correspondencias = ()
@@ -162,18 +174,22 @@ def localizar(ft: str, raiz: Path) -> Fonte:
         deslocamento, aviso = _deslocamento(versao, pags, txt)   # sem texto não há aviso de deslocamento
     return Fonte(ft=ft, doi=doi, referencia=ref, paginas=pags, versao_copia=versao, txt=txt, procedencia=proc,
                  deslocamento=deslocamento, aviso=falta or aviso, sem_paginas=sem, paginas_da_copia=da_copia,
-                 correspondencias=correspondencias)
+                 correspondencias=correspondencias, copia=copia, extraido=extraido)
 
 
 # ---------------------------------------------------------------- páginas e mapa
 
 def texto_corrido(fonte: Fonte) -> Path:
     """A extração sem `-layout`, para artigo em duas colunas que o leiaute intercala linha a linha.
-    Fica ao lado da cópia, com o sufixo .corrido.txt, e se cria uma vez a partir do PDF da procedência."""
-    if not fonte.procedencia:
+    Fica ao lado da cópia, com o sufixo .corrido.txt, e se cria uma vez a partir do PDF, que é a cópia
+    achada pelo hash do parágrafo "Fonte:" ou, quando não houve essa busca, o arquivo que o recibo nomeia."""
+    if fonte.copia:
+        arq, pdf = fonte.copia.name, fonte.copia
+    elif fonte.procedencia:
+        arq = _ler_recibo(fonte.procedencia).get("arquivo") or ""
+        pdf = _no_disco(arq, fonte.procedencia, fonte.procedencia.resolve().parents[2])
+    else:
         raise SystemExit("sem procedência: não há PDF de onde reextrair")
-    arq = _ler_recibo(fonte.procedencia).get("arquivo") or ""
-    pdf = _no_disco(arq, fonte.procedencia, fonte.procedencia.resolve().parents[2])
     if not pdf or pdf.suffix.lower() != ".pdf":
         raise SystemExit(f"a cópia não é PDF ou não está nesta máquina: {arq}")
     alvo = pdf.with_suffix(".corrido.txt")
@@ -692,6 +708,9 @@ def main(argv: list[str] | None = None) -> int:
     f = localizar(a.ft, raiz)
     if f.aviso:
         print(f"aviso: {f.ft}: {f.aviso}", file=sys.stderr)
+    if f.extraido:
+        print(f"nota: {f.ft}: a cópia não tinha texto, e o script o gravou agora, com pdftotext -layout, em "
+              f"{f.txt.relative_to(raiz)}", file=sys.stderr)
     if a.cmd == "localizar":
         print(json.dumps({"ft": f.ft, "doi": f.doi, "paginas_impressas": f.paginas, "deslocamento": f.deslocamento,
                           **({"sem_paginas": f.sem_paginas} if f.sem_paginas else {}),
@@ -699,9 +718,10 @@ def main(argv: list[str] | None = None) -> int:
                           **({"correspondencias": [[i + 1, n] for i, n in f.correspondencias]} if len(f.correspondencias) > 1 else {}),
                           "versao_copia": f.versao_copia,
                           "txt": str(f.txt.relative_to(raiz)) if f.txt else None,
-                          "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None}, ensure_ascii=False, indent=1))
+                          "procedencia": str(f.procedencia.relative_to(raiz)) if f.procedencia else None,
+                          **({"copia": str(f.copia.relative_to(raiz))} if f.copia else {})}, ensure_ascii=False, indent=1))
         if not f.txt:
-            if not f.aviso:   # sem texto, o aviso é o do texto declarado que falta aqui, e reabrir a fonte pode trazer outra versão
+            if not f.aviso:   # sem texto, o aviso diz o que falta aqui, e reabrir a fonte pode trazer outra versão
                 print("sem cópia local: abra pela skill artigos-cientificos (artigo.py abrir/registrar) antes de fichar", file=sys.stderr)
             return 2
         return 0
