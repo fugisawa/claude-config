@@ -353,6 +353,11 @@ def _recusa_da_copia_aberta(caminho: Path, anterior: dict) -> str:
             "lugar dela e do recibo, --listar para só ver os candidatos, ou outro --destino")
 
 
+def _recusa_de_outro_doi(caminho: Path, anterior: dict, doi: str) -> str:
+    return (f"o recibo {caminho} é do DOI {anterior['doi']}, e não de {doi}, que dá o mesmo nome de arquivo: "
+            "use outro --destino")
+
+
 def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: bool = False,
           manter_capa: bool = False, anterior: dict | None = None, substituir: bool = False,
           obter=fontes.http_get, buscar=fontes.http_json, extrair=leitura.extrair_texto,
@@ -371,9 +376,8 @@ def abrir(doi: str, destino: Path, *, email: str | None = None, apenas_listar: b
     fica como estava (`_desfaz_se_falhar`)."""
     if anterior and not apenas_listar:
         caminho = procedencia.caminho_do_recibo(destino, procedencia.slug_de_doi(doi))
-        if (anterior.get("doi") or doi).lower() != doi.lower():
-            raise RuntimeError(f"o recibo {caminho} é do DOI {anterior['doi']}, e não de {doi}, que dá o mesmo nome "
-                               "de arquivo: use outro --destino")
+        if procedencia.de_outro_doi(anterior, doi):
+            raise RuntimeError(_recusa_de_outro_doi(caminho, anterior, doi))
         if procedencia.copia_aberta(anterior) and not substituir:
             raise RuntimeError(_recusa_da_copia_aberta(caminho, anterior))
     resultado = _escada(doi, destino, email=email, apenas_listar=apenas_listar, manter_capa=manter_capa,
@@ -434,7 +438,7 @@ def _capa_a_retirar(arquivo: Path, formato: str, manter_capa: bool) -> bool:
 
 def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta: str,
                      versao: str = "", meta=None, texto: Path | None = None, anterior: dict | None = None,
-                     sobrescrever_texto: bool = False, manter_capa: bool = False,
+                     sobrescrever_texto: bool = False, manter_capa: bool = False, destino: Path | None = None,
                      extrair=leitura.extrair_texto, info=leitura.pdfinfo, agora: str | None = None) -> dict:
     """A cópia obtida por degrau manual (site do autor, pedido atendido, biblioteca) ganha a mesma
     procedência do `abrir`: texto extraído, hash, páginas, data — e a etiqueta que quem a obteve
@@ -442,10 +446,15 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
 
     `meta` são os metadados, ou a função que os busca, chamada só depois das verificações, para que o
     registro recusado não gaste consulta às APIs. `texto` é o texto já extraído da página HTML, que
-    entra sem reextração. `anterior` é o recibo que já estava no destino: se ele registra uma tentativa
-    que falhou, o diário dela e a data em que foi feita passam para este, porque é a mesma busca que
-    agora terminou. A capa do ResearchGate sai da cópia de leitura, salvo com `manter_capa`, e só
-    depois de todas as verificações."""
+    entra sem reextração. `anterior` é o recibo que já estava em `destino` (por padrão, a pasta da
+    cópia). Se ele é de outro DOI com o mesmo nome de arquivo, o registro se recusa antes de tocar em
+    arquivo e de consultar as APIs, porque herdaria o diário de uma tentativa alheia ou tomaria o lugar
+    do recibo de outra cópia. Se ele registra uma tentativa que falhou, o diário dela e a data em que
+    foi feita passam para este, porque é a mesma busca que agora terminou. A capa do ResearchGate sai
+    da cópia de leitura, salvo com `manter_capa`, e só depois de todas as verificações."""
+    if procedencia.de_outro_doi(anterior, doi):
+        caminho = procedencia.caminho_do_recibo(destino or arquivo.parent, procedencia.slug_de_doi(doi))
+        raise RuntimeError(_recusa_de_outro_doi(caminho, anterior, doi))
     if etiqueta not in procedencia.ETIQUETAS_REGISTRAVEIS:
         raise RuntimeError(f"etiqueta {etiqueta!r} não se registra: só A, B ou C (D está fora da escada)")
     if versao not in VERSAO_DECLARADA:

@@ -193,6 +193,12 @@ def tentativa_que_falhou(reg: dict | None) -> bool:
     return bool(reg) and reg.get("status") != "aberto"
 
 
+def de_outro_doi(reg: dict | None, doi: str) -> bool:
+    """Se o recibo é de outro DOI que dá o mesmo nome de arquivo, como dois que só diferem na pontuação. A caixa
+    não conta, porque o DOI não a distingue, e o recibo sem DOI não se diz de outro."""
+    return bool(reg) and (reg.get("doi") or doi).lower() != doi.lower()
+
+
 def gravar(destino: Path, slug: str, reg: dict) -> Path:
     caminho = caminho_do_recibo(destino, slug)
     caminho.write_text(json.dumps(reg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

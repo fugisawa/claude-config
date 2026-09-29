@@ -1,6 +1,7 @@
 """O registro da cópia manual: a página HTML com o texto já extraído, o .txt que não se sobrescreve sem
-aviso e o recibo da tentativa que falhou antes. Os casos são os de 28/09/2026: Mandel e Barnes (2014),
-lidos na página do PubMed Central, e Marrin (2012), que chegou por pedido depois de a escada falhar."""
+aviso, o recibo da tentativa que falhou antes e o de outro DOI com o mesmo nome de arquivo. Os três primeiros
+casos são os de 28/09/2026: Mandel e Barnes (2014), lidos na página do PubMed Central, e Marrin (2012), que
+chegou por pedido depois de a escada falhar."""
 import contextlib
 import io
 import json
@@ -17,6 +18,7 @@ import fontes
 import procedencia
 
 DOI = "10.1073/pnas.1406138111"
+OUTRO_DOI_DO_MESMO_NOME = "10.1073/pnas/1406138111"   # só a pontuação muda, e o nome do recibo é o mesmo
 PMC = "https://pmc.ncbi.nlm.nih.gov/articles/PMC4121776/"
 QUANDO = "2026-09-28T14:45:00-03:00"
 TENTADO = "2026-09-25T17:23:42-03:00"
@@ -223,6 +225,66 @@ class CliRegistrar(Pasta):
         self.assertEqual(codigo, 1)
         self.assertIn(self.recibo().name, erro)
         self.assertEqual(self.recibo().read_text(encoding="utf-8"), "{ recibo cortado")
+
+
+class ReciboDeOutroDoi(Pasta):
+    """Dois DOIs que só diferem na pontuação, como 10.1073/pnas.1406138111 e 10.1073/pnas/1406138111, dão o mesmo
+    nome de recibo. Sem a recusa, o `registrar` de um herdaria o diário da tentativa do outro, ou gravaria o seu
+    recibo no lugar do da cópia do outro; o `abrir` já o recusava desde 28/09/2026. O DOI que só difere na caixa
+    é o mesmo DOI."""
+    def setUp(self):
+        super().setUp()
+        self.html = self.pasta / "mandel-barnes-2014-pmc.html"
+        self.html.write_bytes(HTML)
+        self.txt = self.pasta / "mandel-barnes-2014-pmc.txt"
+        self.txt.write_text(TEXTO_COMPLETO, encoding="utf-8")
+        self.consultas = []
+
+    def rodar(self, doi, *argv):
+        """O `registrar` pela linha de comando, com a rede falsa: cada consulta às APIs fica em `consultas`."""
+        def http_json(url, **kw):
+            self.consultas.append(url)
+            return 404, None
+        saida, erro = io.StringIO(), io.StringIO()
+        with mock.patch.object(fontes, "http_json", http_json), contextlib.redirect_stdout(saida), \
+                contextlib.redirect_stderr(erro):
+            codigo = artigo.main(["registrar", doi, "--url", PMC, "--origem", "PubMed Central", "--etiqueta", "A",
+                                  "--versao", "publicada", *argv])
+        return codigo, saida.getvalue(), erro.getvalue()
+
+    def test_recibo_de_outro_doi_com_o_mesmo_nome_de_arquivo_nao_passa_o_diario(self):
+        recibo = procedencia.gravar(self.pasta, procedencia.slug_de_doi(DOI), recibo_da_falha())
+        antes = recibo.read_bytes()
+        codigo, _, erro = self.rodar(OUTRO_DOI_DO_MESMO_NOME, "--arquivo", str(self.html), "--texto", str(self.txt))
+        self.assertEqual(codigo, 1)
+        self.assertEqual(recibo.read_bytes(), antes)
+        for trecho in (recibo.name, DOI, "--destino"):
+            self.assertIn(trecho, erro)
+        self.assertEqual(self.consultas, [])
+
+    def test_recibo_de_outro_doi_com_o_mesmo_nome_de_arquivo_da_copia_aberta_fica_como_estava(self):
+        recibos = self.pasta / "recibos"
+        codigo, _, _ = self.rodar(DOI, "--arquivo", str(self.html), "--texto", str(self.txt), "--destino", str(recibos))
+        self.assertEqual(codigo, 0)
+        recibo = recibos / f"{procedencia.slug_de_doi(DOI)}.procedencia.json"
+        antes, self.consultas = recibo.read_bytes(), []
+        xml = self.pasta / "outro-artigo.xml"
+        xml.write_bytes(SO_A_FOLHA_DE_ROSTO)
+        codigo, _, erro = self.rodar(OUTRO_DOI_DO_MESMO_NOME, "--arquivo", str(xml), "--destino", str(recibos))
+        self.assertEqual(codigo, 1)
+        self.assertEqual(recibo.read_bytes(), antes)
+        self.assertIn(str(recibo), erro)
+        self.assertFalse(xml.with_suffix(".txt").exists())
+        self.assertEqual(self.consultas, [])
+
+    def test_recibo_do_mesmo_doi_em_outra_caixa_passa_o_diario(self):
+        # o recibo escrito à mão pode trazer o DOI como a editora o imprime, e a linha de comando o põe em minúsculas
+        recibo = procedencia.gravar(self.pasta, procedencia.slug_de_doi(DOI),
+                                    {**recibo_da_falha(), "doi": "10.1073/PNAS.1406138111"})
+        codigo, _, _ = self.rodar(DOI, "--arquivo", str(self.html), "--texto", str(self.txt))
+        self.assertEqual(codigo, 0)
+        self.assertEqual(json.loads(recibo.read_text(encoding="utf-8"))["diario"],
+                         DIARIO_DA_FALHA + [f"manual: PubMed Central, em {PMC}"])
 
 
 if __name__ == "__main__":
