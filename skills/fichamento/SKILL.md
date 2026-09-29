@@ -128,7 +128,9 @@ orçamento de leitura.
    repete ou salta, e cada uma vale da sua página do PDF em diante: a de Costa, Miranda e Melo
    (2022) declara "a página 2 do PDF é a página 1" e "a página 14 do PDF é a página 12", porque a
    página da tabela 2 repete o 12. Nesse caso duas páginas levam o mesmo rótulo, `--pagina 12`
-   abre a primeira delas, e o mapa diz em que posição do PDF a correspondência muda.
+   abre a primeira delas, e o mapa diz em que posição do PDF a correspondência muda. Cada
+   correspondência se confere contra os números do cabeçalho e do pé no trecho em que vale, e o
+   script avisa quando eles discordam; `--pagina` recusa o número que a numeração salta.
 
    A declaração vale também quando a referência não traz o intervalo de páginas do periódico, como
    no artigo que a revista identifica por um número (Schoenegger e col., 2024) e no relatório lido

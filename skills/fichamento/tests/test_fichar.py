@@ -571,6 +571,24 @@ class FicharNumeracaoDaCopia(unittest.TestCase):
         self.assertEqual(f.aviso, "")   # os cabeçalhos concordam com a segunda declaração, que vale da página 5 do PDF em diante
         self.assertEqual(fichar.indice_de_pagina(5, f, 9), 6)   # --pagina 5 abre a 7ª página do PDF
 
+    def test_segunda_declaracao_que_discorda_dos_cabecalhos_avisa(self):
+        continua = "\f".join(["Repositório institucional\n\nUm artigo\n"] +
+                             [f"{n}\t\tAna Teste\n\nTexto da seção.\n" for n in (1, 2, 3, 4, 5, 6)]) + "\f"   # a numeração não se repete
+        digitada = ("manuscrito aceito, com a capa do repositório; a página 2 do PDF é a página 1, e a página 5 do PDF é a página 10, "
+                    "que se repete")   # engano de digitação: a página 5 do PDF traz o 4
+        f = self._fonte(continua, digitada)
+        self.assertEqual(fichar.pagina_impressa(4, f), "p. 10 da cópia")   # vale o registro, como na primeira declaração
+        self.assertIn("p. 10 da cópia na página 5 do PDF", f.aviso); self.assertIn("vale o registro", f.aviso)   # até aqui o aviso só olhava a primeira
+
+    def test_numero_que_a_numeracao_salta_e_recusado(self):
+        salta = "\f".join(["Repositório institucional\n\nUm artigo\n"] +
+                          [f"{n}\t\tAna Teste\n\nTexto da seção.\n" for n in (1, 2, 3, 7, 8, 9)]) + "\f"   # a numeração pula do 3 para o 7
+        f = self._fonte(salta, "manuscrito aceito, com a capa do repositório; a página 2 do PDF é a página 1, e a página 5 do PDF é a página 7")
+        self.assertEqual(f.aviso, ""); self.assertEqual(fichar.indice_de_pagina(7, f, 8), 4)   # --pagina 7 abre a 5ª página do PDF
+        with self.assertRaises(SystemExit) as recusa:   # até aqui abria em silêncio a posição 4, que traz o 3 impresso
+            fichar.indice_de_pagina(4, f, 8)
+        self.assertIn("p. 4", str(recusa.exception))
+
     def test_manuscrito_sem_numero_impresso_fica_na_posicao_e_avisa_sem_atribuir_frase_ao_registro(self):
         f = self._fonte(TXT, "manuscrito do autor, gerado de TeX, sem a paginação do periódico")   # como Laskov e col. (2005): nenhuma página traz número
         self.assertEqual(fichar.pagina_impressa(1, f), "p. 2 da cópia")   # a posição, como antes de 29/09/2026

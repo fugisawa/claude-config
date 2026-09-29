@@ -314,8 +314,9 @@ def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None,
     imprimem; sem nenhum dos dois, o N do rótulo 'p. N da cópia' é a posição no PDF, e o aviso diz como
     declarar. A Versão da cópia pode declarar mais de uma correspondência, quando a numeração se repete ou
     salta, como o 12 repetido na página da tabela 2 de Costa, Miranda e Melo (2022), e cada uma vale da sua
-    página do PDF em diante. A numeração vai até a última página com texto, porque há página cujo número
-    não chega à camada de texto, como a p. 13 de Harrison e col. (2020)."""
+    página do PDF em diante e se confere contra os números impressos no seu trecho. A numeração vai até a
+    última página com texto, porque há página cujo número não chega à camada de texto, como a p. 13 de
+    Harrison e col. (2020)."""
     pags = paginas(txt.read_text(encoding="utf-8", errors="replace"))
     fim = max((i for i, p in enumerate(pags) if p.strip()), default=0)
     achada = _numeracao_achada(pags)
@@ -324,10 +325,7 @@ def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None,
     if declaradas:
         correspondencias = tuple(declaradas)
         deslocamento, primeira = correspondencias[0]
-        if achada and achada[0] - achada[1] not in {n - i for i, n in correspondencias}:   # número impresso menos índice, pelas duas fontes
-            aviso = (f"a Versão da cópia do registro põe a p. {primeira} da cópia na página {deslocamento + 1} do PDF, e os números "
-                     f"impressos no cabeçalho e no pé a põem na página {primeira - achada[0] + achada[1] + 1} do PDF; vale o registro, "
-                     "porque as afirmações dele citam as páginas por essa correspondência")
+        aviso = _divergencias(correspondencias, pags, fim)
     elif achada:
         primeira, deslocamento = achada
         correspondencias = ((deslocamento, primeira),)
@@ -339,6 +337,26 @@ def _numeracao_da_copia(versao: str, txt: Path) -> tuple[tuple[int, int] | None,
                              "\"a página 2 do PDF é a página 1\"")
     ultimo_indice, ultimo_numero = correspondencias[-1]
     return (primeira, ultimo_numero + fim - ultimo_indice), deslocamento, correspondencias, aviso
+
+
+def _divergencias(correspondencias: tuple[tuple[int, int], ...], pags: list[str], fim: int) -> str:
+    """O aviso de cada correspondência declarada que os números do cabeçalho e do pé contradizem no trecho em que
+    ela vale, da sua página do PDF até a anterior à correspondência seguinte. Cada número solto vota no número
+    impresso menos o índice, como em _numeracao_achada, mas só dentro do trecho: o voto do documento inteiro
+    aprovaria uma segunda declaração errada sempre que a primeira estivesse certa."""
+    avisos = []
+    for k, (i, n) in enumerate(correspondencias):
+        ate = correspondencias[k + 1][0] if k + 1 < len(correspondencias) else fim + 1
+        votos = Counter()
+        for j in range(i, min(ate, len(pags))):
+            votos.update(m - j for m in _numeros_da_borda(pags[j]) - {0})
+        c = _mais_votado(votos)
+        if c is not None and c != n - i:
+            avisos.append(f"a Versão da cópia do registro põe a p. {n} da cópia na página {i + 1} do PDF, e os números impressos "
+                          f"no cabeçalho e no pé a põem na página {n - c + 1} do PDF")
+    if not avisos:
+        return ""
+    return "; ".join(avisos) + "; vale o registro, porque as afirmações dele citam as páginas por essa correspondência"
 
 
 def _numeracao_achada(pags: list[str]) -> tuple[int, int] | None:
@@ -433,14 +451,16 @@ def mapa(txt: str, fonte: Fonte | None = None) -> list[tuple[str, int, str]]:
 def indice_de_pagina(pagina: int, fonte: Fonte | None, total: int) -> int:
     """Traduz o que o usuário pediu para o índice na cópia: página impressa se o registro dá o
     intervalo e o número cai nele, ou se o número cai na numeração impressa na cópia, quando o registro
-    cita por ela; senão, índice a partir de 1. A cópia sem paginação não tem página que se peça: a única
-    que ela tem é o texto inteiro."""
+    cita por ela; senão, índice a partir de 1. O número que essa numeração salta não tem página, e o pedido
+    é recusado. A cópia sem paginação não tem página que se peça: a única que ela tem é o texto inteiro."""
     if fonte and fonte.sem_paginas:
         raise SystemExit(f"sem paginação: {fonte.sem_paginas}; peça a janela por --termo ou --secao")
     if fonte and fonte.paginas_da_copia and fonte.paginas_da_copia[0] <= pagina <= fonte.paginas_da_copia[1]:
         indice = _indice_da_copia(pagina, fonte)
-        if indice is not None:
-            return indice
+        if indice is None:   # lido como posição no PDF, o número abriria em silêncio outra página impressa
+            raise SystemExit(f"a p. {pagina} não está na numeração impressa desta cópia, que salta esse número; o mapa diz em que "
+                             "posição do PDF a correspondência muda")
+        return indice
     if fonte and fonte.paginas and fonte.paginas[0] <= pagina <= fonte.paginas[1] and not _sem_paginacao(fonte.versao_copia):
         return pagina - fonte.paginas[0] + fonte.deslocamento
     return pagina - 1
