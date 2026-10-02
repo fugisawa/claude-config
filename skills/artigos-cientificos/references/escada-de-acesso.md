@@ -38,6 +38,19 @@ O script consulta, nesta ordem, e junta os candidatos:
 - **Europe PMC** (`/search?query=DOI:"…"` e depois `/{PMCID}/fullTextXML`): o XML JATS do
   texto integral, que responde 404 honesto quando o artigo não é aberto. É o degrau que salva
   quando a editora está atrás de Cloudflare.
+- **efetch do NCBI** (`eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={PMCID}`):
+  o mesmo XML JATS, servido pelo próprio PubMed Central, para quando o Europe PMC falha. Foi o
+  que abriu o manuscrito de Reyna e col. (2014), PMC4076289, em 02/10/2026, quando o
+  `europepmc.org` deu 403, o REST do Europe PMC deu 500 e a página do PMC pediu reCAPTCHA a
+  script. Com `ARTIGOS_EMAIL` ou `--email`, o pedido leva o `tool` e o e-mail de cortesia que o
+  NCBI pede, e o recibo guarda o endereço do pedido sem os dois. O efetch responde 200 **sem**
+  `<body>` quando a editora não libera o XML; o script só aceita XML com o corpo do artigo, e o
+  diário diz quando ele não veio. O manuscrito do autor depositado pelo programa de acesso
+  público do NIH vem declarado no XML pelo próprio PMC (`pmc-prop-manuscript`), e o recibo
+  registra a versão aceita, com a ressalva. O texto extraído de qualquer XML, e não só do que vem
+  deste degrau, começa pelo título e pelo resumo, onde costuma estar a frase que se quer
+  conferir, e só depois traz o corpo; achar a frase no resumo não dispensa procurá-la no corpo,
+  como manda o passo 2 de `conferencia.md`.
 - **arXiv** (`/pdf/{id}`): quando algum dos anteriores trouxe o identificador.
 
 O CORE e o OpenAIRE não entram: o CORE responde o desafio do Cloudflare a script desta máquina
@@ -95,7 +108,10 @@ versão publicada é a versão publicada que manda.
 - **PubMed/PMC**: só biomedicina e ciências da vida; `convert_article_ids` do PMID ao PMCID e
   `get_full_text_article`. A página do artigo no PMC, salva como `.html` com o texto extraído
   ao lado, registra-se com `artigo.py registrar <doi> --arquivo <página>.html --texto <texto>.txt
-  --url <endereço da página> --origem "PubMed Central" --etiqueta A --versao publicada`.
+  --url <endereço da página> --origem "PubMed Central" --etiqueta A --versao publicada`. Mas a
+  página do PMC pede reCAPTCHA a script (medido em 02/10/2026). O XML do mesmo artigo vem pelo
+  efetch do NCBI, no degrau 1; quando a editora não libera o XML, resta a página, pelo navegador
+  da app, com a verificação anti-robô resolvida pelo Daniel e nunca pelo modelo.
 - **Consensus** e o conector de corpus (`semanticSearch`): passagens e metadados, não o texto;
   servem para achar o DOI e para saber que há contestação.
 

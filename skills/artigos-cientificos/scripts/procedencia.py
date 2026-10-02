@@ -23,11 +23,12 @@ NOME_DO_DEGRAU = {
     "openalex": "OpenAlex",
     "semantic-scholar": "Semantic Scholar",
     "europepmc": "Europe PMC",
+    "ncbi-efetch": "efetch do NCBI (E-utilities, PubMed Central)",
     "arxiv": "arXiv",
     "crossref-tdm": "link de mineração de texto declarado na Crossref",
     "manual": "degrau manual",
 }
-DEGRAUS_AUTOMATICOS = ("unpaywall", "openalex", "semantic-scholar", "europepmc", "arxiv", "crossref-tdm")
+DEGRAUS_AUTOMATICOS = ("unpaywall", "openalex", "semantic-scholar", "europepmc", "ncbi-efetch", "arxiv", "crossref-tdm")
 ETIQUETAS = {"A": "licenciada", "B": "exceção legal", "C": "cinzenta", "D": "excluída"}
 DESCRICAO_DA_ETIQUETA = {
     "A": "acesso aberto em qualquer cor, política de compartilhamento da editora, Share Link, "

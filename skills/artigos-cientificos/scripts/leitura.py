@@ -1,5 +1,6 @@
-"""Do arquivo ao texto: validação do PDF, `pdfinfo`, `pdftotext`, JATS para texto corrido e a capa do
-ResearchGate, que se reconhece pelo texto da p. 1 e se tira com o `pypdf`."""
+"""Do arquivo ao texto: validação do PDF, `pdfinfo`, `pdftotext`, JATS para texto corrido (título, resumo e
+corpo, também dentro do `<pmc-articleset>` do efetch) e a capa do ResearchGate, que se reconhece pelo texto da
+p. 1 e se tira com o `pypdf`."""
 from __future__ import annotations
 
 import hashlib
@@ -113,17 +114,112 @@ def sem_a_primeira_pagina(pdf: Path, destino: Path) -> str:
     return f"pypdf {pypdf.__version__}"
 
 
-def jats_para_texto(xml_bytes: bytes) -> str:
-    """Texto corrido do corpo de um artigo JATS; sem corpo, o documento inteiro."""
+RECUSA_ILEGIVEL = "XML ilegível"
+RECUSA_SEM_CORPO = "XML sem o corpo do artigo"
+MARCAS_DE_MANUSCRITO = frozenset({"pmc-prop-manuscript", "is-manuscript"})   # PMC e Europe PMC, em <custom-meta>; o
+# `is-manuscript` = yes não foi medido num manuscrito real do Europe PMC, só o `no` em três XMLs (02/10/2026)
+SEM_IDENTIFICADOR = "sem identificador"
+
+
+def _nome(el) -> str:
+    return el.tag.split("}")[-1]
+
+
+def _primeiro(el, nome: str):
+    """O primeiro descendente com esse nome, em ordem de documento, ou None."""
+    return next((filho for filho in el.iter() if _nome(filho) == nome), None)
+
+
+def _filho(el, nome: str):
+    """O primeiro filho direto com esse nome, ou None."""
+    return next((filho for filho in el if _nome(filho) == nome), None)
+
+
+def _ler(xml_bytes: bytes):
+    """A raiz do XML, ou None quando ele não se lê, inclusive pela entidade que só o DTD externo definiria."""
     try:
-        raiz = ET.fromstring(xml_bytes)
+        return ET.fromstring(xml_bytes)
     except ET.ParseError:
+        return None
+
+
+def _artigo_de(raiz):
+    """O <article>: a própria raiz, ou o primeiro dentro dela, porque o efetch do NCBI devolve o artigo num
+    <pmc-articleset>; None quando não há nenhum."""
+    return raiz if _nome(raiz) == "article" else _primeiro(raiz, "article")
+
+
+def _texto_inteiro(el) -> str:
+    return re.sub(r"\s+", " ", "".join(el.itertext())).strip()
+
+
+def _titulo_e_resumo(artigo) -> list[str]:
+    """O <article-title> e os parágrafos de cada <abstract> da frente do artigo. O resto da frente (periódico,
+    autores, datas, palavras-chave) fica de fora, e o <article-title> das referências, no fundo, também."""
+    frente = _filho(artigo, "front")
+    if frente is None:
+        return []
+    titulo = _primeiro(frente, "article-title")
+    partes = [" ".join(_texto(titulo).split())] if titulo is not None else []
+    for resumo in (el for el in frente.iter() if _nome(el) == "abstract"):
+        partes += [parte for filho in resumo for parte in _colher(filho)]
+    return [parte for parte in partes if parte]
+
+
+def jats_para_texto(xml_bytes: bytes) -> str:
+    """Texto corrido de um artigo JATS: o título, os parágrafos do resumo e o corpo, nesta ordem, um bloco por
+    parágrafo. Sem nenhum dos três, o documento inteiro; sem XML legível, os bytes como texto."""
+    raiz = _ler(xml_bytes)
+    if raiz is None:
         return xml_bytes.decode("utf-8", "replace")
-    corpo = next((el for el in raiz.iter() if el.tag.split("}")[-1] == "body"), raiz)
-    partes = _colher(corpo)
-    if partes:
-        return "\n\n".join(partes)
-    return re.sub(r"\s+", " ", "".join(raiz.itertext())).strip()
+    artigo = _artigo_de(raiz)
+    if artigo is None:
+        return _texto_inteiro(raiz)
+    corpo = _filho(artigo, "body")
+    partes = _titulo_e_resumo(artigo) + (_colher(corpo) if corpo is not None else [])
+    return "\n\n".join(partes) if partes else _texto_inteiro(artigo)
+
+
+def recusa_do_jats(xml_bytes: bytes) -> str:
+    """Vazio quando o XML é um artigo JATS com o corpo, que é o texto integral; senão, o motivo da recusa. O efetch
+    do NCBI responde 200 só com a folha de rosto e o resumo quando a editora não libera o XML, e 200 com <error>
+    quando o PMCID não existe; a página XHTML também tem <body>, mas não tem <article>, e o <body> de um
+    <sub-article> (parecer, correção) não é o do artigo."""
+    raiz = _ler(xml_bytes)
+    if raiz is None:
+        return RECUSA_ILEGIVEL
+    artigo = _artigo_de(raiz)
+    corpo = _filho(artigo, "body") if artigo is not None else None
+    if corpo is None or not "".join(corpo.itertext()).strip():
+        return RECUSA_SEM_CORPO
+    return ""
+
+
+def _declarado_manuscrito(frente) -> bool:
+    """Se o PMC (`pmc-prop-manuscript`) ou o Europe PMC (`is-manuscript`) dizem, em <custom-meta>, que o XML é o
+    manuscrito do autor."""
+    for meta in (el for el in frente.iter() if _nome(el) == "custom-meta"):
+        nome = (getattr(_filho(meta, "meta-name"), "text", "") or "").strip()
+        valor = (getattr(_filho(meta, "meta-value"), "text", "") or "").strip().lower()
+        if nome in MARCAS_DE_MANUSCRITO and valor == "yes":
+            return True
+    return False
+
+
+def manuscrito_do_jats(xml_bytes: bytes) -> str:
+    """O identificador do manuscrito do autor (NIHMS…) quando o PMC ou o Europe PMC declaram o XML como
+    manuscrito, "sem identificador" quando declaram sem o trazer, e vazio quando não declaram. O
+    <article-id pub-id-type="manuscript-id"> sozinho não serve de marca: ele fica no XML depois que a editora
+    substitui o manuscrito pela versão publicada (medido em 02/10/2026 em dois XMLs, Sage Choice e Springer)."""
+    raiz = _ler(xml_bytes)
+    artigo = _artigo_de(raiz) if raiz is not None else None
+    frente = _filho(artigo, "front") if artigo is not None else None
+    if frente is None or not _declarado_manuscrito(frente):
+        return ""
+    for el in frente.iter():
+        if _nome(el) == "article-id" and el.get("pub-id-type") == "manuscript-id":
+            return (el.text or "").strip() or SEM_IDENTIFICADOR
+    return SEM_IDENTIFICADOR
 
 
 def _texto(el) -> str:

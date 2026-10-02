@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -6,6 +7,7 @@ import _caminho  # noqa: F401
 import acesso
 import fontes
 from fontes import Candidato
+from _jats import ARTICLESET, SO_A_FOLHA_DE_ROSTO
 
 PDF = b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n1 0 obj << >> endobj\n%%EOF\n"
 HTML_COM_META = (b"<html><head><meta content=\"/files/artigo.pdf\" name=\"citation_pdf_url\">"
@@ -62,17 +64,18 @@ class Baixar(unittest.TestCase):
             "https://rep.edu/handle/1": (200, HTML_COM_META, "https://rep.edu/handle/1"),
             "https://rep.edu/files/artigo.pdf": (200, PDF, "https://rep.edu/files/artigo.pdf"),
         })
-        corpo, final, formato = acesso.baixar(Candidato("https://rep.edu/handle/1", "unpaywall", tipo="landing"), obter=obter)
-        self.assertEqual((formato, final), ("pdf", "https://rep.edu/files/artigo.pdf"))
+        (corpo, final, formato), recusa = acesso.baixar_ou_recusa(Candidato("https://rep.edu/handle/1", "unpaywall", tipo="landing"), obter=obter)
+        self.assertEqual((formato, final, recusa), ("pdf", "https://rep.edu/files/artigo.pdf", ""))
         self.assertTrue(corpo.startswith(b"%PDF"))
 
-    def test_html_sem_pdf_devolve_none(self):
+    def test_html_sem_pdf_e_recusado_com_a_linha_do_diario(self):
         obter = falso_obter({"https://ed/x": (200, b"<html>paywall</html>", "https://ed/x")})
-        self.assertIsNone(acesso.baixar(Candidato("https://ed/x", "crossref-tdm"), obter=obter))
+        self.assertEqual(acesso.baixar_ou_recusa(Candidato("https://ed/x", "crossref-tdm"), obter=obter),
+                         (None, "crossref-tdm: nada legível em https://ed/x"))
 
-    def test_xml_conta_como_texto(self):
+    def test_xml_conta_como_texto_quando_traz_o_corpo(self):
         obter = falso_obter({"https://epmc/xml": (200, b"<article><body><p>oi</p></body></article>", "https://epmc/xml")})
-        self.assertEqual(acesso.baixar(Candidato("https://epmc/xml", "europepmc", tipo="xml"), obter=obter)[2], "xml")
+        self.assertEqual(acesso.baixar_ou_recusa(Candidato("https://epmc/xml", "europepmc", tipo="xml"), obter=obter)[0][2], "xml")
 
 
 def falso_buscar(respostas):
@@ -103,7 +106,7 @@ class Coletar(unittest.TestCase):
         self.assertEqual(cands[0].degrau, "unpaywall")
         self.assertIsNone(meta)
 
-    def test_email_so_acompanha_as_tres_apis_de_cortesia(self):
+    def test_email_so_acompanha_as_consultas_de_crossref_openalex_e_unpaywall(self):
         chamadas = []
 
         def buscar(url, **kw):
@@ -174,6 +177,60 @@ class Abrir(unittest.TestCase):
             self.assertEqual(r["status"], "listado")
             self.assertEqual(obter.chamadas, [])
             self.assertEqual(len(r["candidatos"]), 1)
+
+
+DOI_PMC = "10.1177/0956797613497022"
+EFETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=4076289"
+EPMC_PDF = "https://europepmc.org/articles/PMC4076289?pdf=render"
+EPMC_XML = "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4076289/fullTextXML"
+OPENALEX_FECHADO_COM_PMCID = {"doi": f"https://doi.org/{DOI_PMC}", "open_access": {"is_oa": False, "oa_status": "closed"},
+                              "ids": {"pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/4076289"}}
+
+
+class Efetch(unittest.TestCase):
+    """O degrau de 02/10/2026: o manuscrito de Reyna e col. (2014), PMC4076289, que o Europe PMC não serviu (500 no
+    REST, 403 no site) e o efetch do NCBI devolveu inteiro, num `<pmc-articleset>`."""
+    def buscar(self):
+        return falso_buscar({"api.openalex.org": (200, OPENALEX_FECHADO_COM_PMCID)})
+
+    def test_o_pmcid_rende_o_candidato_do_efetch_depois_dos_do_europepmc(self):
+        cands, _, diario = acesso.coletar(DOI_PMC, None, buscar=self.buscar())
+        self.assertEqual([c.url for c in cands], [EPMC_PDF, EPMC_XML, EFETCH])
+        self.assertEqual((cands[-1].degrau, cands[-1].tipo), ("ncbi-efetch", "xml"))
+        self.assertIn("ncbi-efetch: PMCID PMC4076289", diario)
+
+    def test_sem_pmcid_o_degrau_e_pulado_e_o_diario_diz(self):
+        _, _, diario = acesso.coletar("10.1/x", None, buscar=falso_buscar({}))
+        self.assertEqual(diario[-1], "ncbi-efetch: sem PMCID")
+
+    def test_o_xml_sem_corpo_nao_abre_e_o_diario_diz_por_que(self):
+        obter = falso_obter({EPMC_XML: (500, b"", EPMC_XML), EFETCH: (200, SO_A_FOLHA_DE_ROSTO, EFETCH)})
+        with tempfile.TemporaryDirectory() as pasta:
+            r = acesso.abrir(DOI_PMC, Path(pasta), buscar=self.buscar(), obter=obter)
+            self.assertEqual(r["status"], "nao_aberto")
+            self.assertIn(f"europepmc: nada legível em {EPMC_XML}", r["diario"])
+            self.assertIn(f"ncbi-efetch: XML sem o corpo do artigo em {EFETCH}", r["diario"])
+            self.assertEqual(list(Path(pasta).iterdir()), [])
+
+    def test_o_manuscrito_abre_como_xml_na_versao_aceita_e_a_escada_nao_poe_o_email_no_que_grava(self):
+        chamadas = []
+
+        def obter(url, **kw):
+            chamadas.append((url, kw.get("email")))
+            return (200, ARTICLESET, EFETCH, {}) if url == EFETCH else (404, b"", url, {})
+        with tempfile.TemporaryDirectory() as pasta:
+            r = acesso.abrir(DOI_PMC, Path(pasta), email="a@b.c", buscar=self.buscar(), obter=obter,
+                             agora="2026-10-02T12:00:00-03:00")
+            self.assertEqual((r["status"], r["formato"], r["degrau"], r["versao"], r["etiqueta"]),
+                             ("aberto", "xml", "ncbi-efetch", "acceptedVersion", "A"))
+            self.assertEqual((r["url"], r["url_final"]), (EFETCH, EFETCH))
+            self.assertIn((EFETCH, "a@b.c"), chamadas, "o e-mail de cortesia vai no pedido")
+            self.assertNotIn("a@b.c", json.dumps(r), "e a escada não o escreve em candidato, endereço nem diário; "
+                             "o endereço que o http_get devolve sem ele é prova de test_fontes")
+            self.assertTrue(Path(r["texto"]).read_text(encoding="utf-8").startswith("Developmental Reversals"))
+            self.assertEqual(r["diario"][-2:], [
+                f"ncbi-efetch: aberto como xml a partir de {EFETCH}",
+                "ncbi-efetch: o XML se declara manuscrito do autor (NIHMS581621); a versão lida é a aceita, não a publicada"])
 
 
 if __name__ == "__main__":

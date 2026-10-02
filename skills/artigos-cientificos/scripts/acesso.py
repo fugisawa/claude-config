@@ -3,12 +3,16 @@ texto de verdade e devolve um resultado com diário de tudo o que foi tentado.
 
 A ordem é decidida por três chaves, nesta prioridade: o formato (PDF antes de XML, e os dois
 antes de página de pouso), a versão (publicada, depois aceita, depois pré-publicação) e o degrau
-(Unpaywall, OpenAlex, Semantic Scholar, Europe PMC, arXiv, TDM da Crossref). Página de pouso
-entra por último porque só serve se trouxer `citation_pdf_url` no cabeçalho.
+(Unpaywall, OpenAlex, Semantic Scholar, Europe PMC, efetch do NCBI, arXiv, TDM da Crossref).
+Página de pouso entra por último porque só serve se trouxer `citation_pdf_url` no cabeçalho.
+XML só conta como texto quando traz o corpo do artigo: o efetch do NCBI responde 200 só com a
+folha de rosto quando a editora não libera o texto integral, e o diário diz isso.
 
 Cada fonte é uma função pura que devolve (metadados ou None, candidatos, linha do diário); a
 rede entra só por `buscar` (JSON) e `obter` (bytes), injetáveis. O e-mail só é passado às
-chamadas de Crossref, OpenAlex e Unpaywall, e `fontes.http_get` o barra por host de qualquer modo.
+chamadas de Crossref, OpenAlex e Unpaywall e, como parâmetro de cortesia do pedido, ao efetch
+do NCBI; `fontes.http_get` o barra por host de qualquer modo e devolve o endereço sem ele, para
+que o recibo não o carregue.
 
 O que esta escada NÃO faz, de propósito: Sci-Hub, LibGen, Anna's Archive ou qualquer
 espelho que redistribua sem licença. O que ela não abre vira instrução para os degraus
@@ -40,7 +44,7 @@ import leitura
 import procedencia
 from fontes import Candidato, Registro
 
-DEGRAUS = ("unpaywall", "openalex", "semantic-scholar", "europepmc", "arxiv", "crossref-tdm")
+DEGRAUS = procedencia.DEGRAUS_AUTOMATICOS
 RANK_TIPO = {"pdf": 0, "xml": 1, "landing": 2}
 RANK_VERSAO = {"publishedVersion": 0, "acceptedVersion": 1, "submittedVersion": 2, "": 3}
 META_PDF = (
@@ -120,11 +124,18 @@ def _semantic_scholar(doi: str, buscar):
     return cands, f"semantic-scholar: {len(cands)} candidato(s)", fontes.ids_s2(obj)
 
 
-def _europepmc(doi: str, pmcid: str, buscar):
-    if not pmcid:
-        pmcid = fontes.pmcid_de_europepmc(_json(buscar, fontes.europepmc_busca_url(doi)) or {})
-    linha = f"europepmc: {'PMCID ' + pmcid if pmcid else 'sem texto integral'}"
-    return fontes.candidatos_europepmc(pmcid), linha
+def _pmcid(doi: str, pmcid: str, buscar) -> str:
+    """O PMCID que o OpenAlex ou o Semantic Scholar trouxeram, ou o que a busca do Europe PMC resolve pelo DOI."""
+    return pmcid or fontes.pmcid_de_europepmc(_json(buscar, fontes.europepmc_busca_url(doi)) or {})
+
+
+def _europepmc(pmcid: str):
+    return fontes.candidatos_europepmc(pmcid), f"europepmc: {'PMCID ' + pmcid if pmcid else 'sem texto integral'}"
+
+
+def _ncbi_efetch(pmcid: str):
+    """O XML do PubMed Central pelo efetch do NCBI, sem consulta na coleta: o candidato nasce do PMCID."""
+    return fontes.candidatos_efetch(pmcid), f"ncbi-efetch: {'PMCID ' + pmcid if pmcid else 'sem PMCID'}"
 
 
 def _arxiv(arxiv_id: str, meta: Registro | None, buscar, obter):
@@ -154,30 +165,37 @@ def coletar(doi: str, email: str | None, *, buscar=fontes.http_json, obter=fonte
     meta = meta_cr or meta_oa
     arxiv_id = (fontes.extrair_arxiv_id(doi) or (meta_oa.arxiv_id if meta_oa else "")
                 or ids.get("arxiv_id", ""))
-    pmcid = (meta_oa.pmcid if meta_oa else "") or ids.get("pmcid", "")
-    c_ep, l_ep = _europepmc(doi, pmcid, buscar)
+    pmcid = _pmcid(doi, (meta_oa.pmcid if meta_oa else "") or ids.get("pmcid", ""), buscar)
+    c_ep, l_ep = _europepmc(pmcid)
+    c_ef, l_ef = _ncbi_efetch(pmcid)
     meta_ax, c_ax, l_ax = _arxiv(arxiv_id, meta, buscar, obter)
-    diario = [l_cr, l_oa, l_un, l_s2, l_ep, *l_ax]
-    return ordenar(c_cr + c_oa + c_un + c_s2 + c_ep + c_ax), meta or meta_ax, diario
+    diario = [l_cr, l_oa, l_un, l_s2, l_ep, l_ef, *l_ax]
+    return ordenar(c_cr + c_oa + c_un + c_s2 + c_ep + c_ef + c_ax), meta or meta_ax, diario
 
 
 # ── baixar e abrir ────────────────────────────────────────────────────────────────────────
 
-def baixar(cand: Candidato, *, obter=fontes.http_get):
-    """Tenta um candidato. Devolve (corpo, url_final, formato) ou None."""
-    status, corpo, final, _ = obter(cand.url, aceitar=ACEITAR_TEXTO)
+def baixar_ou_recusa(cand: Candidato, *, obter=fontes.http_get, email: str | None = None):
+    """Tenta um candidato. Devolve ((corpo, url_final, formato), "") quando ele é texto de verdade, e (None, a
+    linha do diário que diz por quê) quando não é. XML só conta como texto quando é um artigo com o corpo
+    (`leitura.recusa_do_jats`): o efetch do NCBI responde 200 só com a folha de rosto e o resumo quando a editora
+    não libera o texto integral. O e-mail segue para `obter`, que decide, por host, se e como ele acompanha o
+    pedido."""
+    status, corpo, final, _ = obter(cand.url, aceitar=ACEITAR_TEXTO, email=email)
+    recusa = f"{cand.degrau}: nada legível em {cand.url}"
     if status != 200 or not corpo:
-        return None
+        return None, recusa
     if eh_pdf(corpo):
-        return corpo, final, "pdf"
+        return (corpo, final, "pdf"), ""
     if cand.tipo == "xml" and corpo.lstrip().startswith(b"<"):
-        return corpo, final, "xml"
+        motivo = leitura.recusa_do_jats(corpo)
+        return ((corpo, final, "xml"), "") if not motivo else (None, f"{cand.degrau}: {motivo} em {cand.url}")
     url_pdf = pdf_url_na_pagina(corpo[:300_000].decode("utf-8", "replace"), final)
     if url_pdf and url_pdf != cand.url:
-        status, corpo, final, _ = obter(url_pdf, aceitar="application/pdf")
+        status, corpo, final, _ = obter(url_pdf, aceitar="application/pdf", email=email)
         if status == 200 and eh_pdf(corpo):
-            return corpo, final, "pdf"
-    return None
+            return (corpo, final, "pdf"), ""
+    return None, recusa
 
 
 def _agora() -> str:
@@ -249,6 +267,11 @@ def retirar_capa(arquivo: Path, *, info=leitura.pdfinfo, extrair=leitura.extrair
     return copia, texto
 
 
+def _linha_do_manuscrito(degrau: str, manuscrito: str) -> str:
+    return (f"{degrau}: o XML se declara manuscrito do autor ({manuscrito}); a versão lida é a aceita, "
+            "não a publicada")
+
+
 def _linha_da_capa(copia: dict, paginas_do_obtido) -> str:
     return (f"{copia['retirada']} (p. {copia['pagina_retirada']} do PDF obtido) retirada com {copia['ferramenta']}; "
             f"a cópia de leitura, neste caminho, tem {copia['paginas'] or '?'} páginas e SHA-256 {copia['sha256']}; "
@@ -284,9 +307,9 @@ def _escada(doi: str, destino: Path, *, email: str | None, apenas_listar: bool, 
     destino.mkdir(parents=True, exist_ok=True)
     slug = procedencia.slug_de_doi(doi)
     for cand in candidatos:
-        baixado = baixar(cand, obter=obter)
+        baixado, recusa = baixar_ou_recusa(cand, obter=obter, email=email)
         if baixado is None:
-            diario = diario + [f"{cand.degrau}: nada legível em {cand.url}"]
+            diario = diario + [recusa]
             continue
         corpo, final, formato = baixado
         arquivo = destino / f"{slug}.{formato}"
@@ -300,16 +323,18 @@ def _escada(doi: str, destino: Path, *, email: str | None, apenas_listar: bool, 
                                "o destino ficou como estava") from erro
         obtido = Path(copia["pdf_obtido"]) if copia else arquivo
         info = leitura.pdfinfo(obtido) if formato == "pdf" else {}
+        manuscrito = leitura.manuscrito_do_jats(corpo) if formato == "xml" else ""
         return {
             **base, "status": "aberto", "arquivo": str(arquivo), "texto": str(texto),
             "formato": formato, "degrau": cand.degrau, "url": cand.url, "url_final": final,
-            "versao": cand.versao, "licenca": cand.licenca,
+            "versao": "acceptedVersion" if manuscrito else cand.versao, "licenca": cand.licenca,
             "etiqueta": procedencia.etiqueta_do_degrau(cand.degrau),
             "sha256": leitura.sha256_de(obtido), "paginas": info.get("paginas"),
             "produtor": info.get("produtor", ""), "copia_de_leitura": copia,
             "baixado_em": agora or _agora(),
             "diario": diario + [f"{cand.degrau}: aberto como {formato} a partir de {final}"]
-                      + ([_linha_da_capa(copia, info.get("paginas"))] if copia else nota),
+                      + ([_linha_da_capa(copia, info.get("paginas"))] if copia else nota)
+                      + ([_linha_do_manuscrito(cand.degrau, manuscrito)] if manuscrito else []),
         }
     return {**base, "diario": diario}
 
@@ -436,6 +461,17 @@ def _capa_a_retirar(arquivo: Path, formato: str, manter_capa: bool) -> bool:
     return False
 
 
+def _aviso_do_xml(arquivo: Path) -> list[str]:
+    """O aviso do `registrar` para o XML que não é o texto integral: sem o corpo do artigo, o texto extraído é só
+    a folha de rosto; ilegível, é o XML cru."""
+    motivo = leitura.recusa_do_jats(arquivo.read_bytes())
+    if not motivo:
+        return []
+    consequencia = ("o texto extraído tem só o que a folha de rosto dá" if motivo == leitura.RECUSA_SEM_CORPO
+                    else "o texto extraído é o XML cru")
+    return [f"{arquivo.name}: {motivo}; {consequencia}"]
+
+
 def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta: str,
                      versao: str = "", meta=None, texto: Path | None = None, anterior: dict | None = None,
                      sobrescrever_texto: bool = False, manter_capa: bool = False, destino: Path | None = None,
@@ -474,7 +510,8 @@ def registrar_manual(doi: str, arquivo: Path, *, url: str, origem: str, etiqueta
     elif formato != "html":
         texto = extrair(arquivo, formato)
     obtido = Path(copia["pdf_obtido"]) if copia else arquivo
-    avisos = [f"{substituido} existia e foi substituído pelo texto extraído de {arquivo.name}"] if substituido else []
+    avisos = ([f"{substituido} existia e foi substituído pelo texto extraído de {arquivo.name}"] if substituido else []) \
+        + (_aviso_do_xml(arquivo) if formato == "xml" else [])
     dados = info(obtido) if formato == "pdf" else {}
     quando = agora or _agora()
     diario, tentado_em = [f"manual: {origem}, em {url}"], quando

@@ -5,11 +5,13 @@ decodificada em um `Registro`, e a que extrai `Candidato`s de acesso ao texto.
 As duas últimas são puras (recebem dicionários, devolvem objetos imutáveis) e são
 o que os testes cobrem sem rede. Só `http_get` e `http_json` tocam a rede.
 
-APIs cobertas: Crossref, OpenAlex, Unpaywall, Semantic Scholar, Europe PMC e arXiv.
-Nenhuma exige chave. Unpaywall exige um e-mail real (rejeita placeholder com 422);
-OpenAlex e Crossref usam o e-mail só para o "polite pool". O e-mail nunca é fixado
-no código: vem de `ARTIGOS_EMAIL` ou de `--email`, e sem ele o degrau Unpaywall é
-pulado, com aviso.
+APIs cobertas: Crossref, OpenAlex, Unpaywall, Semantic Scholar, Europe PMC, arXiv e o
+efetch das E-utilities do NCBI (o XML do PubMed Central). Nenhuma exige chave. Unpaywall
+exige um e-mail real (rejeita placeholder com 422); OpenAlex e Crossref usam o e-mail só
+para o "polite pool"; o NCBI o pede, com o nome da ferramenta, como parâmetro de cortesia
+do pedido, e `http_get` devolve o endereço sem os dois, para que o e-mail não vá ao recibo.
+O e-mail nunca é fixado no código: vem de `ARTIGOS_EMAIL` ou de `--email`, e sem ele o
+degrau Unpaywall é pulado, com aviso, e o efetch vai sem cortesia.
 """
 from __future__ import annotations
 
@@ -31,9 +33,14 @@ OPENALEX = "https://api.openalex.org/works"
 UNPAYWALL = "https://api.unpaywall.org/v2/"
 S2 = "https://api.semanticscholar.org/graph/v1/paper/"
 EUROPEPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest"
+EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+HOST_DO_NCBI = "eutils.ncbi.nlm.nih.gov"
+FERRAMENTA = "artigos-cientificos"     # o `tool` que as E-utilities pedem junto com o `email`
 ARXIV_API = "https://export.arxiv.org/api/query"
 ATOM = {"a": "http://www.w3.org/2005/Atom", "x": "http://arxiv.org/schemas/atom"}
-HOSTS_COM_EMAIL = frozenset({"api.crossref.org", "api.openalex.org", "api.unpaywall.org"})
+HOSTS_COM_EMAIL = frozenset({"api.crossref.org", "api.openalex.org", "api.unpaywall.org", HOST_DO_NCBI})
+PARAMETROS_DE_CORTESIA = ("tool", "email")
+PMCID_RE = re.compile(r"PMC[0-9]+")   # só dígitos ASCII: `\d` aceitaria algarismo de outra escrita, e a URL não
 TENTATIVAS = 3
 ESPERA = 2.0
 TIMEOUT = 60
@@ -90,7 +97,7 @@ def extrair_arxiv_id(texto: str) -> str:
 
 
 def email_para(url: str, email: str | None) -> str | None:
-    """O e-mail só acompanha pedidos a Crossref, OpenAlex e Unpaywall; para qualquer outro host, None."""
+    """O e-mail só acompanha pedidos a Crossref, OpenAlex, Unpaywall e ao efetch do NCBI; para qualquer outro host, None."""
     if not email:
         return None
     host = (urllib.parse.urlsplit(url).hostname or "").lower()
@@ -98,21 +105,51 @@ def email_para(url: str, email: str | None) -> str | None:
 
 
 def user_agent(email: str | None) -> str:
-    base = f"artigos-cientificos/{VERSAO} (skill do Claude Code)"
+    base = f"{FERRAMENTA}/{VERSAO} (skill do Claude Code)"
     return f"{base} mailto:{email}" if email else base
+
+
+def com_cortesia(url: str, email: str | None) -> str:
+    """O endereço do pedido às E-utilities do NCBI, com o `tool` e o `email` que elas pedem; só com e-mail e só para
+    esse host. O endereço que entra aqui é o que vai para o recibo, sem os dois parâmetros."""
+    host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    if host != HOST_DO_NCBI or not email_para(url, email):
+        return url
+    separador = "&" if "?" in url else "?"
+    return f"{url}{separador}{urllib.parse.urlencode({'tool': FERRAMENTA, 'email': email})}"
+
+
+def sem_cortesia(url: str) -> str:
+    """O endereço sem os parâmetros `tool` e `email` de cortesia, que é o que o recibo guarda."""
+    partes = urllib.parse.urlsplit(url)
+    pares = [(k, v) for k, v in urllib.parse.parse_qsl(partes.query, keep_blank_values=True)
+             if k not in PARAMETROS_DE_CORTESIA]
+    return urllib.parse.urlunsplit(partes._replace(query=urllib.parse.urlencode(pares)))
+
+
+def _endereco_para_o_recibo(url: str, pedido: str, final: str) -> str:
+    """O endereço final sem a cortesia: o próprio `url` quando o pedido foi sem cortesia ou voltou sem
+    redirecionamento, e o endereço redirecionado, limpo, quando o servidor redirecionou preservando a consulta."""
+    if pedido == url:
+        return final
+    return url if final == pedido else sem_cortesia(final)
 
 
 def http_get(url: str, *, email: str | None = None, aceitar: str = "*/*",
              timeout: int = TIMEOUT, tentativas: int = TENTATIVAS,
              espera: float = ESPERA, dormir=time.sleep):
-    """Devolve (status, corpo, url_final, cabeçalhos). Não levanta em 4xx; repete em 429 e 5xx."""
+    """Devolve (status, corpo, url_final, cabeçalhos). Não levanta em 4xx; repete em 429 e 5xx. O pedido ao NCBI
+    leva os parâmetros de cortesia (`com_cortesia`), e a url_final volta sempre sem eles, mesmo quando o servidor
+    redireciona preservando a consulta, porque é ela que vai para o recibo."""
+    pedido = com_cortesia(url, email)
     req = urllib.request.Request(
-        url, headers={"User-Agent": user_agent(email_para(url, email)), "Accept": aceitar})
+        pedido, headers={"User-Agent": user_agent(email_para(url, email)), "Accept": aceitar})
     ultimo = (0, b"", url, {})
     for i in range(tentativas):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return resp.status, resp.read(), resp.geturl(), dict(resp.headers)
+                return (resp.status, resp.read(), _endereco_para_o_recibo(url, pedido, resp.geturl()),
+                        dict(resp.headers))
         except urllib.error.HTTPError as erro:
             corpo = erro.read() if hasattr(erro, "read") else b""
             ultimo = (erro.code, corpo, url, dict(erro.headers or {}))
@@ -378,6 +415,26 @@ def candidatos_europepmc(pmcid: str) -> list[Candidato]:
         Candidato(url=f"{EUROPEPMC}/{pmcid}/fullTextXML", degrau="europepmc",
                   versao="publishedVersion", hospedeiro="repository", tipo="xml"),
     ]
+
+
+# ── NCBI: o XML do PubMed Central pelo efetch ───────────────────────────────
+
+def efetch_pmc_url(pmcid: str) -> str:
+    """O artigo em JATS, dentro de um `<pmc-articleset>`, pelo efetch das E-utilities; o `id` é o PMCID sem o
+    prefixo, como a documentação pede (o efetch aceita também com ele, medido em 02/10/2026)."""
+    return f"{EUTILS}/efetch.fcgi?db=pmc&id={normalizar_pmcid(pmcid)[3:]}"
+
+
+def candidatos_efetch(pmcid: str) -> list[Candidato]:
+    """O degrau que serve quando o Europe PMC falha: em 02/10/2026 o REST dele respondeu 500 ao manuscrito
+    PMC4076289, que o efetch devolveu inteiro. A versão declarada é a do PMC em geral, a publicada; o XML que se
+    declara manuscrito do autor corrige isso depois de baixado (`acesso._escada`). O PMCID vem de outra API, e só
+    `PMC` seguido de dígitos vira pedido."""
+    pmcid = normalizar_pmcid(pmcid)
+    if not PMCID_RE.fullmatch(pmcid):
+        return []
+    return [Candidato(url=efetch_pmc_url(pmcid), degrau="ncbi-efetch", versao="publishedVersion",
+                      hospedeiro="repository", tipo="xml")]
 
 
 # ── arXiv ───────────────────────────────────────────────────────────────────

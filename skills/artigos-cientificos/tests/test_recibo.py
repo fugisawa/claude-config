@@ -56,8 +56,11 @@ def info_falso(arquivo):
 
 class Etiquetas(unittest.TestCase):
     def test_todo_degrau_automatico_e_rota_a_e_o_manual_nao_tem_etiqueta_implicita(self):
-        for degrau in acesso.DEGRAUS:
+        automaticos = ("unpaywall", "openalex", "semantic-scholar", "europepmc", "ncbi-efetch", "arxiv", "crossref-tdm")
+        self.assertEqual(acesso.DEGRAUS, automaticos)
+        for degrau in automaticos:
             self.assertEqual(procedencia.etiqueta_do_degrau(degrau), "A", degrau)
+            self.assertIn(degrau, procedencia.NOME_DO_DEGRAU, "todo degrau tem o nome que o parágrafo Fonte: imprime")
         self.assertEqual(procedencia.etiqueta_do_degrau("manual"), "")
         self.assertEqual(procedencia.nome_da_etiqueta("C"), "rota C, cinzenta")
         self.assertEqual(procedencia.nome_da_etiqueta(""), "")

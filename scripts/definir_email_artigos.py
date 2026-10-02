@@ -6,8 +6,8 @@
     python3 scripts/definir_email_artigos.py --gancho      SessionStart: avisa só quando falta
 
 Por que aqui, e não no settings.json: o claude-config é PÚBLICO, e o e-mail é a identificação
-do Daniel para o Unpaywall, o Crossref e o OpenAlex (autorizada em 16/09/2026 para esses três
-serviços e mais nenhum), não para o GitHub. O settings.local.json fica fora do git por
+do Daniel para o Unpaywall, o Crossref, o OpenAlex e o efetch do NCBI (autorizada em 16/09/2026
+para os três primeiros e em 02/10/2026 para o NCBI, e para mais nenhum), não para o GitHub. O settings.local.json fica fora do git por
 whitelist, então cada máquina grava o seu; o gancho de SessionStart, este mesmo script com
 `--gancho`, avisa a máquina que ainda não gravou, e cala assim que ela grava. O e-mail nunca
 está neste arquivo: vem do argumento, e a sessão o tem no próprio contexto.
@@ -21,7 +21,8 @@ from pathlib import Path
 LOCAL = Path.home() / ".claude" / "settings.local.json"
 CHAVE = "ARTIGOS_EMAIL"
 AVISO = (f"{CHAVE} não está definido nesta máquina ({LOCAL}): a skill artigos-cientificos pula o "
-         "Unpaywall. O Daniel autorizou em 16/09/2026 o e-mail dele para Unpaywall, Crossref e OpenAlex "
+         "Unpaywall. O Daniel autorizou o e-mail dele para Unpaywall, Crossref e OpenAlex (16/09/2026) e para o "
+         "efetch do NCBI (02/10/2026) "
          "(skills/artigos-cientificos/SKILL.md, Perfil de acesso); grave com: "
          "python3 ~/.claude/scripts/definir_email_artigos.py <e-mail do Daniel>")
 

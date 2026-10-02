@@ -121,6 +121,11 @@ class TextoQueJaExiste(Pasta):
         self.assertEqual(r["texto"], str(self.txt))
         self.assertEqual(self.txt.read_text(encoding="utf-8"), "Accuracy of forecasts in strategic intelligence")
 
+    def test_o_xml_sem_o_corpo_do_artigo_entra_com_aviso(self):
+        r = self.registrar(self.xml, sobrescrever_texto=True)
+        self.assertIn(f"{self.xml.name}: XML sem o corpo do artigo; o texto extraído tem só o que a folha de rosto dá",
+                      r["avisos"])
+
 
 class ReciboAnterior(Pasta):
     def setUp(self):

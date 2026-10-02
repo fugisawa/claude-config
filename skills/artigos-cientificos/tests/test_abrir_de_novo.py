@@ -45,7 +45,7 @@ OPENALEX_ABERTO = {"doi": f"https://doi.org/{DOI}", "open_access": {"is_oa": Tru
                    "best_oa_location": {"is_oa": True, "pdf_url": URL_OA, "version": "publishedVersion"}}
 # o diário da escada falsa quando tudo responde 404, sem ARTIGOS_EMAIL
 DIARIO_DA_ESCADA_QUE_FALHA = ["crossref: sem registro", "openalex: sem registro", acesso.SEM_EMAIL,
-                              "semantic-scholar: sem registro", "europepmc: sem texto integral"]
+                              "semantic-scholar: sem registro", "europepmc: sem texto integral", "ncbi-efetch: sem PMCID"]
 
 
 def recibo_da_falha(diario=DIARIO_DA_FALHA) -> dict:
