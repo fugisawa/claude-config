@@ -4,11 +4,12 @@ description: >
   Mapa verificado de fontes de legislação, jurisprudência e dados públicos
   brasileiros — como obter o TEXTO CONSOLIDADO de uma norma federal, o que
   responde só metadado e o que está bloqueado. Use SEMPRE que a tarefa envolver
-  buscar, citar ou conferir norma federal (CF/88, leis, LC, decretos, EC),
-  acórdão ou súmula (TCU, STF, STJ, TST, CARF), publicação no DOU ou diário
-  municipal, dados de Câmara/Senado/TCU/transparência — e também quando Daniel
-  pedir "acha o artigo X da lei Y", "essa lei ainda está em vigor", "o que o TCU
-  decidiu sobre Z", "cita a fonte oficial disso", ou estiver montando questão,
+  buscar, citar ou conferir norma federal (CF/88, leis, LC, decretos, EC,
+  resolução e Regimento Interno da Câmara), acórdão ou súmula (TCU, STF, STJ,
+  TST, CARF), publicação no DOU ou diário municipal, dados de
+  Câmara/Senado/TCU/transparência — e também quando Daniel pedir "acha o
+  artigo X da lei Y", "essa lei ainda está em vigor", "o que o TCU decidiu
+  sobre Z", "cita a fonte oficial disso", ou estiver montando questão,
   flashcard, vade mecum ou discursiva que dependa de dispositivo legal. Consulte
   ANTES de tentar buscar norma ou acórdão: diz qual fonte serve texto limpo hoje,
   qual responde só metadado, qual está quebrada, e as armadilhas de extração de
@@ -25,13 +26,15 @@ diz explicitamente que não conferiu.
 ## O que funciona
 
 Texto consolidado e Planalto reverificados ao vivo em **07/08/2026**;
-jurisprudência e DOU, em **01/08/2026**. Cada seção abaixo repete a sua data —
+jurisprudência e DOU, em **01/08/2026**; resolução da Câmara, em **07/10/2026**.
+Cada seção abaixo repete a sua data —
 quando divergirem, vale a da seção, que é onde o teste foi feito.
 
 | Preciso de… | Use | Como |
 |---|---|---|
 | **Texto consolidado** de norma federal | `normas.leg.br`, encoding **Compilação Monovigente** | plano A — ver `referencias/consultar-norma.md` |
 | Texto quando não há Monovigente | **Planalto por `curl` com User-Agent de navegador** | plano B — ver abaixo, exige separar o riscado |
+| Texto consolidado de **resolução da Câmara** (Regimento Interno, Código de Ética) | **Legin**, a página "norma atualizada" | o `normas.leg.br` não a indexa — ver "Resolução da Câmara" abaixo |
 | URN canônica + ementa + link oficial de uma norma | `normas.leg.br/api/public/normas` | idem |
 | Acórdão do **TCU** por número/ano | **LexML por URN** + Exa/Tavily sobre `contas.tcu.gov.br` | `mcp-brasil` não serve para isto — ver abaixo |
 | Acórdãos recentes do TCU (feed) | MCP `mcp-brasil`, `tcu_consultar_acordaos` **sem filtro** | qualquer filtro quebra a chamada — ver abaixo |
@@ -70,6 +73,54 @@ a Lei 8.443/1992 de ponta a ponta (detalhe em `referencias/extrair-planalto.md`)
   bruto acusa mudança sempre. Remova `<script>` antes de hashear.
 
 Extraia com `beautifulsoup4` + `lxml`, não com regex sobre o HTML.
+
+## Resolução da Câmara: o Legin, porque o `normas.leg.br` não a indexa (07/10/2026)
+
+O Regimento Interno da Câmara (Resolução nº 17/1989) e o Código de Ética e Decoro
+Parlamentar (Resolução nº 25/2001) **não estão no `normas.leg.br`**, nem com a URN
+certa: `urn:lex:br:camara.deputados:resolucao:1989-09-21;17` devolve o eco de si
+mesma, 63 bytes e HTTP 200 — o mesmo sintoma da URN errada (ver "O outro buraco",
+abaixo). O texto consolidado oficial está no **Legin**, a base de legislação que a
+própria Câmara mantém, na página "norma atualizada":
+
+```
+https://www2.camara.leg.br/legin/fed/rescad/1989/resolucaodacamaradosdeputados-17-21-setembro-1989-320110-normaatualizada-pl.html
+https://www2.camara.leg.br/legin/fed/rescad/2001/resolucaodacamaradosdeputados-25-10-outubro-2001-320496-normaatualizada-pl.html
+```
+
+O número antes de `-normaatualizada` (320110, 320496) é identificador interno do
+Legin e não se deriva do número nem da data da resolução. Ache a página por busca e
+confira o título antes de baixar.
+
+O que se mediu nela, comparando com o Planalto:
+
+- **Responde sem User-Agent** (HTTP 200, 1 MB a do Regimento), e o `charset=UTF-8`
+  declarado é verdadeiro: o arquivo decodifica em UTF-8 estrito. A regra do `cp1252`
+  é do Planalto e não se aplica aqui.
+- **Não traz redação vencida**: zero `<strike>` e zero `line-through` na página do
+  Regimento. A procedência de cada alteração vem numa anotação entre parênteses,
+  escrita pelo tipo do dispositivo ("Inciso acrescido pela…"), que o parser precisa
+  aprender a reconhecer.
+- **A página irmã com sufixo `-publicacaooriginal-1-pl.html` é o texto como
+  assinado em 1989** (434 KB), sem nenhuma alteração. O sufixo do endereço é a única
+  coisa que distingue as duas.
+- **Uma página pode empilhar normas.** A do Regimento traz a Resolução nº 17/1989, o
+  Regimento que ela aprova, a Resolução nº 25/2001 e o Código de Ética, cada um com
+  numeração própria. Sem recortar, quem procura o art. 1º do Regimento acha o da
+  resolução.
+- **Não declara até quando está consolidada.** As anotações mais recentes do
+  Regimento capturado são das Resoluções nº 33 e 34, de 22/04/2026. Uma resolução
+  mais nova que o Legin ainda não tenha incorporado não deixa rastro na página, e o
+  prazo de incorporação não foi medido.
+
+Os quatro modos de corromper o texto ao extrair o Regimento, todos medidos, estão em
+`referencias/extrair-camara.md`. A implementação de referência está em
+`~/manual_estudo/normas/`: o manifesto declara `fora_do_normas_leg_br` (a razão por
+escrito, sem a qual a guarda da URN que não resolve continua barrando a captura) e
+`recorte: {de, ate}`, e o host precisa estar em `corpus.FONTES_DIRETAS`.
+
+**Não medidos:** o Regimento Interno do Senado e o Regimento Comum do Congresso. Não
+presuma que seguem o caminho do Legin, nem que não estão no `normas.leg.br`.
 
 ## A armadilha que nenhuma verificação de fonte pega
 
@@ -180,6 +231,7 @@ Quem testasse só o caminho anunciado veria 404 e concluiria que não há texto.
 |---|---|
 | `normas.leg.br` binário | **Plano A.** Monovigente = consolidado, sem riscado. Path anunciado 404; ver acima. |
 | `planalto.gov.br` | **Plano B.** HTTP 200 com User-Agent de navegador (reverificado 07/08/2026; antes devolvia bot-challenge). Exige separar redação vigente da revogada — ver seção acima. |
+| Legin (`www2.camara.leg.br/legin`) | **O caminho da resolução da Câmara**, que o `normas.leg.br` não indexa. Consolidado oficial, UTF-8 verdadeiro, sem riscado; a página pode empilhar normas — ver a seção da Câmara acima. |
 | `normas.leg.br` metadados | URN, ementa, datas, estrutura. **Não** serve texto. |
 | `lexml.gov.br` (SRU/OAI-PMH) | Devolve página "Verificação de segurança — Senado Federal". |
 | `mcp-brasil` / DOU | Serve o texto **como publicado** no diário, não o consolidado, e a busca privilegia publicações recentes. |
@@ -187,6 +239,7 @@ Quem testasse só o caminho anunciado veria 404 e concluiria que não há texto.
 **Consequência prática:** para ler o texto de uma lei, primeiro o binário
 Monovigente; se não houver, o `curl` no Planalto; depois o corpus local (PDFs e
 materiais do `manual_estudo`); o navegador via `claude-in-chrome` é plano D.
+Resolução da Câmara pula os dois primeiros e vai direto ao Legin.
 
 ### O buraco que importa
 
@@ -230,6 +283,9 @@ Detalhe e o caso do art. 163 em `referencias/consultar-norma.md`.
   **304 com 0 bytes**. É o caminho barato para revalidar em lote.
 - **`normas.leg.br` não manda `ETag` nem `Last-Modified`** no endpoint de
   binário — só `Content-Length`. Ali, compare **hash do conteúdo**.
+- **O Legin também não manda `ETag` nem `Last-Modified`**; ali vale o hash. Os
+  bytes vêm idênticos entre duas buscas, porque a página não tem script com token
+  (medido em 07/10/2026).
 - `dateModified` nos metadados vem `None`: **não sirva esse campo como prova
   de que uma lei está em vigor.**
 
@@ -300,3 +356,6 @@ Melhor uma procedência honestamente incompleta que uma página inventada.
   falha em silêncio, e a implementação de referência já existe em
   `~/manual_estudo/normas/` com 51 testes offline (medido em 12/08/2026; o número sai de
   `pytest normas/tests --collect-only`, e não desta linha).
+- `referencias/extrair-camara.md` — os quatro modos de corromper o texto ao extrair
+  o Regimento Interno da Câmara do Legin, medidos em 07/10/2026, e o que ali **não**
+  acontece, ao contrário do Planalto.
