@@ -129,6 +129,23 @@ de modo que trocar de perfil ou reinstalar traz o defeito de volta sem aviso nen
 
 ---
 
+## Máquina C — laptop ThinkPad
+
+Terceira máquina, que vai viajar em outubro de 2026 depois de meses fechada. **Nunca medida:**
+o bloco abaixo fica `pendente` até alguém rodar o bloco de coleta lá e substituir os valores.
+O doutor avisa e não reprova, para que a pendência de uma máquina não trave o commit das
+outras; enquanto durar, o § *O que já é comum às duas* continua falando só das duas medidas.
+O roteiro de retomada, com a ordem e as armadilhas, está em
+[`retomada-de-maquina.md`](retomada-de-maquina.md).
+
+```decl
+machine-id: pendente
+rotulo: laptop · ThinkPad (modelo a medir)
+medido-em: pendente
+```
+
+---
+
 ## O que já é comum às duas
 
 Com a Máquina B medida em 11/08/2026, o comum passa a ser isto, e só isto:
