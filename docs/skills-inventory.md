@@ -529,3 +529,11 @@ Skill de terceiro copiada para `skills/` sem passar por plugin. Não é versiona
 | `zotero-cli` | [54yyyu/zotero-mcp](https://github.com/54yyyu/zotero-mcp), subcomando `install-skill` | 0.13.1 | 27/09/2026 | `uv tool install "git+https://github.com/54yyyu/zotero-mcp@v0.13.1" && zotero-mcp install-skill --target claude-user` | `rm -r ~/.claude/skills/zotero-cli && uv tool uninstall zotero-mcp-server` |
 
 A mesma instalação registra o servidor MCP `zotero` no escopo do usuário (`claude mcp add -s user zotero -e ZOTERO_LOCAL=true -- zotero-mcp serve`), que lê a biblioteca pela API local do Zotero. A API local é uma preferência do Zotero (Editar, Configurações, Avançado) que só o Daniel liga; sem ela, skill e servidor respondem 403 e não há o que ler.
+
+## Skills próprias só locais (fora do git de propósito)
+
+Skill escrita aqui, e não de terceiro, que fica fora da lista branca do `.gitignore` porque traz dados pessoais e este repositório é público. Não viaja pelo git: para tê-la na outra máquina, copia-se a pasta à mão. O router a cita com esse aviso, e o `doctor_router.py` a isenta em `SO_LOCAIS`.
+
+| Skill | Criada em | Para quê | Como levar à outra máquina | Como remover |
+|---|---|---|---|---|
+| `cebraspe-inscricoes` | 11/11/2026 | Lado administrativo de concursos do Cebraspe: edital, Área do Candidato, documentos, recursos | copiar `~/.claude/skills/cebraspe-inscricoes/` (SKILL.md, `referencias/`, `scripts/`) e reiniciar o Claude Code | mover a pasta para fora de `skills/`, e tirar a linha do router e o nome de `SO_LOCAIS` |

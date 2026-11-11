@@ -34,6 +34,10 @@ NATIVOS = {
 MCP_TOOLS = {"mcp-brasil", "search_tools", "call_tool"}
 # Skills de projeto (fora de ~/.claude) e agentes de plugin — resolvem noutro escopo.
 FORA_DO_ESCOPO = {"artefatos-estudo", "planner", "tdd-guide", "research"}
+# Skills próprias que existem só na máquina em que nasceram, fora do git de
+# propósito: trazem dados pessoais, e este repositório é público. O router as
+# cita com esse aviso; onde a pasta não existe, a citação não é erro.
+SO_LOCAIS = {"cebraspe-inscricoes"}
 
 # Menções históricas deliberadas: o router explica um erro passado de propósito.
 # Formato: nome -> trecho que precisa estar na mesma linha para valer a isenção.
@@ -65,7 +69,7 @@ def main() -> int:
     agentes = nomes_com_frontmatter(ROOT / "agents")
     aposentados = nomes_com_frontmatter(ROOT / "agents-archive")
     commands = {p.stem for p in (ROOT / "commands").glob("*.md")}
-    ok = skills | agentes | commands | NATIVOS | MCP_TOOLS | FORA_DO_ESCOPO
+    ok = skills | agentes | commands | NATIVOS | MCP_TOOLS | FORA_DO_ESCOPO | SO_LOCAIS
 
     problemas: list[tuple[int, str, str]] = []
     vistos: set[str] = set()
