@@ -75,17 +75,17 @@ não-interativo vem do brew. Script que assuma uma versão só quebra num dos do
 
 ## Máquina B — casa
 
-Ubuntu 24.04.4 LTS, sem rede corporativa no caminho — o apt resolve direto.
+Ubuntu 26.04.1 LTS (era 24.04.4 até a atualização de versão de 2026-11-11), sem rede corporativa no caminho — o apt resolve direto.
 
 ```decl
 machine-id: 8b4740ec
 rotulo: casa · Dell Precision Tower 5810
-medido-em: 2026-09-06
+medido-em: 2026-11-12
 node-interativo: nvm v24
 node-nao-interativo: outro v26
-node-apt: apt v18
-presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, convert, tesseract, pdftoppm
-ausentes: bat, fd, conda, magick
+node-apt: apt v22
+presentes: batcat, fdfind, rg, nvm, uv, pyenv, bun, brew, magick, convert, tesseract, pdftoppm
+ausentes: bat, fd, conda
 ```
 
 > **Tesseract sem `sudo` (06/09/2026).** O `tesseract` desta seção não veio do apt: a árvore dos
@@ -95,6 +95,16 @@ ausentes: bat, fd, conda, magick
 > antes do `exec`. Reinstalar o sistema ou limpar `~/.local` o leva junto. A receita, e o
 > diagnóstico de máquina nova, estão em `skills/ocr-com-evidencia/scripts/preflight.py` — é ele
 > que se roda na máquina do trabalho e no laptop antes de declarar `tesseract` lá.
+
+> **Correção medida em 12/11/2026.** A máquina subiu do Ubuntu 24.04.4 para o **26.04.1 LTS**
+> (registro em `/var/log/dist-upgrade/`, 2026-11-11), e três linhas da declaração ficaram falsas até
+> o doutor reprovar o commit: o `node-apt` passou de v18 para **v22** (`/usr/bin/node` 22.22.1);
+> **`magick` passou a existir** — `/usr/bin/magick`, ImageMagick **7.1.2** do pacote
+> `imagemagick-7.q16`, ao lado do `convert` do ImageMagick 6.9.12 (`legacy`), que continua;
+> e o `pdftoppm` é o poppler **26.01.0** (era 24.02), o que mudou uma mensagem que um teste do
+> `manual_estudo` esperava. O que a atualização NÃO mudou: nvm v24 no terminal, node v26 de
+> `~/.local/bin` nos scripts, `batcat` sem `bat`. A regra do `CLAUDE.md` — operação de imagem
+> portável via pillow — continua, porque o trabalho segue sem ImageMagick.
 
 > **Correção medida em 26/08/2026.** O `node-nao-interativo` era `apt v18` e passou a ser
 > `outro v26`: instalou-se um node v26 em `~/.local/bin`, que precede o `/usr/bin` no PATH.
@@ -150,8 +160,9 @@ medido-em: pendente
 
 Com a Máquina B medida em 11/08/2026, o comum passa a ser isto, e só isto:
 
-`uv`, `pyenv`, `bun`, `brew`, `rg`, `fdfind` e **`nvm`** existem nas duas; `conda` e
-`magick` não existem em nenhuma. **O `convert` deixou de ser comum: em 14/08/2026 o
+`uv`, `pyenv`, `bun`, `brew`, `rg`, `fdfind` e **`nvm`** existem nas duas; `conda` não existe
+em nenhuma, e **`magick` deixou de ser ausente nas duas em 12/11/2026**: existe em casa
+(ImageMagick 7 do Ubuntu 26.04) e segue ausente no trabalho. **O `convert` deixou de ser comum: em 14/08/2026 o
 doutor mediu `/usr/bin/convert` na máquina de casa** — ImageMagick 6.9.12, a interface
 antiga —, e continua ausente na de trabalho. Quem escrever script compartilhado que
 dependa dele confere com `command -v`, como já vale para `bat`×`batcat`. O `node` do terminal interativo é **v24 pelo nvm** nos
@@ -165,6 +176,7 @@ trabalho só existe `bat`. Uma inversão perfeita, do tipo que uma máquina sozi
 detecta, porque de cada lado a instrução parece certa.
 
 **O que continua divergindo, e por isso não sobe para o `CLAUDE.md`:** o `node` de dentro de
-script (v18 em casa, v26 no trabalho), o node do apt, a presença de `fd`, e a rede.
+script (v26 de `~/.local/bin` em casa, v26 no trabalho — a versão coincide, o dono não), o
+node do apt (v22 em casa, v20 no trabalho), a presença de `fd` e de `magick`, e a rede.
 
 **Nada volta a ser escrito como "esta máquina".**
