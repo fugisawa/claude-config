@@ -156,3 +156,39 @@ Comentários · Estatísticas · Cadernos · Anotações`.
 ## Registro
 
 Toda montagem/adaptação vira nota no artefato do plano que a consumiu (ex.: `build/simulado_cadernos.md` no manual_estudo) — nomes exatos dos simulados, cotas reais e desvios do planejado. Auditoria de questão vira `[!divergencia]` no artefato de estudo, sempre com o código `Qxxxxxxx` e a data, para a próxima passagem saber o que já foi conferido.
+
+## Amostra de autossuficiência pelo QC — medido em 12/11/2026
+
+Quando a pergunta é **"o PDF do capítulo responde às questões da banca?"** (a régua da
+`decisoes/0014` do `manual_estudo`), o QC é a fonte da amostra, e o fluxo tem regras próprias
+além das de cima. Medido em 12/11/2026, 37 questões em quatro frentes, com a sessão do Daniel.
+
+- **URL de busca, logado:** `https://elite.qconcursos.com/questoes-de-concursos/questoes` com
+  `examining_board_ids[]=2` (Cebraspe) ou `63` (FGV), `discipline_ids[]`, `subject_ids[]` e
+  `q=`. Anuladas e desatualizadas já vêm excluídas. **O nó de assunto pode estar fino e o `q=`
+  ganhar:** o nó do Regimento Comum (`discipline 92`, `subject 10647`) devolveu uma questão, e
+  `q=Regimento+Comum+Congresso` na mesma disciplina devolveu oito, todas classificadas naquele
+  nó. Registre no relatório **cada busca e quantas devolveu** — é o que permite repetir.
+- **A página da questão não é `/questoes/<número>`** (dá "página não encontrada"): o link da
+  listagem carrega um código de hash. Para o gabarito, nem precisa sair da listagem: a aba
+  **Comentários** de cada card abre por clique de coordenada **na aba em primeiro plano**, depois
+  de um screenshot **na mesma aba**, e nunca no mesmo lote (`browser_batch`) que a navegação;
+  o último card da página fica em y ≈ 602. O `javascript_tool` está bloqueado nesse domínio
+  (dados de cookie): leia com `get_page_text`.
+- **Gabarito confirmado = dois ou mais comentários concordantes**, de preferência um deles com a
+  letra da norma; dissidente se anota com a fonte que ele declara (um "Certo" com fonte
+  "ChatGPT" contra dois "Errado" com o artigo não empata). Sem concordância, "gabarito não
+  confirmado", e a questão sai da taxa. **Nunca clique em "Responder"** (move a questão para
+  resolvidas e contamina o conjunto de medição) nem abra "Gabarito Comentado" que exija
+  responder; não crie caderno nem simulado para isso.
+- **Cláusula 5 da 0014:** questão que o capítulo auditado já imprime sai da medição — confira
+  por trecho do enunciado no MD. Questão repetida da listagem (cópia literal com código novo)
+  também sai.
+- **Buracos medidos:** cessão de servidor **não tem questão Cebraspe** no nó de agentes
+  públicos nem na disciplina (só FGV); coprodução **não tem questão Cebraspe** (sete da FGV). Se a
+  banca não cobra, a seção fica "amostra fina" e o relatório diz, em vez de completar com
+  questão inventada ou "no estilo da banca".
+- **O produto é um relatório, não uma edição.** Erro de fato reporta-se primeiro e separado da
+  taxa; achado não autoriza editar o capítulo, autoriza abrir a fonte primária. O método
+  inteiro, com os briefs de agente, está na skill de projeto `auditoria-de-questoes` do
+  `manual_estudo` (`.claude/skills/auditoria-de-questoes/SKILL.md`).

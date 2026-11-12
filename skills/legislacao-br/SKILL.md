@@ -359,3 +359,61 @@ Melhor uma procedência honestamente incompleta que uma página inventada.
 - `referencias/extrair-camara.md` — os quatro modos de corromper o texto ao extrair
   o Regimento Interno da Câmara do Legin, medidos em 07/10/2026, e o que ali **não**
   acontece, ao contrário do Planalto.
+
+## Provas e gabaritos oficiais das bancas — medido em 11 e 12/11/2026
+
+A melhor amostra de questão real é o **caderno oficial com gabarito definitivo**, e as duas
+bancas que importam o publicam em domínio próprio. Nenhum site de terceiro é necessário.
+
+- **Cebraspe.** A página do concurso (`cebraspe.org.br/concursos/<SIGLA>`, por exemplo
+  `CD_25_NS`) é montada por JavaScript: `WebFetch` e `curl` não veem os links. Abra no navegador
+  embutido e extraia as âncoras com `javascript_tool` (`[...document.querySelectorAll('a')]`
+  filtrando "PROVA OBJETIVA", "GABARITO DEFINITIVO", "Justificativas de alterações de
+  gabarito"); os arquivos moram em `cdn.cebraspe.org.br/concursos/<sigla>/arquivos/<hash>.pdf`
+  e baixam com `curl` sem truque. Concursos antigos (`cdn.cebraspe.org.br/concursos/CD_12_AT/`)
+  têm página estática com links relativos, legíveis por `curl`. O gabarito definitivo é uma
+  tabela "Item … Gabarito …" com `X` para item anulado; o PDF das justificativas diz por que
+  cada gabarito mudou. Medido: a prova da Câmara de 08/03/2026 (`CD_25_NS`, cargos 1 e 2, gerais
+  e específicos) e as do TCU de 2015 e 2026.
+- **FGV.** A página do evento é `conhecimento.fgv.br/concursos/<evento>` (ex.: `senado22/1`),
+  estática. Os cadernos seguem o padrão
+  `conhecimento.fgv.br/sites/default/files/concursos/<código>_-_<cargo-com-hifens><código>_tipo_1.pdf`
+  (ex.: `e1cns08_-_analista_legislativo_-_processo_legislativoe1cns08_tipo_1.pdf`; o código
+  numera as especialidades na ordem alfabética do edital) e o gabarito definitivo é um só por
+  edital (`senado2022_gabarito_definitivo_edital01.pdf`), com uma seção por cargo e tipo. Medido:
+  Senado 2022 (Analista – Processo Legislativo; Consultor E4CNS07) e TCU 2021.
+- **Depois de baixar:** `pdftotext -layout`; o caderno do Cebraspe vem em duas colunas, e o
+  texto de um item pode cair na coluna da direita da linha seguinte — leia por coluna, não por
+  linha. Guarde caderno, gabarito e justificativas juntos e cite os três endereços no relatório.
+
+## Jurisprudência do STF e do STJ: por onde abriu, e por onde não — medido em 11/11/2026
+
+- **Informativo do STF** em `stf.jus.br/arquivo/informativo/documento/informativoNNNN.htm`
+  abre por `WebFetch` e por extração do Tavily (475, 1079 e 1166 lidos; o 1023 só pelo
+  Buscador Dizer o Direito, que o transcreve). É a fonte oficial mais barata para tese, data,
+  relator e vencidos; a ementa literal continua só no acórdão.
+- **Voto do relator** publicado em `digital.stf.jus.br/decisoes-monocraticas/api/public/votos/<id>/conteudo.pdf`
+  abre e transcreve a tese (medido no HC 254.442 AgR). O endereço se acha por busca; o `<id>`
+  não se deriva do número do processo.
+- **LexML para acórdão do STF** precisa do sufixo numérico interno na URN
+  (`…;ms:2007-08-09;24631-2159173`); sem ele, "documento não encontrado". O sufixo vem de um
+  resultado de busca, nunca de dedução.
+- **STJ:** a página de informativos (`scon.stj.jus.br/jurisprudencia/externo/informativo…`)
+  não respondeu; a tese do Informativo 828 (RMS 72.642-PR) foi lida em duas fontes secundárias
+  concordantes (Dizer o Direito e EmÁudio) e entrou no material **com a procedência declarada e
+  o acórdão não aberto**. É o teto do que se afirma quando a fonte oficial não abre.
+- **Doutrina com etiqueta de confiança.** Quando a obra não abre, a citação entra como "lida
+  em quem a cita" (B), nunca como lida (A); trecho de busca (C) não entra. O relatório de
+  doutrina de 11/11/2026 (`scratchpad/lacunas/fontes/doutrina-adm-publica.md` daquela sessão)
+  é o modelo: obra, URL que abriu, trecho literal, etiqueta, data.
+
+## O `normas.leg.br` atrasa, e "igual à fonte" não é "igual à lei" — medido em 11/11/2026
+
+A Compilação Monovigente da **LAI** e da **LGPD** estava sem a Lei 15.141/2025 e sem a Lei
+15.352/2026 (a ANPD como Agência), e a guarda de deriva do `manual_estudo` dizia "igual à
+fonte" porque a fonte é que estava atrasada. A saída foi declarar no manifesto do corpus a
+chave `monovigente_atrasado`, com a razão medida, para a captura ir ao compilado do Planalto
+até o Monovigente alcançar. **Ao usar o Monovigente para lei que mudou nos últimos doze meses,
+confira a alteração mais recente no Planalto antes de confiar.** O Planalto, por sua vez, tem
+mais uma armadilha de extração além das oito de `referencias/extrair-planalto.md`: a **nota de
+revogação sem parênteses** (ver lá, item 9).
