@@ -53,10 +53,11 @@ quê e o que entra no lugar.
 - **A skill nunca envia e-mail.** O pedido ao autor vira rascunho no Gmail (`create_draft`), e
   quem envia é o Daniel, depois de ler. `send_message` não aparece em lugar nenhum daqui, e um
   teste o garante.
-- **O e-mail do Daniel só vai para Crossref, OpenAlex e Unpaywall**, que o usam como
-  identificação de cortesia (o Unpaywall o exige), e só se `ARTIGOS_EMAIL` estiver definido ou
-  `--email` for passado. Nunca fixado no código, nunca em outro serviço. Desde 16/09/2026 a
-  variável mora no `env` do `~/.claude/settings.local.json`, fora do git.
+- **O e-mail do Daniel só vai para Crossref, OpenAlex, Unpaywall e o efetch do NCBI**, que o
+  usam como identificação de cortesia (o Unpaywall o exige; o NCBI o recebe, com o `tool`, no
+  endereço do pedido, e o recibo guarda o endereço sem ele), e só se `ARTIGOS_EMAIL` estiver
+  definido ou `--email` for passado. Nunca fixado no código, nunca em outro serviço. Desde
+  16/09/2026 a variável mora no `env` do `~/.claude/settings.local.json`, fora do git.
 - **Nada de despejar o artigo no contexto.** O texto extraído fica no disco; o que entra na
   conversa são as linhas que o `conferir` devolve, ou uma janela de `grep -n -C`. Um artigo de
   27 páginas vale ~25 mil tokens, e cada despejo entra na próxima compactação.
@@ -71,8 +72,9 @@ degrau pulado, sem perguntar e sem tentar credencial nenhuma. Segredo não entra
 - Bibliotecas com cadastro (empréstimo entre bibliotecas, COMUT): nenhuma
 - Orçamento para compra ou aluguel de artigo: nenhum; a skill cita o preço e não compra
 - Assinatura do pedido ao autor: `ARTIGOS_ASSINATURA`, ou "Daniel Fugisawa"
-- E-mail para as APIs de cortesia (Crossref, OpenAlex, Unpaywall): `ARTIGOS_EMAIL`, autorizado pelo
-  Daniel em 16/09/2026 para esses três serviços e para mais nenhum. Mora no bloco `env` do
+- E-mail para as APIs de cortesia (Crossref, OpenAlex, Unpaywall, efetch do NCBI): `ARTIGOS_EMAIL`,
+  autorizado pelo Daniel em 16/09/2026 para os três primeiros e em 02/10/2026 para o NCBI, e para
+  mais nenhum. Mora no bloco `env` do
   `~/.claude/settings.local.json`, que não é versionado porque o repositório é público. Cada
   máquina grava a sua com `python3 ~/.claude/scripts/definir_email_artigos.py <e-mail>`; o gancho
   de SessionStart avisa a máquina onde ela falta, e sem ela o Unpaywall é pulado e o diário diz isso
@@ -119,12 +121,15 @@ ser o diretório de trabalho da sessão, nunca o repositório (ver *O que vai pa
 em `references/conferencia.md`).
 
 O `abrir` é a parte automatizável da escada: consulta Crossref, OpenAlex, Unpaywall (com
-e-mail), Semantic Scholar, Europe PMC e arXiv; ordena os candidatos por formato (PDF, XML,
-página), versão (publicada, aceita, submetida) e degrau; baixa o primeiro que é texto de verdade
-(magic bytes do PDF, ou JATS); extrai o texto com `pdftotext -layout`; grava o hash e o diário
-de tudo o que tentou. Página de pouso só serve se trouxer `citation_pdf_url` no cabeçalho. Sites
-atrás de Cloudflare (PeerJ, `europepmc.org`) devolvem 403 a qualquer cliente sem navegador; o
-script contorna pelo REST do Europe PMC (XML) quando há PMCID.
+e-mail), Semantic Scholar, Europe PMC, o efetch do NCBI (a API que entrega o XML do PubMed
+Central) e arXiv; ordena os candidatos por formato (PDF, XML, página), versão (publicada, aceita,
+submetida) e degrau; baixa o primeiro que é texto de verdade (o cabeçalho `%PDF-`, ou JATS com o
+corpo do artigo); extrai o texto com `pdftotext -layout`, ou, do XML, o título, o resumo e o
+corpo; grava o hash e o diário de tudo o que tentou. Página de pouso só serve se trouxer
+`citation_pdf_url` no cabeçalho. Sites atrás de Cloudflare (PeerJ, `europepmc.org`) devolvem 403
+a qualquer cliente sem navegador; para esses, quando há PMCID, o texto vem de duas APIs abertas
+que servem o XML, o REST do Europe PMC e o efetch do NCBI. O XML que o PMC declara manuscrito do
+autor entra no recibo como versão aceita.
 
 ## As quatro etiquetas
 
@@ -144,7 +149,7 @@ comparado), está em `references/mapa-juridico.md`; o resumo brasileiro, em
 
 | # | Degrau | Quem faz | Etiqueta | Para quando |
 |---|---|---|---|---|
-| 1 | APIs abertas: Unpaywall, OpenAlex (cobre SciELO, HAL, Zenodo, RePEc e repositórios), Semantic Scholar, Europe PMC, arXiv, TDM da Crossref | `abrir` | A | o diário diz `ABERTO` |
+| 1 | APIs abertas: Unpaywall, OpenAlex (cobre SciELO, HAL, Zenodo, RePEc e repositórios), Semantic Scholar, Europe PMC, efetch do NCBI, arXiv, TDM da Crossref | `abrir` | A | o diário diz `ABERTO` |
 | 2 | Cópia do autor: `WebSearch "<título exato>" filetype:pdf`, página pessoal, repositório da universidade, ResearchGate; depois `registrar` | você | A ou C | achou PDF com cabeçalho do periódico (versão publicada) ou manuscrito aceito |
 | 3 | Pré-publicação: OSF Preprints, PsyArXiv, EdArXiv, arXiv (também `hf://papers/<id>/paper.md`), SSRN, SciELO Preprints | você, pela API do OSF ou `WebSearch` | A | achou; e anote que é pré-publicação |
 | 4 | Conectores com texto: scite `read_fulltext` (`source` tem de ser `"fulltext"`), scite `search_literature` com `dois` + `term`, PubMed/PMC (biomédico) | você | A (B, se for trecho) | o trecho que interessa apareceu |

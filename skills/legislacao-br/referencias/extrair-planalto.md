@@ -143,3 +143,16 @@ por texto da lei.
 `~/manual_estudo/normas/` implementa tudo isto com 34 testes offline sobre HTML salvo:
 `estrutura.py` (limpeza + classificação), `corpus.py` (procedência + deriva). Portar de lá
 é mais barato que redescobrir.
+
+## 9. A nota de revogação sem parênteses gruda no dispositivo anterior (11/11/2026)
+
+No Decreto 9.203/2017, o Planalto riscou o art. 20-A inteiro, inclusive a anotação
+"(Incluído pelo Decreto nº 9.901, de 2019)", mas deixou vivos, **sem parênteses**, dois links
+no fim do mesmo parágrafo: "Revogado pelo Decreto nº 10.756, de 2021" e "Vigência". Depois de
+remover o riscado, sobra um bloco sem rótulo que começa por "Revogado…"; um classificador que
+só reconhece a anotação entre parênteses o trata como continuação e o costura ao último
+dispositivo vigente — no caso, o inciso IV do art. 19, que saiu da lei seca com a nota de
+revogação de outro artigo. A regra: bloco órfão que começa por `Revogad…`, `Incluíd…`,
+`Redação…`, `Acrescid…`, `Vigência` ou `Vide`, com ou sem parênteses, é anotação, e anotação
+órfã não pertence ao vizinho. A implementação de referência (`normas/estrutura.py`,
+`SO_ANOTACAO`) tem teste para o caso.

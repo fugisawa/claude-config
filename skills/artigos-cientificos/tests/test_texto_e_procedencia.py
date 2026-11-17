@@ -4,7 +4,6 @@ from pathlib import Path
 
 import _caminho  # noqa: F401
 import artigo
-import leitura
 import procedencia
 import texto
 
@@ -36,21 +35,6 @@ class Procurar(unittest.TestCase):
         a = texto.procurar(TRECHO, ["p < .001"], contexto=1)[0]
         self.assertEqual(len(a.antes), 1)
         self.assertIn("Table 2", a.depois[0])
-
-
-class Jats(unittest.TestCase):
-    def test_corpo_vira_paragrafos(self):
-        xml = b'<article xmlns:x="u"><front><title>T</title></front><body><p>um</p><sec><title>Res</title><p>dois</p></sec></body></article>'
-        self.assertEqual(leitura.jats_para_texto(xml), "um\n\nRes\n\ndois")
-
-    def test_elemento_aninhado_nao_duplica(self):
-        xml = b'<article><body><fig><caption><title>Legenda</title><p>texto da legenda</p></caption></fig></body></article>'
-        self.assertEqual(leitura.jats_para_texto(xml), "Legenda texto da legenda")
-        em_linha = b'<article><body><p>CO<sub>2</sub> e <italic>g</italic> = 1</p></body></article>'
-        self.assertEqual(leitura.jats_para_texto(em_linha), "CO2 e g = 1")
-
-    def test_xml_quebrado_nao_derruba(self):
-        self.assertEqual(leitura.jats_para_texto(b"<a><b>"), "<a><b>")
 
 
 class Procedencia(unittest.TestCase):

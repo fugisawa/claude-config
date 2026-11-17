@@ -173,9 +173,10 @@ class Http(unittest.TestCase):
         self.assertIn("mailto:a@b.c", fontes.user_agent("a@b.c"))
         self.assertNotIn("mailto", fontes.user_agent(None))
 
-    def test_email_so_vai_para_crossref_openalex_e_unpaywall(self):
+    def test_email_so_vai_para_crossref_openalex_unpaywall_e_ncbi(self):
         for url in ("https://api.crossref.org/works/10.1/x", "https://api.openalex.org/works/doi:10.1/x",
-                    "https://api.unpaywall.org/v2/10.1/x?email=a@b.c"):
+                    "https://api.unpaywall.org/v2/10.1/x?email=a@b.c",
+                    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=4076289"):
             self.assertEqual(fontes.email_para(url, "a@b.c"), url and "a@b.c")
         for url in ("https://api.semanticscholar.org/graph/v1/paper/DOI:10.1/x", "https://arxiv.org/pdf/1",
                     "https://link.springer.com/content/pdf/x.pdf", "https://www.ebi.ac.uk/europepmc/x",
@@ -215,6 +216,69 @@ class Http(unittest.TestCase):
             urllib.request.urlopen = original
         self.assertNotIn("mailto", vistos[0])
         self.assertIn("mailto:a@b.c", vistos[1])
+
+    def test_http_get_pede_ao_ncbi_com_cortesia_e_devolve_o_endereco_sem_ela(self):
+        import urllib.request
+        from unittest import mock
+        pedidos = []
+
+        def abrir_falso(req, timeout=0, redireciona_para=None):
+            pedidos.append(req.full_url)
+            final = redireciona_para or req.full_url
+            resposta = mock.MagicMock(status=200, headers={})
+            resposta.read.return_value = b"<pmc-articleset/>"
+            resposta.geturl.return_value = final
+            resposta.__enter__.return_value = resposta
+            return resposta
+        with mock.patch.object(urllib.request, "urlopen", abrir_falso):
+            _, _, final, _ = fontes.http_get(EFETCH, email="a@b.c")
+            self.assertEqual(pedidos[-1], EFETCH + "&tool=artigos-cientificos&email=a%40b.c")
+            self.assertEqual(final, EFETCH, "o endereço devolvido, que vai para o recibo, não leva o e-mail")
+            _, _, final, _ = fontes.http_get(EFETCH)
+            self.assertEqual((pedidos[-1], final), (EFETCH, EFETCH))
+        redirecionado = mock.patch.object(urllib.request, "urlopen",
+                                          lambda req, timeout=0: abrir_falso(req, redireciona_para="https://x/y"))
+        with redirecionado:
+            self.assertEqual(fontes.http_get(EFETCH, email="a@b.c")[2], "https://x/y")
+        com_a_consulta = EFETCH.replace("https://", "https://www.") + "&tool=artigos-cientificos&email=a%40b.c"
+        preservando = mock.patch.object(urllib.request, "urlopen",
+                                        lambda req, timeout=0: abrir_falso(req, redireciona_para=com_a_consulta))
+        with preservando:
+            self.assertEqual(fontes.http_get(EFETCH, email="a@b.c")[2], EFETCH.replace("https://", "https://www."),
+                             "o redirecionamento que preserva a consulta também sai sem o e-mail")
+
+
+EFETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=4076289"
+
+
+class Efetch(unittest.TestCase):
+    """O degrau de 02/10/2026: o XML do PubMed Central pelo efetch das E-utilities do NCBI."""
+    def test_url_do_efetch_leva_o_pmcid_sem_o_prefixo(self):
+        self.assertEqual(fontes.efetch_pmc_url("PMC4076289"), EFETCH)
+        self.assertEqual(fontes.efetch_pmc_url("4076289"), EFETCH)
+
+    def test_o_candidato_e_o_xml_do_pmc(self):
+        cands = fontes.candidatos_efetch("PMC4076289")
+        self.assertEqual([(c.url, c.degrau, c.tipo, c.versao, c.hospedeiro) for c in cands],
+                         [(EFETCH, "ncbi-efetch", "xml", "publishedVersion", "repository")])
+        self.assertEqual(fontes.candidatos_efetch(""), [])
+
+    def test_a_cortesia_so_vai_para_o_ncbi_e_so_com_email(self):
+        self.assertEqual(fontes.com_cortesia(EFETCH, "a@b.c"), EFETCH + "&tool=artigos-cientificos&email=a%40b.c")
+        self.assertEqual(fontes.com_cortesia(EFETCH, None), EFETCH)
+        self.assertEqual(fontes.com_cortesia("https://rep/x.pdf", "a@b.c"), "https://rep/x.pdf")
+        self.assertEqual(fontes.com_cortesia("https://api.openalex.org/works/x", "a@b.c"), "https://api.openalex.org/works/x")
+        self.assertEqual(fontes.com_cortesia("https://eutils.ncbi.nlm.nih.gov.evil.example/efetch.fcgi?db=pmc", "a@b.c"),
+                         "https://eutils.ncbi.nlm.nih.gov.evil.example/efetch.fcgi?db=pmc")
+
+    def test_sem_cortesia_tira_so_o_tool_e_o_email(self):
+        self.assertEqual(fontes.sem_cortesia(EFETCH + "&tool=artigos-cientificos&email=a%40b.c"), EFETCH)
+        self.assertEqual(fontes.sem_cortesia("https://x/y?email=a%40b.c&db=pmc&tool=t&id=1"), "https://x/y?db=pmc&id=1")
+        self.assertEqual(fontes.sem_cortesia("https://x/y"), "https://x/y")
+
+    def test_pmcid_que_nao_e_pmc_e_digitos_nao_vira_candidato(self):
+        for ruim in ("PMC1&db=pubmed", "PMCabc", "PMC", "PMC1/x", "PMC\u0661\u0662\u0663"):
+            self.assertEqual(fontes.candidatos_efetch(ruim), [], ruim)
 
 
 if __name__ == "__main__":

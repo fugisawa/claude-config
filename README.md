@@ -41,15 +41,14 @@ git -C ~/.claude/vendor/mattpocock-skills pull   # symlinks acompanham
 
 Instaladas por symlink relativo: `grilling`, `grill-me`, `grill-with-docs`, `domain-modeling`, `codebase-design`, `writing-great-skills`, `teach`. Exceção: `skills/diagnosing-bugs` é **cópia adaptada** (virou user-invoked para não colidir com `superpowers:systematic-debugging`) — não acompanha o `pull`; reconciliar à mão se o upstream mudar.
 
-## Restaurar em outra máquina
+## Restaurar em outra máquina, ou retomar uma que ficou meses fechada
 
-```bash
-mv ~/.claude ~/.claude.bak 2>/dev/null   # se existir
-git clone --recurse-submodules https://github.com/fugisawa/claude-config.git ~/.claude
-claude   # login recria .credentials.json; plugins reinstalam a partir do settings.json
-```
-
-Memória persistente (`projects/`) e credenciais são por máquina — não viajam pelo repo.
+O roteiro inteiro está em [`docs/retomada-de-maquina.md`](docs/retomada-de-maquina.md). Em
+resumo: `scripts/empacotar_para_outra_maquina.sh`, na máquina em dia, junta o que o git não
+leva (servidores MCP, `settings.local.json`, `~/.ai_env`, a fonte Lora); `scripts/retomar_maquina.sh`,
+na outra, mede a máquina, clona ou avança os clones quando é seguro, instala ganchos e symlinks
+e imprime o que só você fecha — senha, login, a declaração da máquina. Memória persistente
+(`projects/`) e credenciais são por máquina e não viajam pelo repo.
 
 **Dependência externa:** as skills do LifeOS (`obsidian-note`, `vault-search`, `vault-review`, `daily-capture`) são symlinks absolutos para `~/Documents/LifeOS/.claude/skills/` — resolvem depois de clonar o vault (repo privado `lifeos`) nesse caminho.
 

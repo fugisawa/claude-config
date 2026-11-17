@@ -12,8 +12,9 @@
     python3 artigo.py pedido <doi> --tema "…" [--para EMAIL] [--idioma auto|pt|en] [--assinatura "…"]
     python3 artigo.py conferir <arquivo.txt|.pdf> "<expressão>" ["<expressão>" ...]
 
-O e-mail para o "polite pool" (Crossref, OpenAlex) e para o Unpaywall, que o exige, vem de
-`ARTIGOS_EMAIL` ou de `--email`; sem ele, o Unpaywall é pulado e o resto funciona.
+O e-mail para o "polite pool" (Crossref, OpenAlex), para o Unpaywall, que o exige, e para a
+cortesia do efetch do NCBI vem de `ARTIGOS_EMAIL` ou de `--email`; sem ele, o Unpaywall é pulado
+e o resto funciona. O recibo nunca guarda o e-mail.
 Saída humana por padrão; `--json` devolve o dicionário inteiro.
 
 `registrar` é para a cópia que veio de degrau manual (site do autor, pedido atendido): grava a
@@ -382,7 +383,7 @@ def montar_parser() -> argparse.ArgumentParser:
     c.add_argument("--contexto", type=int, default=1)
 
     for s in (r, b, a, g, e, c):
-        s.add_argument("--email", default=None, help="e-mail para polite pool e Unpaywall")
+        s.add_argument("--email", default=None, help="e-mail para polite pool, Unpaywall e cortesia do NCBI")
         s.add_argument("--json", action="store_true", help="saída em JSON")
     return p
 

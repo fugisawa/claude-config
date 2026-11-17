@@ -48,7 +48,15 @@ Os quatro blocos, na ordem em que a energia que eles exigem se degrada:
 | 1 | Uma **seção da folha do tópico** | 30–40 min | o momento mais fresco do dia |
 | 2 | Um **lote de 20 questões** (banca do dia) | 30–40 min | cansaço médio |
 | 3 | **Triagem do caderno de erros** | 20–30 min | exige pouco |
-| 4 | **Anki e microdose** | 15–20 min | dia atropelado — e o dia conta como verde |
+| 4 | **Anki e microdose** | 30–40 min | dia atropelado — e o dia conta como verde |
+
+> **Emenda de 15/11/2026, decisão do Daniel.** A janela do bloco 4 passou de 15–20 para
+> **30–40 min**, e a razão é o Anki, não a microdose. O deck autocontido da Câmara (1.222
+> cards em seis decks, 30 novos por dia, intervalo máximo de 21 dias) custa, na simulação
+> do FSRS feita naquele dia, **35 min de média e 56 de pico**. Com a folha dizendo 20, ele
+> estouraria o bloco todo dia e leria isso como atraso. A microdose de revisão continua do
+> tamanho que tinha. **Vale até a prova de 17/01/2027**: o deck da Câmara sai depois dela, e
+> a janela volta a 15–20 min. O Dia Mínimo Viável não mudou; nele, do Anki, só as revisões.
 
 **A ordem é a regra, e ela substitui o relógio.** O que importava do antigo "pico às 6h10" nunca foi o 6h10: era teoria pesada quando ele está mais fresco. A hora era só o jeito de garantir isso; a ordem garante melhor, porque sobrevive à semana difícil.
 
