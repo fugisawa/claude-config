@@ -33,7 +33,7 @@ NATIVOS = {
 }
 MCP_TOOLS = {"mcp-brasil", "search_tools", "call_tool"}
 # Skills de projeto (fora de ~/.claude) e agentes de plugin — resolvem noutro escopo.
-FORA_DO_ESCOPO = {"artefatos-estudo", "planner", "tdd-guide", "research"}
+FORA_DO_ESCOPO = {"artefatos-estudo", "questao-em-cards", "planner", "tdd-guide", "research"}
 
 # Menções históricas deliberadas: o router explica um erro passado de propósito.
 # Formato: nome -> trecho que precisa estar na mesma linha para valer a isenção.

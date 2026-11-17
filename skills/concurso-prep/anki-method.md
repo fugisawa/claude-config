@@ -17,6 +17,7 @@
 | 2 Teoria elaborativa | durante o estudo | 3–5/sessão | temporária |
 | 3 Questão errada | após erro real (gate), em ≤24h | 1–3/questão | **permanente, fonte principal (~60%)** |
 
+- Trilha 3 no `manual_estudo`, item do Cebraspe (17/11/2026): o procedimento é a skill de projeto `questao-em-cards`, e o contrato, `~/manual_estudo/anki/cards-de-questao.md`. Lá a triagem vem antes do card, e o julgamento ganhou formato próprio — o **card de item**, que mostra uma redação nova do mesmo ponto por dia, com veredito e regra no verso. Ele substitui o padrão 3 abaixo; a proibição de "julgue C/E" continua valendo para card de frente fixa. Evidência e limites: `anki/_pesquisa-questao-em-cards-2026-11.md`.
 - Bootstrap: pretesting fixa **só o que é perguntado** (meta-análises 2023/25: g≈0,6 específico, transferência ≈0) — dirigir às 6 categorias do doc de substrato (terminologia, estrutura, números, **pares confundíveis** ← prioridade, fluxos, expressões), nunca "aquecimento amplo".
 - Trilha 2: o "por quê" precisa ser **auto-gerado** — o hábito é tentar produzir a explicação ANTES de virar o card; o verso é feedback, não substituto (elaboração lida pronta não gera o ganho).
 
