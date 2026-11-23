@@ -138,7 +138,16 @@ def scan(texto: str, probe: dict, origem: Path = DEFAULT_DECL) -> Report:
         bruto = declarada.get(f"node-{contexto}")
         if not bruto:
             continue
-        esperado, medido = _node(bruto), probe["node"].get(contexto)
+        medido = probe["node"].get(contexto)
+        # `ausente` é declaração, não lacuna: diz que nenhum node responde ali.
+        if bruto.strip() == "ausente":
+            if medido is not None:
+                findings.append(Finding(
+                    Severity.ERROR, "fato-divergente", rotulo,
+                    f"node-{contexto}: declarado ausente, medido {medido[0]} "
+                    f"v{medido[1]}."))
+            continue
+        esperado = _node(bruto)
         if esperado is None:
             findings.append(Finding(
                 Severity.ERROR, "fato-divergente", rotulo,
@@ -146,6 +155,13 @@ def scan(texto: str, probe: dict, origem: Path = DEFAULT_DECL) -> Report:
                 "e não pôde ser conferido."))
             continue
         if medido is None:
+            # Até 23/11/2026 isto era `continue`, e o node do apt que a troca
+            # para o 26.04 levou embora seguiu declarado como `apt v20`.
+            findings.append(Finding(
+                Severity.ERROR, "fato-divergente", rotulo,
+                f"node-{contexto}: declarado {esperado[0]} v{esperado[1]} e "
+                "nenhum node responde nesse contexto. Se sumiu de vez, "
+                f"declare `node-{contexto}: ausente`."))
             continue
         if esperado != medido:
             findings.append(Finding(

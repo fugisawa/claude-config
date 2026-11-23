@@ -102,6 +102,27 @@ class ScanTest(unittest.TestCase):
         report = scan(DECL, probe_com(node={"interativo": ("brew", 24)}))
         self.assertEqual(self.codes(report, Severity.ERROR), ["fato-divergente"])
 
+    def test_node_declarado_que_sumiu_e_divergencia(self):
+        # O defeito real de 23/11/2026: a troca para o 26.04 levou o nodejs do
+        # apt da máquina do trabalho, a declaração seguia dizendo `apt v20` e o
+        # doctor passava, porque contexto não medido virava silêncio.
+        sem_apt = {k: v for k, v in PROBE_A["node"].items() if k != "apt"}
+        report = scan(DECL, {**PROBE_A, "node": sem_apt})
+        self.assertEqual(self.codes(report, Severity.ERROR), ["fato-divergente"])
+        detalhe = next(f.detail for f in report.findings if f.code == "fato-divergente")
+        self.assertIn("node-apt", detalhe)
+
+    def test_node_declarado_ausente_e_ausente_passa(self):
+        decl = DECL.replace("node-apt: apt v20", "node-apt: ausente")
+        sem_apt = {k: v for k, v in PROBE_A["node"].items() if k != "apt"}
+        report = scan(decl, {**PROBE_A, "node": sem_apt})
+        self.assertEqual(self.codes(report, Severity.ERROR), [])
+
+    def test_node_declarado_ausente_que_apareceu_e_divergencia(self):
+        decl = DECL.replace("node-apt: apt v20", "node-apt: ausente")
+        report = scan(decl, PROBE_A)
+        self.assertEqual(self.codes(report, Severity.ERROR), ["fato-divergente"])
+
     def test_patch_diferente_NAO_e_divergencia(self):
         # A decisão central do desenho: declarar comportamento, não leitura.
         # v24.18.0 → v24.19.1 não muda nada para quem lê a instrução, e

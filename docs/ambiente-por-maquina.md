@@ -53,16 +53,19 @@ ninguém sabe qual das duas está lendo.
 
 ## Máquina A — trabalho · Dell OptiPlex 7070
 
-Ubuntu 24.04.4 LTS. Rede corporativa com **TLS interceptado** (`fw.abin.gov.br`): o apt
-quebra em repositório de VPN, e o contorno é `--fix-missing`. Não é defeito da máquina.
+Ubuntu 26.04.1 LTS (era 24.04.4 até a atualização de versão de 2026-11-13). Rede corporativa
+com **TLS interceptado** (`fw.abin.gov.br`): o apt quebra em repositório de VPN, e o contorno é
+`--fix-missing`. Não é defeito da máquina. **O SSH para o GitHub não passa** — nem a porta 22
+nem o `ssh.github.com:443` do `~/.ssh/config` respondem (medido em 23/11/2026); só HTTPS
+funciona, então clone com remoto `git@github.com:` falha calado aqui.
 
 ```decl
 machine-id: 19aeb4de
 rotulo: trabalho · Dell OptiPlex 7070
-medido-em: 2026-08-10
+medido-em: 2026-11-23
 node-interativo: nvm v24
 node-nao-interativo: brew v26
-node-apt: apt v20
+node-apt: ausente
 presentes: bat, fd, fdfind, rg, nvm, uv, pyenv, bun, brew
 ausentes: batcat, conda, magick, convert
 ```
@@ -177,6 +180,7 @@ detecta, porque de cada lado a instrução parece certa.
 
 **O que continua divergindo, e por isso não sobe para o `CLAUDE.md`:** o `node` de dentro de
 script (v26 de `~/.local/bin` em casa, v26 no trabalho — a versão coincide, o dono não), o
-node do apt (v22 em casa, v20 no trabalho), a presença de `fd` e de `magick`, e a rede.
+node do apt (presente em casa, ausente no trabalho desde a troca para o 26.04), a presença de
+`fd` e de `magick`, e a rede.
 
 **Nada volta a ser escrito como "esta máquina".**
