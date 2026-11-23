@@ -67,14 +67,17 @@ Input primário = **screenshots do usuário** (Gabarito Detalhado de cada cadern
 5. **Gotcha visual:** screenshots longos do QC podem ter coluna fantasma sobreposta (fragmentos de outras questões) — ler só os cards numerados da coluna principal.
 6. **Saídas e fronteira:** erros × confiança → **conf 4–5 = ponto cego (★) → ficha** no formato `manual_estudo/caderno-erros-a4/ficha-fv-exemplo.typ` (conf 1–3 → log); placar por banca×disciplina → check-in do `estrategista-concurso`. Esta skill **extrai e cruza**; interpretar zonas e realocar é do estrategista. Registro: análise vira MD companion em `build/` (ex.: `build/analise-simulado-diagnostico.md`).
 
-## Uso geral da plataforma — vereditos (análise 24/07/2026)
+## Uso geral da plataforma — vereditos (análise 24/07/2026, conta reconfigurada em 23/11/2026)
 
-Fonte canônica: `manual_estudo/build/guia-qconcursos-uso-geral.md` (matriz recurso a recurso). Regras duras para o agente:
+Fonte canônica: `manual_estudo/build/guia-qconcursos-uso-geral.md` (v3 de 23/11/2026), que traz a matriz recurso a recurso e o estado da conta conferido na tela. Esta seção só resume o que o agente precisa para não contradizê-la; em divergência, **o guia vence** e esta seção é que está velha. Regras duras para o agente:
 
-- **Nunca sugerir** ao Daniel os recursos de sequenciamento/comparação do QC (Trilha da Semana, Mini Simulados automáticos, Treinador, Ranking, Resumão, cursos/teoria): conflitam com trilhas próprias, IGEPP, check-in e o perfil anti-vanity-metrics.
+- **Nunca sugerir** ao Daniel os recursos que decidem por ele: Trilha da Semana, mini simulados, Simuladão da semana e desafios semanais, Treinador, Resumão e os cursos e videoaulas do QC. Eles conflitam com as trilhas próprias, com o calendário de simulados e com o check-in, e a teoria deste projeto nunca vem de cursinho.
+- **O ranking e a comparação com a comunidade passaram a "usar, como estímulo"** em 23/11/2026, por fala do Daniel: saber como se compara com os outros o motiva, e isso pesa contra o risco nº 1, que é a desistência. Pode mencioná-los. O que não muda é a leitura: o ranking mede volume, não prontidão, então ele empurra, mas não dá nota.
 - **Meu Desempenho** (filtra por banca) = conferência rápida FGV×Cebraspe entre check-ins; nunca fonte-mestre (sem tipo de erro nem calibração; % da comunidade enviesado p/ cima).
 - **TEC Concursos** = upgrade consciente com gatilho registrado (edital publicado → reavaliar no protocolo 72h); não sugerir assinatura antes disso.
-- Curso-alvo da Central: Senado-Analista (âncora; QC não suporta 2 alvos) — a Central não é bússola.
+- **Curso da Central: Câmara dos Deputados — Analista Legislativo — Registro e Redação** (Cebraspe, prova em 17/01/2027), único curso matriculado desde 23/11/2026. O Senado Analista e o Técnico Legislativo saíram. A Central continua não sendo bússola: a trilha manda.
+- **A conta tem três filtros salvos**, em *Questões → Meus filtros*, todos com "não resolvidas" e sem anuladas nem desatualizadas: `Cebraspe — não resolvidas — limpo` (a base do lote da reta da Câmara, à qual se acrescenta o assunto do tópico), `Cebraspe — não resolvidas — difíceis` (com *Difícil* e *Muito Difícil*, a porta do deck difícil do Anki) e `FGV — não resolvidas — limpo` (reserva). Para montar o lote do dia, aplique o filtro salvo, acrescente o assunto e clique em *Filtrar*. **Nunca clique em *Salvar alterações***, o botão ao lado de *Limpar*: ele reescreve o filtro salvo que está aplicado.
+- **A prova CD-AL-011** (Câmara 2026, Analista de Processo Legislativo e Gestão) só serve de **treino**, nunca de medição: o material foi conferido contra ela em 11/11/2026, e alguns itens entraram nos capítulos e no Anki. Qual prova serve para medir, o guia diz.
 
 ## Auditar UMA questão — gabarito, desatualização e o "contra a doutrina" (medido 08/08/2026)
 
